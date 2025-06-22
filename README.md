@@ -72,7 +72,7 @@ Fichier `Objectifs-6e-CM2-Auto-4.csv` au format UTF8 `;` avec les colonnes suiva
 
 - `Code`,  `Automatisme`
 
-```spoiler Contenu du fichier csv :
+### Contenu du fichier csv :
 
 | Code | Description |
 |------|-------------|
@@ -134,4 +134,4 @@ Fichier `Objectifs-6e-CM2-Auto-4.csv` au format UTF8 `;` avec les colonnes suiva
 | 🎲↩8 | Dans des situations d’équiprobabilité, recenser toutes les issues possibles d’une expérience aléatoire en deux étapes dans un tableau ou dans un arbre afin de déterminer des probabilités (CM2). |
 | ∝🛠1 | L'élève sait repérer des relations multiplicatives simples entre des nombres (double, quadruple, moitié, tiers, quart). |
 | ∝🛠2 | Il associe de manière automatique les expressions du type : « 4 fois plus grand, 4 fois plus petit, 5 fois plus, 5 fois moins » à une multiplication ou à une division. |
-```
+
