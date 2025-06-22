@@ -84,7 +84,7 @@ auto_weeks = defaultdict(list)
 used_codes = defaultdict(int)
 next_index_by_theme = defaultdict(lambda: 1)
 
-st.markdown("## \U0001F4CC Grille des 32 semaines (clic sur ❓ pour choisir)")
+st.markdown("## \U0001F4CC Grille de 32 semaines")
 
 rows = [st.columns(8) for _ in range(4)]
 for i in range(32):
@@ -124,7 +124,7 @@ for i in range(32):
             attendu = next_index_by_theme[theme_semaine]
             for _, row in theme_df.iterrows():
                 if int(row['Num']) == attendu:
-                    selection.append(row.to_dict())
+                    selection.append(row)
                     next_index_by_theme[theme_semaine] += 1
                     break
 
@@ -140,7 +140,7 @@ for i in range(32):
             for _, row in restants.iterrows():
                 if row['Code'] not in [sel['Code'] for sel in selection]:
                     if respecte_espacement(auto_weeks[row['Code']], i, row['Rappel']):
-                        selection.append(row.to_dict())
+                        selection.append(row)
                         break
             essais += 1
 
