@@ -73,7 +73,7 @@ if 'selection_by_week' not in st.session_state:
 col_random, col_export = st.columns([1, 2])
 
 with col_random:
-    if st.button("📅:one: Remplir avec séquence fixe"):
+    if st.button("📅:one:"):
         st.session_state.sequences = theme_sequence_custom
         st.rerun()
 
@@ -82,7 +82,7 @@ auto_weeks = defaultdict(list)
 used_codes = defaultdict(int)
 next_index_by_theme = defaultdict(lambda: 1)
 
-st.markdown("## \U0001F4CC Grille des 32 semaines (clic sur ❓ pour choisir)")
+st.markdown("## \U0001F4CC Grille des 32 semaines")
 
 rows = [st.columns(8) for _ in range(4)]
 for i in range(32):
