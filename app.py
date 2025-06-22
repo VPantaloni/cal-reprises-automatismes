@@ -36,7 +36,7 @@ def respecte_espacement(semaines, semaine_actuelle, est_rappel):
 emoji_numeros = [f"S{i+1}" for i in range(32)]
 
 try:
-    data = pd.read_csv("Auto-6e.csv", sep=';', encoding='utf-8')
+    data = pd.read_csv("Objectifs-6e-CM2-Auto-4.csv", sep=';', encoding='utf-8')
     data = data.dropna(subset=['Code', 'Automatisme'])
 except Exception as e:
     st.error("Erreur lors de la lecture du fichier CSV : " + str(e))
@@ -84,7 +84,7 @@ auto_weeks = defaultdict(list)
 used_codes = defaultdict(int)
 next_index_by_theme = defaultdict(lambda: 1)
 
-st.markdown("## \U0001F4CC Grille de 32 semaines")
+st.markdown("## \U0001F4CC Grille des 32 semaines (clic sur ❓ pour choisir)")
 
 rows = [st.columns(8) for _ in range(4)]
 for i in range(32):
@@ -124,7 +124,7 @@ for i in range(32):
             attendu = next_index_by_theme[theme_semaine]
             for _, row in theme_df.iterrows():
                 if int(row['Num']) == attendu:
-                    selection.append(row)
+                    selection.append(row.to_dict())
                     next_index_by_theme[theme_semaine] += 1
                     break
 
@@ -140,7 +140,7 @@ for i in range(32):
             for _, row in restants.iterrows():
                 if row['Code'] not in [sel['Code'] for sel in selection]:
                     if respecte_espacement(auto_weeks[row['Code']], i, row['Rappel']):
-                        selection.append(row)
+                        selection.append(row.to_dict())
                         break
             essais += 1
 
