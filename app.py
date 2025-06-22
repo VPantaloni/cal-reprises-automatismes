@@ -84,7 +84,7 @@ auto_weeks = defaultdict(list)
 used_codes = defaultdict(int)
 next_index_by_theme = defaultdict(lambda: 1)
 
-st.markdown("## \U0001F4CC Grille des 32 semaines (clic sur ❓ pour choisir)")
+st.markdown("## \U0001F4CC Grille de 32 semaines")
 
 rows = [st.columns(8) for _ in range(4)]
 for i in range(32):
