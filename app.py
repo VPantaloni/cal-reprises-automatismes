@@ -35,6 +35,11 @@ def respecte_espacement(semaines, semaine_actuelle, est_rappel):
 
 emoji_numeros = [f"S{i+1}" for i in range(32)]
 
+theme_sequence_custom = [
+    "📐", "🔢", "📏", "🔷", "🔢", "⌚", "📐", "➗", "🎲", "📐", "∝", "📐", "🎲", "🔢", "🧊", "➗",
+    "🔢", "⌚", "🔷", "🧊", "🔢", "📐", "➗", "📐", "📏", "📐", "∝", "📊"
+] + [random.choice(subtheme_emojis) for _ in range(32 - 28)]
+
 try:
     data = pd.read_csv("Auto-6e.csv", sep=';', encoding='utf-8')
     data = data.dropna(subset=['Code', 'Automatisme'])
@@ -58,25 +63,16 @@ with st.expander("\U0001F4D8 Légende des thèmes"):
                 <b>{emoji}</b> {label}</div>""", unsafe_allow_html=True)
 
 if 'sequences' not in st.session_state:
-    st.session_state.sequences = [None] * 32
+    st.session_state.sequences = theme_sequence_custom
+
 if 'selection_by_week' not in st.session_state:
     st.session_state.selection_by_week = [[] for _ in range(32)]
 
-col_reset, col_random, col_export = st.columns([1, 2, 2])
-with col_reset:
-    if st.button("\U0001F504 Réinitialiser"):
-        st.session_state.sequences = [None] * 32
-        st.rerun()
+col_random, col_export = st.columns([1, 2])
+
 with col_random:
-    if st.button("\U0001F3B2 Remplir aléatoirement"):
-        new_seq = []
-        prev = None
-        for _ in range(32):
-            options = [s for s in subtheme_emojis if s != prev]
-            choice = random.choice(options)
-            new_seq.append(choice)
-            prev = choice
-        st.session_state.sequences = new_seq
+    if st.button("📅:one: Remplir avec séquence fixe"):
+        st.session_state.sequences = theme_sequence_custom
         st.rerun()
 
 # Init trackers
@@ -84,7 +80,7 @@ auto_weeks = defaultdict(list)
 used_codes = defaultdict(int)
 next_index_by_theme = defaultdict(lambda: 1)
 
-st.markdown("## \U0001F4CC Grille de 32 semaines")
+st.markdown("## \U0001F4CC Grille des 32 semaines (clic sur ❓ pour choisir)")
 
 rows = [st.columns(8) for _ in range(4)]
 for i in range(32):
@@ -96,16 +92,6 @@ for i in range(32):
     with col:
         emoji = selected if selected else "❓"
         st.markdown(f"<b>{emoji_numeros[i]}</b> ", unsafe_allow_html=True)
-        if st.button(emoji, key=f"pick_{i}"):
-            st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
-
-        if st.session_state.get(f"show_picker_{i}", False):
-            picker_cols = st.columns(5)
-            for idx, (icon, color) in enumerate(subthemes):
-                with picker_cols[idx % 5]:
-                    if st.button(f"{icon}", key=f"choose_{i}_{icon}"):
-                        st.session_state.sequences[i] = icon
-                        st.session_state[f"show_picker_{i}"] = False
 
         theme_semaine = st.session_state.sequences[i]
         deja_abordes = [st.session_state.sequences[k] for k in range(i+1) if st.session_state.sequences[k]]
@@ -124,7 +110,7 @@ for i in range(32):
             attendu = next_index_by_theme[theme_semaine]
             for _, row in theme_df.iterrows():
                 if int(row['Num']) == attendu:
-                    selection.append(row)
+                    selection.append(row.to_dict())
                     next_index_by_theme[theme_semaine] += 1
                     break
 
@@ -140,7 +126,7 @@ for i in range(32):
             for _, row in restants.iterrows():
                 if row['Code'] not in [sel['Code'] for sel in selection]:
                     if respecte_espacement(auto_weeks[row['Code']], i, row['Rappel']):
-                        selection.append(row)
+                        selection.append(row.to_dict())
                         break
             essais += 1
 
