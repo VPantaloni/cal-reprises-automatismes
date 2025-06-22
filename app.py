@@ -36,7 +36,7 @@ def respecte_espacement(semaines, semaine_actuelle, est_rappel):
 emoji_numeros = [f"S{i+1}" for i in range(32)]
 
 try:
-    data = pd.read_csv("Objectifs-6e-CM2-Auto-4.csv", sep=';', encoding='utf-8')
+    data = pd.read_csv("Auto-6e.csv", sep=';', encoding='utf-8')
     data = data.dropna(subset=['Code', 'Automatisme'])
 except Exception as e:
     st.error("Erreur lors de la lecture du fichier CSV : " + str(e))
