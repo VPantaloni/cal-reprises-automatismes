@@ -58,7 +58,7 @@ with st.expander("\U0001F4D8 Légende des thèmes"):
                 <b>{emoji}</b> {label}</div>""", unsafe_allow_html=True)
 
 if 'sequences' not in st.session_state:
-    st.session_state.sequences = [None] * 32
+    st.session_state.sequences = ["🔢", "📐", "📊", "➗", "📐", "🔢", "📏", "🔷"] + [""] * (32 - 8)
 if 'selection_by_week' not in st.session_state:
     st.session_state.selection_by_week = [[] for _ in range(32)]
 
