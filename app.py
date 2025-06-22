@@ -132,8 +132,12 @@ for i in range(32):
                         break
             essais += 1
 
-        selection_df = pd.DataFrame(selection).head(6)
-        st.session_state.selection_by_week[i] = selection_df['Code'].tolist() if not selection_df.empty else []
+        selection_df = pd.DataFrame(selection)
+        if selection_df.empty:
+            st.session_state.selection_by_week[i] = []
+        else:
+            selection_df = selection_df.head(6)
+            st.session_state.selection_by_week[i] = selection_df['Code'].tolist()
 
         for code in st.session_state.selection_by_week[i]:
             auto_weeks[code].append(i)
