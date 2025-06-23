@@ -96,10 +96,10 @@ def afficher_legende():
                     </div>
                 """, unsafe_allow_html=True)
 
-def afficher_grille_selection():
+def afficher_grille_selection(data, auto_weeks, used_codes, next_index_by_theme):
     """
     Affiche la grille de sélection des thèmes pour chaque semaine.
-    Gère également les popups de sélection de thème.
+    Gère également les automatismes sélectionnés pour chaque semaine.
     """
     emoji_numeros = [f"S{i+1}" for i in range(32)]
     
@@ -126,32 +126,62 @@ def afficher_grille_selection():
             # Affichage du sélecteur de thème si activé
             if st.session_state.get(f"show_picker_{i}", False):
                 afficher_selecteur_theme(i)
+            
+            # Sélection et affichage des automatismes pour cette semaine
+            if selected_theme:
+                codes_selectionnes = selectionner_automatismes_pour_semaine(
+                    data, i, selected_theme, auto_weeks, used_codes, next_index_by_theme
+                )
+                
+                # Mise à jour des trackers
+                st.session_state.selection_by_week[i] = codes_selectionnes
+                for code in codes_selectionnes:
+                    auto_weeks[code].append(i)
+                    used_codes[code] += 1
+                
+                # Affichage des automatismes (2 colonnes de 3)
+                selection_df = data[data['Code'].isin(codes_selectionnes)]
+                if not selection_df.empty:
+                    col1, col2 = st.columns(2)
+                    for idx, (_, row) in enumerate(selection_df.iterrows()):
+                        target_col = col1 if idx % 2 == 0 else col2
+                        with target_col:
+                            st.markdown(f"""
+                                <div title="{row['Automatisme']}" 
+                                     style='padding:2px; margin:2px; border: 3px solid {row['Couleur']}; 
+                                            background:transparent; border-radius:4px; display:inline-block; 
+                                            width:100%; min-height:28px; font-size:0.75em; font-weight:bold; 
+                                            text-align:center; cursor:help;'>
+                                    {row['Code']}
+                                </div>
+                            """, unsafe_allow_html=True)
 
 def afficher_selecteur_theme(semaine_idx):
     """
-    Affiche le sélecteur de thème pour une semaine donnée.
+    Affiche le sélecteur de thème compact pour une semaine donnée.
+    
     Args:
         semaine_idx: Index de la semaine (0-31)
     """
-    # Organisation des thèmes en grille 4x3
+    # Organisation plus compacte : 2 lignes de 5 thèmes
     layout = [
-        ["🔢", "➗", ""],
-        ["📏", "🔷", "⌚"],
-        ["📐", "🧊", ""],
-        ["📊", "🎲", "∝"]
+        ["🔢", "➗", "📏", "🔷", "⌚"],
+        ["📐", "🧊", "📊", "🎲", "∝"]
     ]
     
-    picker_rows = [st.columns(3) for _ in range(4)]
+    st.markdown("**Choisir un thème:**")
     
-    for row, emojis in zip(picker_rows, layout):
-        for col, icon in zip(row, emojis):
+    for emojis in layout:
+        cols = st.columns(5)
+        for col, icon in zip(cols, emojis):
             with col:
-                if icon:  # Seulement si l'icône n'est pas vide
-                    if st.button(f"{icon}", key=f"choose_{semaine_idx}_{icon}", use_container_width=True):
-                        # Sélection du thème et fermeture du sélecteur
-                        st.session_state.sequences[semaine_idx] = icon
-                        st.session_state[f"show_picker_{semaine_idx}"] = False
-                        st.rerun()
+                # Bouton compact avec juste l'emoji
+                if st.button(icon, key=f"choose_{semaine_idx}_{icon}", 
+                           use_container_width=True, help=subtheme_legend[icon]):
+                    # Sélection du thème et fermeture du sélecteur
+                    st.session_state.sequences[semaine_idx] = icon
+                    st.session_state[f"show_picker_{semaine_idx}"] = False
+                    st.rerun()
 
 def generer_selection_aleatoire():
     """Génère une sélection aléatoire de thèmes pour toutes les semaines."""
@@ -249,27 +279,7 @@ def selectionner_automatismes_pour_semaine(data, semaine_idx, theme_semaine,
     
     return [row['Code'] for row in selection[:6]]
 
-def afficher_automatismes_semaine(selection_df):
-    """
-    Affiche les automatismes sélectionnés pour une semaine.
-    
-    Args:
-        selection_df: DataFrame des automatismes sélectionnés
-    """
-    if not selection_df.empty:
-        col1, col2 = st.columns(2)
-        for idx, (_, row) in enumerate(selection_df.iterrows()):
-            target_col = col1 if idx % 2 == 0 else col2
-            with target_col:
-                st.markdown(f"""
-                    <div title="{row['Automatisme']}" 
-                         style='padding:2px; margin:2px; border: 3px solid {row['Couleur']}; 
-                                background:transparent; border-radius:4px; display:inline-block; 
-                                width:100%; min-height:28px; font-size:0.75em; font-weight:bold; 
-                                text-align:center; cursor:help;'>
-                        {row['Code']}
-                    </div>
-                """, unsafe_allow_html=True)
+
 
 # ===== APPLICATION PRINCIPALE =====
 
@@ -314,34 +324,14 @@ def main():
     
     # Affichage de la grille de sélection
     st.markdown("## 📌 Grille de 32 semaines")
-    afficher_grille_selection()
-    
-    # ===== TRAITEMENT ET AFFICHAGE DES AUTOMATISMES =====
     
     # Initialisation des trackers pour l'algorithme
     auto_weeks = defaultdict(list)  # {code: [semaines_utilisees]}
     used_codes = defaultdict(int)   # {code: nb_utilisations}
     next_index_by_theme = defaultdict(lambda: 1)  # {theme: prochain_numero}
     
-    # Traitement semaine par semaine
-    for i in range(32):
-        theme_semaine = st.session_state.sequences[i]
-        
-        if theme_semaine:  # Seulement si un thème est sélectionné
-            # Sélection des automatismes pour cette semaine
-            codes_selectionnes = selectionner_automatismes_pour_semaine(
-                data, i, theme_semaine, auto_weeks, used_codes, next_index_by_theme
-            )
-            
-            # Mise à jour des trackers
-            st.session_state.selection_by_week[i] = codes_selectionnes
-            for code in codes_selectionnes:
-                auto_weeks[code].append(i)
-                used_codes[code] += 1
-            
-            # Affichage des automatismes sélectionnés
-            selection_df = data[data['Code'].isin(codes_selectionnes)]
-            afficher_automatismes_semaine(selection_df)
+    # Affichage de la grille avec traitement des automatismes
+    afficher_grille_selection(data, auto_weeks, used_codes, next_index_by_theme)
     
     # ===== SECTION RÉCAPITULATIF =====
     st.markdown("---")
