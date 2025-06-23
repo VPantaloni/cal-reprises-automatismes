@@ -1,4 +1,6 @@
-import streamlit as st
+...
+
+        import streamlit as st
 import pandas as pd
 import random
 from collections import defaultdict
@@ -115,7 +117,7 @@ for i in range(32):
                                 st.session_state.sequences[i] = icon
                                 st.session_state[f"show_picker_{i}"] = False
                                 st.rerun()
-
+#fin de boutons
         theme_semaine = st.session_state.sequences[i]
         deja_abordes = [st.session_state.sequences[k] for k in range(i+1) if st.session_state.sequences[k]]
         rappels = data[data['Rappel']]['Sous-Thème'].unique().tolist()
@@ -166,7 +168,7 @@ for i in range(32):
                 target_col = col1 if idx % 2 == 0 else col2
                 with target_col:
                     st.markdown(f"""
-                        <div title=\"{row['Automatisme']}\" style='padding:2px; margin:2px; background:{row['Couleur']}; border-radius:4px; display:inline-block; width:100%; min-height:28px; font-size:0.75em; font-weight:bold; text-align:center; cursor:help;'>
+                        <div title=\"{row['Automatisme']}\" style='padding:2px; margin:2px; border: 3px solid {row['Couleur']}; background:transparent; border-radius:4px; display:inline-block; width:100%; min-height:28px; font-size:0.75em; font-weight:bold; text-align:center; cursor:help;'>
                             {row['Code']}</div>""", unsafe_allow_html=True)
 
 # Lecture par automatisme
@@ -185,7 +187,7 @@ for _, row in data.iterrows():
 
 recap_df = pd.DataFrame(recap_data)
 for _, row in recap_df.iterrows():
-    st.markdown(f"""<div style='padding:2px; margin:2px; background:{row['Couleur']}; border-radius:4px; font-size:0.8em;'>
+    st.markdown(f"""<div style='padding:2px; margin:2px; border: 3px solid {row['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em;'>
             <b>{row['Code']}</b> : {row['Automatisme']}<br>
             <small><i>Semaine(s)</i> : {row['Semaines']}</small>
         </div>""", unsafe_allow_html=True)
