@@ -149,3 +149,53 @@ for i in range(32):
         used_codes[code] += 1
 
 #   Affichage dynamique des pastilles et export Excel)
+
+
+
+
+
+# DEUXIEME VOLET - Lecture par automatisme
+st.markdown("---")
+st.markdown("## \U0001F50D Lecture par automatisme")
+recap_data = []
+for _, row in data.iterrows():
+    code = row['Code']
+    semaines = [f"S{w+1}" for w in auto_weeks.get(code, [])]
+    recap_data.append({
+        "Code": code,
+        "Automatisme": row['Automatisme'],
+        "Semaines": ", ".join(semaines),
+        "Couleur": row['Couleur']
+    })
+
+recap_df = pd.DataFrame(recap_data)
+for _, row in recap_df.iterrows():
+    st.markdown(f"""<div style='padding:2px; margin:2px; border: 3px solid {row['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em;'>
+            <b>{row['Code']}</b> : {row['Automatisme']}<br>
+            <small><i>Semaine(s)</i> : {row['Semaines']}</small>
+        </div>""", unsafe_allow_html=True)
+
+with col_export:
+    buffer = BytesIO()
+    grille_data = []
+    for i in range(32):
+        semaine = f"S{i+1}"
+        theme_emoji = st.session_state.sequences[i] if st.session_state.sequences[i] else ""
+        theme_label = subtheme_legend.get(theme_emoji, "")
+        auto_codes = st.session_state.selection_by_week[i] if i < len(st.session_state.selection_by_week) else []
+        auto_codes += [""] * (6 - len(auto_codes))
+        grille_data.append([semaine, f"{theme_emoji} {theme_label}"] + auto_codes)
+
+    df_grille = pd.DataFrame(grille_data, columns=["Semaine", "Thème semaine"] + [f"Auto{i+1}" for i in range(6)])
+    df_recap = pd.DataFrame(recap_data)
+
+    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+        df_grille.to_excel(writer, index=False, sheet_name='Grille')
+        df_recap.to_excel(writer, index=False, sheet_name='Lecture_par_automatisme')
+
+    st.download_button(
+        label="\U0001F4C5 Télécharger le planning Excel",
+        data=buffer.getvalue(),
+        file_name="planning_reprises.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
