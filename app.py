@@ -142,16 +142,24 @@ def afficher_grille_selection(data, auto_weeks, used_codes, next_index_by_theme)
                 # Affichage des automatismes (2 colonnes de 3)
                 selection_df = data[data['Code'].isin(codes_selectionnes)]
                 if not selection_df.empty:
+                    # Création de 2 colonnes
                     col1, col2 = st.columns(2)
+                    
+                    # Répartition des automatismes en 2 colonnes de 3
                     for idx, (_, row) in enumerate(selection_df.iterrows()):
+                        if idx >= 6:  # Limiter à 6 automatismes maximum
+                            break
+                        
+                        # Alternance entre les colonnes
                         target_col = col1 if idx % 2 == 0 else col2
+                        
                         with target_col:
                             st.markdown(f"""
                                 <div title="{row['Automatisme']}" 
-                                     style='padding:2px; margin:2px; border: 3px solid {row['Couleur']}; 
-                                            background:transparent; border-radius:4px; display:inline-block; 
-                                            width:100%; min-height:28px; font-size:0.75em; font-weight:bold; 
-                                            text-align:center; cursor:help;'>
+                                     style='padding:3px; margin:1px; border: 2px solid {row['Couleur']}; 
+                                            background:transparent; border-radius:4px; display:block; 
+                                            width:100%; min-height:20px; font-size:0.7em; font-weight:bold; 
+                                            text-align:center; cursor:help; line-height:1.2;'>
                                     {row['Code']}
                                 </div>
                             """, unsafe_allow_html=True)
@@ -163,25 +171,40 @@ def afficher_selecteur_theme(semaine_idx):
     Args:
         semaine_idx: Index de la semaine (0-31)
     """
-    # Organisation plus compacte : 2 lignes de 5 thèmes
+    # Nouveau layout sur 4 lignes plus compact
     layout = [
-        ["🔢", "➗", "📏", "🔷", "⌚"],
-        ["📐", "🧊", "📊", "🎲", "∝"]
+        ["🔢", "➗", ""],
+        ["📏", "🔷", "⌚"],
+        ["📐", "🧊", ""],
+        ["📊", "🎲", "∝"]
     ]
     
     st.markdown("**Choisir un thème:**")
     
+    # CSS pour des boutons plus compacts
+    st.markdown("""
+        <style>
+        .compact-button {
+            padding: 2px 4px !important;
+            margin: 1px !important;
+            min-height: 25px !important;
+            font-size: 0.8em !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
     for emojis in layout:
-        cols = st.columns(5)
-        for col, icon in zip(cols, emojis):
-            with col:
-                # Bouton compact avec juste l'emoji
-                if st.button(icon, key=f"choose_{semaine_idx}_{icon}", 
-                           use_container_width=True, help=subtheme_legend[icon]):
-                    # Sélection du thème et fermeture du sélecteur
-                    st.session_state.sequences[semaine_idx] = icon
-                    st.session_state[f"show_picker_{semaine_idx}"] = False
-                    st.rerun()
+        cols = st.columns(3)  # 3 colonnes pour correspondre au layout
+        for col_idx, emoji in enumerate(emojis):
+            if emoji:  # Seulement si l'emoji n'est pas vide
+                with cols[col_idx]:
+                    # Bouton compact avec juste l'emoji
+                    if st.button(emoji, key=f"choose_{semaine_idx}_{emoji}", 
+                               use_container_width=True, help=subtheme_legend[emoji]):
+                        # Sélection du thème et fermeture du sélecteur
+                        st.session_state.sequences[semaine_idx] = emoji
+                        st.session_state[f"show_picker_{semaine_idx}"] = False
+                        st.rerun()
 
 def generer_selection_aleatoire():
     """Génère une sélection aléatoire de thèmes pour toutes les semaines."""
