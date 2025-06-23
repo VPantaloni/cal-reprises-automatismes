@@ -50,6 +50,16 @@ data['Num'] = data['Code'].str.extract(r'(\d+)$').astype(float)
 st.set_page_config(layout="wide")
 st.title("\U0001F4C5 Reprises d'automatismes mathématiques en 6e")
 
+# MODE NUIT (toggle)
+dark_mode = st.sidebar.checkbox("🌙 Mode nuit")
+if dark_mode:
+    st.markdown("""
+        <style>
+        body, .stApp { background-color: #0e1117; color: white; }
+        .stButton>button { background-color: #333; color: white; }
+        </style>
+    """, unsafe_allow_html=True)
+
 with st.expander("\U0001F4D8 Légende des thèmes"):
     cols = st.columns(5)
     for idx, (emoji, label) in enumerate(subtheme_legend.items()):
