@@ -19,6 +19,30 @@ subtheme_legend = {
     "🎲": "Probabilités", "∝": "Proportionnalité"
 }
 
+if 'dark_mode' not in st.session_state:
+    st.session_state.dark_mode = False
+
+# Bouton toggle mode nuit en haut à droite
+#col_dm1, col_dm2, col_dm3 = st.columns([6, 1, 1])
+#with col_dm3:
+#    if st.button("🌙" if not st.session_state.dark_mode else "🌞"):
+#        st.session_state.dark_mode = not st.session_state.dark_mode
+
+if st.session_state.dark_mode:
+    st.markdown("""
+        <style>
+        html, body, [class*="css"]  {
+            background-color: #111 !important;
+            color: #ddd !important;
+        }
+        .stButton>button {
+            background-color: #333 !important;
+            color: white !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+
 def respecte_espacement(semaines, semaine_actuelle, est_rappel):
     if not semaines:
         return True
@@ -49,6 +73,16 @@ data['Num'] = data['Code'].str.extract(r'(\d+)$').astype(float)
 
 st.set_page_config(layout="wide")
 st.title("\U0001F4C5 Reprises d'automatismes mathématiques en 6e")
+
+# MODE NUIT (toggle)
+dark_mode = st.sidebar.checkbox("🌙 Mode nuit")
+if dark_mode:
+    st.markdown("""
+        <style>
+        body, .stApp { background-color: #0e1117; color: white; }
+        .stButton>button { background-color: #333; color: white; }
+        </style>
+    """, unsafe_allow_html=True)
 
 with st.expander("\U0001F4D8 Légende des thèmes"):
     cols = st.columns(5)
@@ -115,7 +149,7 @@ for i in range(32):
                                 st.session_state.sequences[i] = icon
                                 st.session_state[f"show_picker_{i}"] = False
                                 st.rerun()
-
+#fin de boutons
         theme_semaine = st.session_state.sequences[i]
         deja_abordes = [st.session_state.sequences[k] for k in range(i+1) if st.session_state.sequences[k]]
         rappels = data[data['Rappel']]['Sous-Thème'].unique().tolist()
@@ -166,7 +200,7 @@ for i in range(32):
                 target_col = col1 if idx % 2 == 0 else col2
                 with target_col:
                     st.markdown(f"""
-                        <div title=\"{row['Automatisme']}\" style='padding:2px; margin:2px; background:{row['Couleur']}; border-radius:4px; display:inline-block; width:100%; min-height:28px; font-size:0.75em; font-weight:bold; text-align:center; cursor:help;'>
+                        <div title=\"{row['Automatisme']}\" style='padding:2px; margin:2px; border: 3px solid {row['Couleur']}; background:transparent; border-radius:4px; display:inline-block; width:100%; min-height:28px; font-size:0.75em; font-weight:bold; text-align:center; cursor:help;'>
                             {row['Code']}</div>""", unsafe_allow_html=True)
 
 # Lecture par automatisme
@@ -185,7 +219,7 @@ for _, row in data.iterrows():
 
 recap_df = pd.DataFrame(recap_data)
 for _, row in recap_df.iterrows():
-    st.markdown(f"""<div style='padding:2px; margin:2px; background:{row['Couleur']}; border-radius:4px; font-size:0.8em;'>
+    st.markdown(f"""<div style='padding:2px; margin:2px; border: 3px solid {row['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em;'>
             <b>{row['Code']}</b> : {row['Automatisme']}<br>
             <small><i>Semaine(s)</i> : {row['Semaines']}</small>
         </div>""", unsafe_allow_html=True)
