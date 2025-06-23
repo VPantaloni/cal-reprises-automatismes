@@ -104,7 +104,7 @@ for i in range(32):
             picker_style = """
                 <style>
                     div.row-widget.stButton > button {
-                        padding: 0.2em 0.4em !important;
+                        padding: 0.1em 0.1em !important;
                         font-size: 1em !important;
                         margin: 0 !important;
                     }
