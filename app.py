@@ -100,6 +100,27 @@ for i in range(32):
             st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
 #grille de boutons de sélection des themes :
         if st.session_state.get(f"show_picker_{i}", False):
+            # Grille ultra compacte sans marges ni espaces entre les boutons
+            picker_style = """
+                <style>
+                    div.row-widget.stButton > button {
+                        padding: 0.05em 0.2em !important;
+                        font-size: 0.8em !important;
+                        margin: 0 !important;
+                        height: 1.8em !important;
+                    }
+                    div[data-testid="column"] {
+                        padding: 0 !important;
+                        margin: 0 !important;
+                    }
+                    div[data-testid="stHorizontalBlock"] {
+                        gap: 0 !important;
+                        margin-bottom: 0 !important;
+                    }
+                </style>
+            """
+            st.markdown(picker_style, unsafe_allow_html=True)
+
             picker_rows = [st.columns(3) for _ in range(4)]
             layout = [
                 ["🔢", "➗", ""],
