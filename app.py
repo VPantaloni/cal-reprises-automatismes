@@ -185,19 +185,18 @@ for i in range(32):
 #
 st.markdown("---")
 st.markdown("## 🔍 Lecture par automatisme")
-recap_data = []
-for _, row in data.iterrows():
-    code = row['Code']
-    semaines = [f"S{i+1}" for i in auto_weeks.get(code, [])]
-    recap_data.append({"Code": code, "Automatisme": row['Automatisme'], "Semaines": ", ".join(semaines), "Couleur": row['Couleur']})
-
 cols = st.columns(3)
-nb = len(recap_data)
-chunk_size = (nb + 2) // 3
-for j in range(3):
-    for r in recap_data[j*chunk_size:(j+1)*chunk_size]:
-        with cols[j]:
-            st.markdown(f"<div style='padding:2px; margin:2px; border: 3px solid {r['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em;'><b>{r['Code']}</b> : {r['Automatisme']}<br><small><i>Semaine(s)</i> : {r['Semaines']}</small></div>", unsafe_allow_html=True)
+col1, col2, col3 = cols
+
+for j, r in enumerate(recap_data):
+    if j < 18:
+        col = col1
+    elif j < 36:
+        col = col2
+    else:
+        col = col3
+    with col:
+        st.markdown(f"<div style='padding:2px; margin:2px; border: 3px solid {r['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em;'><b>{r['Code']}</b> : {r['Automatisme']}<br><small><i>Semaine(s)</i> : {r['Semaines']}</small></div>", unsafe_allow_html=True)
 
 
 # ===== EXPORT EXCEL =====
