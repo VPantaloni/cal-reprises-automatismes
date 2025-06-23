@@ -100,23 +100,20 @@ for i in range(32):
             st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
 
     if st.session_state.get(f"show_picker_{i}", False):
-        layout = [
-        ["🔢", "➗", ""],
-        ["📏", "🔷", "⌚"],
-        ["📐", "🧊", ""],
-        ["📊", "🎲", "∝"]
-        ]
-    for row_emojis in layout:
-        cols = st.columns([1, 1, 1], gap="small")
-        for col, icon in zip(cols, row_emojis):
-            with col:
-                if icon:  # Affiche un bouton seulement s’il y a un emoji
-                    st.button(
-                        f"{icon}",
-                        key=f"choose_{i}_{icon}",
-                        help=subtheme_legend.get(icon, ""),
-                        use_container_width=True
-                    )
+            picker_rows = [st.columns(3) for _ in range(4)]
+            layout = [
+                ["🔢", "➗", ""],
+                ["📏", "🔷", "⌚"],
+                ["📐", "🧊", ""],
+                ["📊", "🎲", "∝"]
+            ]
+            for row, emojis in zip(picker_rows, layout):
+                for col, icon in zip(row, emojis):
+                    with col:
+                        if icon:
+                            if st.button(f"{icon}", key=f"choose_{i}_{icon}", use_container_width=True):
+                                st.session_state.sequences[i] = icon
+                                st.session_state[f"show_picker_{i}"] = False
 
         theme_semaine = st.session_state.sequences[i]
         deja_abordes = [st.session_state.sequences[k] for k in range(i+1) if st.session_state.sequences[k]]
