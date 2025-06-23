@@ -140,7 +140,22 @@ for i in range(32):
     with rows[row][col]:
         emoji = st.session_state.sequences[i] if st.session_state.sequences[i] else "❓"
         label = emoji_numeros[i]
-        if st.button(f"{label} {emoji}", key=f"pick_{i}"):
+
+        st.markdown("""
+            <style>
+            .theme-button {
+                width: 100%;
+                padding: 6px;
+                text-align: center;
+                font-size: 1.1em;
+                font-weight: bold;
+                border-radius: 8px;
+                margin-bottom: 4px;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+
+        if st.button(f"{label} {emoji}", key=f"pick_{i}", help="Changer de thème"):
             st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
 
         if st.session_state.get(f"show_picker_{i}", False):
