@@ -65,7 +65,7 @@ def charger_donnees():
 def afficher_pastilles_compacte(selection_df):
     if not selection_df.empty:
         pastilles = [
-            f"<div title=\"{row['Automatisme']}\" style='flex:1; padding:2px; border: 2px solid {row['Couleur']}; background:transparent; border-radius:4px; font-size:0.75em; font-weight:bold; text-align:center; cursor:help;'> {row['Code']} </div>"
+            f"<div title=\"{row['Automatisme']}\" style='flex:1; padding:2px; border: 2.5px solid {row['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em; font-weight:bold; text-align:center; cursor:help;'> {row['Code']} </div>"
             for _, row in selection_df.iterrows()
         ]
         lignes = ["<div style='display:flex; gap:4px;'>" + "".join(pastilles[i:i+2]) + "</div>" for i in range(0, len(pastilles), 2)]
@@ -130,7 +130,7 @@ data = charger_donnees()
 auto_weeks = defaultdict(list)
 used_codes = defaultdict(int)
 next_index_by_theme = defaultdict(lambda: 1)
-emoji_numeros = [f"S{i+1}" for i in range(32)]
+emoji_numeros = [f"Semaine{i+1}" for i in range(32)]
 
 # Grille 4 lignes × 8 colonnes
 rows = [st.columns(8) for _ in range(4)]
