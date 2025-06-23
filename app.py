@@ -30,7 +30,7 @@ subtheme_legend = {
 # =====  SIDEBAR =====
 # - bouton remplissage aléatoire
 st.sidebar.markdown("### Actions")
-if st.sidebar.button("🎲 Remplir aléatoirement les thèmes"):
+if st.sidebar.button("🎲 Remplir aléatoirement les thèmes ❓"):
     new_seq = []
     prev = None
     for _ in range(32):
