@@ -28,6 +28,13 @@ subtheme_legend = {
 }
 
 # ===== ESPACEMENT PARAMÉTRABLE VIA SIDEBAR =====
+st.sidebar.markdown("### Paramètres d'espacement")
+min_espacement_rappel = st.sidebar.slider("Espacement min pour rappels", 1, 6, 2)
+espacement_min2 = st.sidebar.slider("1ère → 2e apparition (min)", 1, 6, 2)
+espacement_max2 = st.sidebar.slider("1ère → 2e apparition (max)", 2, 10, 4)
+espacement_min3 = st.sidebar.slider("2e → 3e apparition (min)", 2, 10, 4)
+espacement_max3 = st.sidebar.slider("2e → 3e apparition (max)", 2, 12, 6)
+# - bouton remplissage aléatoire
 st.sidebar.markdown("### Actions")
 if st.sidebar.button("🎲 Remplir aléatoirement les thèmes"):
     new_seq = []
@@ -39,13 +46,6 @@ if st.sidebar.button("🎲 Remplir aléatoirement les thèmes"):
         prev = choice
     st.session_state.sequences = new_seq
     st.rerun()
-st.sidebar.markdown("### Paramètres d'espacement")
-min_espacement_rappel = st.sidebar.slider("Espacement min pour rappels", 1, 6, 2)
-espacement_min2 = st.sidebar.slider("1ère → 2e apparition (min)", 1, 6, 2)
-espacement_max2 = st.sidebar.slider("1ère → 2e apparition (max)", 2, 10, 4)
-espacement_min3 = st.sidebar.slider("2e → 3e apparition (min)", 2, 10, 4)
-espacement_max3 = st.sidebar.slider("2e → 3e apparition (max)", 2, 12, 6)
-
 # ===== FONCTIONS UTILITAIRES =====
 
 def respecte_espacement(semaines_precedentes, semaine_actuelle, est_rappel):
