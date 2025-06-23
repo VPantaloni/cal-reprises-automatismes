@@ -118,14 +118,10 @@ def afficher_grille_selection(data, auto_weeks, used_codes, next_index_by_theme)
             st.markdown(f"<b>{emoji_numeros[i]}</b>", unsafe_allow_html=True)
             emoji = selected_theme if selected_theme else "❓"
             
-            # Bouton pour ouvrir/fermer le sélecteur de thème
+            # Bouton pour ouvrir le sélecteur de thème (modal)
             if st.button(emoji, key=f"pick_{i}"):
-                picker_key = f"show_picker_{i}"
-                st.session_state[picker_key] = not st.session_state.get(picker_key, False)
-            
-            # Affichage du sélecteur de thème si activé
-            if st.session_state.get(f"show_picker_{i}", False):
-                afficher_selecteur_theme(i)
+                st.session_state.modal_open = i
+                st.rerun()
             
             # Sélection et affichage des automatismes pour cette semaine
             if selected_theme:
@@ -139,72 +135,139 @@ def afficher_grille_selection(data, auto_weeks, used_codes, next_index_by_theme)
                     auto_weeks[code].append(i)
                     used_codes[code] += 1
                 
-                # Affichage des automatismes (2 colonnes de 3)
+                # Affichage des automatismes en grille 2x3
                 selection_df = data[data['Code'].isin(codes_selectionnes)]
                 if not selection_df.empty:
-                    # Création de 2 colonnes
-                    col1, col2 = st.columns(2)
-                    
-                    # Répartition des automatismes en 2 colonnes de 3
+                    # Création de la grille 2 colonnes × 3 lignes
+                    auto_grid = ""
                     for idx, (_, row) in enumerate(selection_df.iterrows()):
                         if idx >= 6:  # Limiter à 6 automatismes maximum
                             break
                         
-                        # Alternance entre les colonnes
-                        target_col = col1 if idx % 2 == 0 else col2
+                        # Nouvelle ligne tous les 2 éléments
+                        if idx % 2 == 0:
+                            auto_grid += "<div style='display:flex; gap:2px; margin:1px 0;'>"
                         
-                        with target_col:
-                            st.markdown(f"""
-                                <div title="{row['Automatisme']}" 
-                                     style='padding:3px; margin:1px; border: 2px solid {row['Couleur']}; 
-                                            background:transparent; border-radius:4px; display:block; 
-                                            width:100%; min-height:20px; font-size:0.7em; font-weight:bold; 
-                                            text-align:center; cursor:help; line-height:1.2;'>
-                                    {row['Code']}
-                                </div>
-                            """, unsafe_allow_html=True)
+                        auto_grid += f"""
+                            <div title="{row['Automatisme']}" 
+                                 style='flex:1; padding:2px; border: 1px solid {row['Couleur']}; 
+                                        background:transparent; border-radius:3px; 
+                                        font-size:0.6em; font-weight:bold; text-align:center; 
+                                        cursor:help; min-height:18px; line-height:1.1;'>
+                                {row['Code']}
+                            </div>
+                        """
+                        
+                        # Fermeture de ligne après 2 éléments
+                        if idx % 2 == 1:
+                            auto_grid += "</div>"
+                    
+                    # Fermeture de la dernière ligne si impaire
+                    if len(selection_df) % 2 == 1:
+                        auto_grid += "</div>"
+                    
+                    st.markdown(auto_grid, unsafe_allow_html=True)
 
-def afficher_selecteur_theme(semaine_idx):
+def afficher_modal_selecteur_theme():
     """
-    Affiche le sélecteur de thème compact pour une semaine donnée.
-    
-    Args:
-        semaine_idx: Index de la semaine (0-31)
+    Affiche le modal de sélection de thème.
     """
-    # Nouveau layout sur 4 lignes plus compact
-    layout = [
-        ["🔢", "➗", ""],
-        ["📏", "🔷", "⌚"],
-        ["📐", "🧊", ""],
-        ["📊", "🎲", "∝"]
-    ]
-    
-    st.markdown("**Choisir un thème:**")
-    
-    # CSS pour des boutons plus compacts
-    st.markdown("""
-        <style>
-        .compact-button {
-            padding: 2px 4px !important;
-            margin: 1px !important;
-            min-height: 25px !important;
-            font-size: 0.8em !important;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-    
-    for emojis in layout:
-        cols = st.columns(3)  # 3 colonnes pour correspondre au layout
-        for col_idx, emoji in enumerate(emojis):
-            if emoji:  # Seulement si l'emoji n'est pas vide
-                with cols[col_idx]:
-                    # Bouton compact avec juste l'emoji
-                    if st.button(emoji, key=f"choose_{semaine_idx}_{emoji}", 
-                               use_container_width=True, help=subtheme_legend[emoji]):
-                        # Sélection du thème et fermeture du sélecteur
-                        st.session_state.sequences[semaine_idx] = emoji
-                        st.session_state[f"show_picker_{semaine_idx}"] = False
-                        st.rerun()
+    if 'modal_open' in st.session_state and st.session_state.modal_open is not None:
+        semaine_idx = st.session_state.modal_open
+        
+        # CSS pour le modal
+        st.markdown("""
+            <style>
+            .modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 1000;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .modal-content {
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                max-width: 400px;
+                width: 90%;
+            }
+            .theme-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+                margin: 15px 0;
+            }
+            .theme-button {
+                padding: 10px;
+                border: 2px solid #ddd;
+                border-radius: 8px;
+                background: white;
+                cursor: pointer;
+                text-align: center;
+                font-size: 1.2em;
+                transition: all 0.2s;
+            }
+            .theme-button:hover {
+                background: #f0f0f0;
+                transform: scale(1.05);
+            }
+            .close-button {
+                float: right;
+                background: #ff4b4b;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 5px 10px;
+                cursor: pointer;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+        
+        # Structure du modal avec les thèmes organisés
+        layout = [
+            ["🔢", "➗", ""],
+            ["📏", "🔷", "⌚"],
+            ["📐", "🧊", ""],
+            ["📊", "🎲", "∝"]
+        ]
+        
+        st.markdown(f"### Choisir un thème pour la semaine S{semaine_idx + 1}")
+        
+        # Bouton de fermeture
+        if st.button("❌ Fermer", key="close_modal"):
+            st.session_state.modal_open = None
+            st.rerun()
+        
+        # Affichage des thèmes en grille
+        st.markdown("**Sélectionnez un thème :**")
+        
+        for row_emojis in layout:
+            cols = st.columns(3)
+            for col_idx, emoji in enumerate(row_emojis):
+                if emoji:  # Seulement si l'emoji n'est pas vide
+                    with cols[col_idx]:
+                        # Affichage du thème avec sa description
+                        st.markdown(f"""
+                            <div style='text-align: center; padding: 5px; border: 1px solid #ddd; 
+                                        border-radius: 5px; margin: 2px;'>
+                                <div style='font-size: 1.5em;'>{emoji}</div>
+                                <div style='font-size: 0.7em; color: #666;'>{subtheme_legend[emoji][:15]}...</div>
+                            </div>
+                        """, unsafe_allow_html=True)
+                        
+                        # Bouton de sélection
+                        if st.button(f"Choisir {emoji}", key=f"select_{semaine_idx}_{emoji}", 
+                                   use_container_width=True):
+                            st.session_state.sequences[semaine_idx] = emoji
+                            st.session_state.modal_open = None
+                            st.rerun()
 
 def generer_selection_aleatoire():
     """Génère une sélection aléatoire de thèmes pour toutes les semaines."""
@@ -337,6 +400,9 @@ def main():
     if 'selection_by_week' not in st.session_state:
         st.session_state.selection_by_week = [[] for _ in range(32)]
     
+    if 'modal_open' not in st.session_state:
+        st.session_state.modal_open = None
+    
     # Boutons d'action
     col_random, col_export = st.columns([2, 2])
     
@@ -355,6 +421,9 @@ def main():
     
     # Affichage de la grille avec traitement des automatismes
     afficher_grille_selection(data, auto_weeks, used_codes, next_index_by_theme)
+    
+    # Affichage du modal de sélection de thème si nécessaire
+    afficher_modal_selecteur_theme()
     
     # ===== SECTION RÉCAPITULATIF =====
     st.markdown("---")
