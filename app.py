@@ -168,7 +168,6 @@ for i in range(32):
                 used_codes[code] += 1
             afficher_pastilles_compacte(data[data['Code'].isin(codes)])
             st.markdown("---")
-
 st.markdown("---")
 st.markdown("## 🔍 Lecture par automatisme")
 recap_data = []
@@ -178,7 +177,18 @@ for _, row in data.iterrows():
     recap_data.append({"Code": code, "Automatisme": row['Automatisme'], "Semaines": ", ".join(semaines), "Couleur": row['Couleur']})
 for r in recap_data:
     st.markdown(f"<div style='padding:2px; margin:2px; border: 3px solid {r['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em;'><b>{r['Code']}</b> : {r['Automatisme']}<br><small><i>Semaine(s)</i> : {r['Semaines']}</small></div>", unsafe_allow_html=True)
-
+# Bouton aléatoire -------
+if st.sidebar.button("🎲 Remplir aléatoirement"):
+    new_seq = []
+    prev = None
+    for _ in range(32):
+        options = [s for s in subtheme_emojis if s != prev]
+        choice = random.choice(options)
+        new_seq.append(choice)
+        prev = choice
+    st.session_state.sequences = new_seq
+    st.rerun()
+    
 # ===== EXPORT EXCEL =====
 buffer = BytesIO()
 grille_data = []
