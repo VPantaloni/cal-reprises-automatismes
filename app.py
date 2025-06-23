@@ -99,13 +99,13 @@ for i in range(32):
         if st.button(emoji, key=f"pick_{i}"):
             st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
 
-        if st.session_state.get(f"show_picker_{i}", False):
-    layout = [
+    if st.session_state.get(f"show_picker_{i}", False):
+        layout = [
         ["🔢", "➗", ""],
         ["📏", "🔷", "⌚"],
         ["📐", "🧊", ""],
         ["📊", "🎲", "∝"]
-    ]
+        ]
     for row_emojis in layout:
         cols = st.columns([1, 1, 1], gap="small")
         for col, icon in zip(cols, row_emojis):
