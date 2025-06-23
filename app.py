@@ -100,12 +100,20 @@ for i in range(32):
             st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
 
         if st.session_state.get(f"show_picker_{i}", False):
-            picker_cols = st.columns(5)
-            for idx, (icon, color) in enumerate(subthemes):
-                with picker_cols[idx % 5]:
-                    if st.button(f"{icon}", key=f"choose_{i}_{icon}"):
-                        st.session_state.sequences[i] = icon
-                        st.session_state[f"show_picker_{i}"] = False
+            # Boutons en 4 lignes personnalisées
+            picker_rows = [st.columns(2), st.columns(3), st.columns(2), st.columns(3)]
+            layout = [
+                ["🔢", "➗"],
+                ["📏", "🔷", "⌚"],
+                ["📐", "🧊"],
+                ["📊", "🎲", "∝"]
+            ]
+            for row, emojis in zip(picker_rows, layout):
+                for col, icon in zip(row, emojis):
+                    with col:
+                        if st.button(f"{icon}", key=f"choose_{i}_{icon}"):
+                            st.session_state.sequences[i] = icon
+                            st.session_state[f"show_picker_{i}"] = False
 
         theme_semaine = st.session_state.sequences[i]
         deja_abordes = [st.session_state.sequences[k] for k in range(i+1) if st.session_state.sequences[k]]
