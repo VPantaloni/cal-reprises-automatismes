@@ -107,13 +107,13 @@ for i in range(32):
                 ["📐", "🧊", ""],
                 ["📊", "🎲", "∝"]
             ]
-        for row, emojis in zip(picker_rows, layout):
-            for col, icon in zip(row, emojis):
-                with col:
-                    if icon:
-                        if st.button(f"{icon}", key=f"choose_{i}_{icon}", use_container_width=True):
-                            st.session_state.sequences[i] = icon
-                            st.session_state[f"show_picker_{i}"] = False
+            for row, emojis in zip(picker_rows, layout):
+                for col, icon in zip(row, emojis):
+                    with col:
+                        if icon:
+                            if st.button(f"{icon}", key=f"choose_{i}_{icon}", use_container_width=True):
+                                st.session_state.sequences[i] = icon
+                                st.session_state[f"show_picker_{i}"] = False
 
         theme_semaine = st.session_state.sequences[i]
         deja_abordes = [st.session_state.sequences[k] for k in range(i+1) if st.session_state.sequences[k]]
