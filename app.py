@@ -30,14 +30,17 @@ subtheme_legend = {
 # =====  SIDEBAR =====
 # - bouton remplissage aléatoire
 st.sidebar.markdown("### Actions")
-if st.sidebar.button("🎲 Remplir aléatoirement les thèmes ❓"):
-    new_seq = []
+if st.sidebar.button("🎲 Remplir aléatoirement les thèmes vides"):
+    new_seq = st.session_state.sequences.copy()
     prev = None
-    for _ in range(32):
-        options = [s for s in subtheme_emojis if s != prev]
-        choice = random.choice(options)
-        new_seq.append(choice)
-        prev = choice
+    for i in range(32):
+        if not new_seq[i] or new_seq[i] == "❓":
+            options = [s for s in subtheme_emojis if s != prev]
+            choice = random.choice(options)
+            new_seq[i] = choice
+            prev = choice
+        else:
+            prev = new_seq[i]
     st.session_state.sequences = new_seq
     st.rerun()
 # parametres en sliders
