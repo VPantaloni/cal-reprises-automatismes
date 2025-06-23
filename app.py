@@ -98,15 +98,16 @@ for i in range(32):
         st.markdown(f"<b>{emoji_numeros[i]}</b> ", unsafe_allow_html=True)
         if st.button(emoji, key=f"pick_{i}"):
             st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
-
+#grille de boutons de sélection des themes :
         if st.session_state.get(f"show_picker_{i}", False):
-            # Grille très compacte sans marges ni espaces entre les boutons
+            # Grille ultra compacte sans marges ni espaces entre les boutons
             picker_style = """
                 <style>
                     div.row-widget.stButton > button {
-                        padding: 0.1em 0.3em !important;
-                        font-size: 0.9em !important;
+                        padding: 0.05em 0.2em !important;
+                        font-size: 0.8em !important;
                         margin: 0 !important;
+                        height: 1.8em !important;
                     }
                     div[data-testid="column"] {
                         padding: 0 !important;
