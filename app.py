@@ -114,6 +114,7 @@ for i in range(32):
                             if st.button(f"{icon}", key=f"choose_{i}_{icon}", use_container_width=True):
                                 st.session_state.sequences[i] = icon
                                 st.session_state[f"show_picker_{i}"] = False
+                                st.rerun()
 
         theme_semaine = st.session_state.sequences[i]
         deja_abordes = [st.session_state.sequences[k] for k in range(i+1) if st.session_state.sequences[k]]
