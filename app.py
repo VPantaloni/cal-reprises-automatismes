@@ -63,10 +63,10 @@ if 'selection_by_week' not in st.session_state:
     st.session_state.selection_by_week = [[] for _ in range(32)]
 
 col_reset, col_random, col_export = st.columns([1, 2, 2])
-with col_reset:
-    if st.button("\U0001F504 Réinitialiser"):
-        st.session_state.sequences = [None] * 32
-        st.rerun()
+#with col_reset:
+#    if st.button("\U0001F504 Réinitialiser"):
+#        st.session_state.sequences = [None] * 32
+#        st.rerun()
 with col_random:
     if st.button("\U0001F3B2 Remplir aléatoirement"):
         new_seq = []
