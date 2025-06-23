@@ -23,10 +23,10 @@ if 'dark_mode' not in st.session_state:
     st.session_state.dark_mode = False
 
 # Bouton toggle mode nuit en haut à droite
-col_dm1, col_dm2, col_dm3 = st.columns([6, 1, 1])
-with col_dm3:
-    if st.button("🌙" if not st.session_state.dark_mode else "🌞"):
-        st.session_state.dark_mode = not st.session_state.dark_mode
+#col_dm1, col_dm2, col_dm3 = st.columns([6, 1, 1])
+#with col_dm3:
+#    if st.button("🌙" if not st.session_state.dark_mode else "🌞"):
+#        st.session_state.dark_mode = not st.session_state.dark_mode
 
 if st.session_state.dark_mode:
     st.markdown("""
