@@ -186,14 +186,15 @@ for i in range(32):
                         selection.append(row)
                         break
             essais += 1
-
+# Enregistre la sélection finale d'automatismes pour la semaine i :
+# Enregistre dans st.session_state.selection_by_week[i] la liste des Code des automatismes retenus pour la semaine i.
         selection_df = pd.DataFrame(selection).head(6)
         st.session_state.selection_by_week[i] = selection_df['Code'].tolist() if not selection_df.empty else []
-
+# Ajoute la semaine i dans la liste des semaines où code apparaît. Incrémente le compteur d’utilisation de ce code :
         for code in st.session_state.selection_by_week[i]:
             auto_weeks[code].append(i)
             used_codes[code] += 1
-
+# Affiche chaque pastille d'automatisme sur fond transparent avec bordure colorée (le code est affiché, et l'automatisme complet est en tooltip au survol).
         if not selection_df.empty:
             col1, col2 = st.columns(2)
             for idx, (_, row) in enumerate(selection_df.iterrows()):
