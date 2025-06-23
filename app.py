@@ -19,6 +19,30 @@ subtheme_legend = {
     "🎲": "Probabilités", "∝": "Proportionnalité"
 }
 
+if 'dark_mode' not in st.session_state:
+    st.session_state.dark_mode = False
+
+# Bouton toggle mode nuit en haut à droite
+col_dm1, col_dm2, col_dm3 = st.columns([6, 1, 1])
+with col_dm3:
+    if st.button("🌙" if not st.session_state.dark_mode else "🌞"):
+        st.session_state.dark_mode = not st.session_state.dark_mode
+
+if st.session_state.dark_mode:
+    st.markdown("""
+        <style>
+        html, body, [class*="css"]  {
+            background-color: #111 !important;
+            color: #ddd !important;
+        }
+        .stButton>button {
+            background-color: #333 !important;
+            color: white !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+
 def respecte_espacement(semaines, semaine_actuelle, est_rappel):
     if not semaines:
         return True
