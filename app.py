@@ -100,17 +100,21 @@ for i in range(32):
             st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
 
         if st.session_state.get(f"show_picker_{i}", False):
-            # Grille compacte sans marges entre les boutons
+            # Grille très compacte sans marges ni espaces entre les boutons
             picker_style = """
                 <style>
                     div.row-widget.stButton > button {
-                        padding: 0.1em 0.1em !important;
-                        font-size: 1em !important;
+                        padding: 0.1em 0.3em !important;
+                        font-size: 0.9em !important;
                         margin: 0 !important;
                     }
                     div[data-testid="column"] {
                         padding: 0 !important;
                         margin: 0 !important;
+                    }
+                    div[data-testid="stHorizontalBlock"] {
+                        gap: 0 !important;
+                        margin-bottom: 0 !important;
                     }
                 </style>
             """
