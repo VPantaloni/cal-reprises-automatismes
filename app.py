@@ -180,6 +180,9 @@ for i in range(32):
                 used_codes[code] += 1
             afficher_pastilles_compacte(data[data['Code'].isin(codes)])
             st.markdown("---")
+#
+## === LECTURE AUTOMATISMES
+#
 st.markdown("---")
 st.markdown("## 🔍 Lecture par automatisme")
 recap_data = []
@@ -187,37 +190,15 @@ for _, row in data.iterrows():
     code = row['Code']
     semaines = [f"S{i+1}" for i in auto_weeks.get(code, [])]
     recap_data.append({"Code": code, "Automatisme": row['Automatisme'], "Semaines": ", ".join(semaines), "Couleur": row['Couleur']})
-#for r in recap_data:
-#    st.markdown(f"<div style='padding:2px; margin:2px; border: 3px solid {r['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em;'><b>{r['Code']}</b> : {r['Automatisme']}<br><small><i>Semaine(s)</i> : {r['Semaines']}</small></div>", unsafe_allow_html=True)
-cols = st.columns(2)
-previous_theme = None
-block = []
 
-for r in recap_data:
-    theme = r['Code'][0]
-    bloc_html = f"""
-        <div style='padding:2px; margin:2px; border: 3px solid {r['Couleur']}; 
-                    background:transparent; border-radius:4px; font-size:0.8em;'>
-            <b>{r['Code']}</b> : {r['Automatisme']}<br>
-            <small><i>Semaine(s)</i> : {r['Semaines']}</small>
-        </div>
-    """
-    if previous_theme is None:
-        previous_theme = theme
+cols = st.columns(3)
+nb = len(recap_data)
+chunk_size = (nb + 2) // 3
+for j in range(3):
+    for r in recap_data[j*chunk_size:(j+1)*chunk_size]:
+        with cols[j]:
+            st.markdown(f"<div style='padding:2px; margin:2px; border: 3px solid {r['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em;'><b>{r['Code']}</b> : {r['Automatisme']}<br><small><i>Semaine(s)</i> : {r['Semaines']}</small></div>", unsafe_allow_html=True)
 
-    if theme != previous_theme and block:
-        for i, b in enumerate(block):
-            with cols[i % 2]:
-                st.markdown(b, unsafe_allow_html=True)
-        block = []
-        previous_theme = theme
-
-    block.append(bloc_html)
-
-# Afficher le reste
-for i, b in enumerate(block):
-    with cols[i % 2]:
-        st.markdown(b, unsafe_allow_html=True)
 
 # ===== EXPORT EXCEL =====
 buffer = BytesIO()
