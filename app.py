@@ -29,18 +29,14 @@ subtheme_legend = {
 
 # =====  SIDEBAR =====
 # - bouton remplissage aléatoire
-st.sidebar.markdown("### Actions")
-if st.sidebar.button("🎲 Remplir aléatoirement les thèmes vides"):
+if st.sidebar.button("🎲 Remplir aléatoirement les ❓"):
     new_seq = st.session_state.sequences.copy()
-    prev = None
-    for i in range(32):
-        if not new_seq[i] or new_seq[i] == "❓":
-            options = [s for s in subtheme_emojis if s != prev]
-            choice = random.choice(options)
-            new_seq[i] = choice
-            prev = choice
-        else:
-            prev = new_seq[i]
+    prev = new_seq[7]  # On part de la semaine 8
+    for i in range(8, 32):
+        options = [s for s in subtheme_emojis if s != prev]
+        choice = random.choice(options)
+        new_seq[i] = choice
+        prev = choice
     st.session_state.sequences = new_seq
     st.rerun()
 # parametres en sliders
