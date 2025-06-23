@@ -58,15 +58,15 @@ with st.expander("\U0001F4D8 Légende des thèmes"):
                 <b>{emoji}</b> {label}</div>""", unsafe_allow_html=True)
 
 if 'sequences' not in st.session_state:
-    st.session_state.sequences = [None] * 32
+    st.session_state.sequences = ["🔢", "📐", "📊", "➗", "📐", "🔢", "📏", "🔷"] + [""] * (32 - 8)
 if 'selection_by_week' not in st.session_state:
     st.session_state.selection_by_week = [[] for _ in range(32)]
 
 col_reset, col_random, col_export = st.columns([1, 2, 2])
-with col_reset:
-    if st.button("\U0001F504 Réinitialiser"):
-        st.session_state.sequences = [None] * 32
-        st.rerun()
+#with col_reset:
+#    if st.button("\U0001F504 Réinitialiser"):
+#        st.session_state.sequences = [None] * 32
+#        st.rerun()
 with col_random:
     if st.button("\U0001F3B2 Remplir aléatoirement"):
         new_seq = []
@@ -84,7 +84,7 @@ auto_weeks = defaultdict(list)
 used_codes = defaultdict(int)
 next_index_by_theme = defaultdict(lambda: 1)
 
-st.markdown("## \U0001F4CC Grille de 32 semaines")
+#st.markdown("## \U0001F4CC Grille de 32 semaines")
 
 rows = [st.columns(8) for _ in range(4)]
 for i in range(32):
@@ -98,8 +98,7 @@ for i in range(32):
         st.markdown(f"<b>{emoji_numeros[i]}</b> ", unsafe_allow_html=True)
         if st.button(emoji, key=f"pick_{i}"):
             st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
-
-        #grille de boutons de sélection des themes :
+#grille de boutons de sélection des themes :
         if st.session_state.get(f"show_picker_{i}", False):
             picker_rows = [st.columns(3) for _ in range(4)]
             layout = [
@@ -115,6 +114,7 @@ for i in range(32):
                             if st.button(f"{icon}", key=f"choose_{i}_{icon}", use_container_width=True):
                                 st.session_state.sequences[i] = icon
                                 st.session_state[f"show_picker_{i}"] = False
+                                st.rerun()
 
         theme_semaine = st.session_state.sequences[i]
         deja_abordes = [st.session_state.sequences[k] for k in range(i+1) if st.session_state.sequences[k]]
