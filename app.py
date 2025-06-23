@@ -28,7 +28,7 @@ subtheme_legend = {
 }
 
 # =====  SIDEBAR =====
-# - bouton remplissage aléatoire
+# -- bouton remplissage aléatoire
 if st.sidebar.button("🎲 Remplir aléatoirement les ❓"):
     new_seq = st.session_state.sequences.copy()
     prev = new_seq[7]  # On part de la semaine 8
