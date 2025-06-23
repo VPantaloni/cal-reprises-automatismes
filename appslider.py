@@ -73,11 +73,79 @@ def respecte_espacement(semaines, semaine_actuelle, est_rappel):
         return espacement_min3 <= ecart <= espacement_max3
     else:
         return False
+# === CHARGEMENT DES DONNÉES ===
+try:
+    data = pd.read_csv("Auto-6e.csv", sep=';', encoding='utf-8')
+    data = data.dropna(subset=['Code', 'Automatisme'])
+except Exception as e:
+    st.error("Erreur lors de la lecture du fichier CSV : " + str(e))
+    st.stop()
 
-# === BLOC ALGORITHMIQUE À VENIR ===
+data['Sous-Thème'] = data['Code'].str[0]
+data['Rappel'] = data['Code'].str[1] == '↩'
+data['Num'] = data['Code'].str.extract(r'(\d+)$').astype(float)
+data['Couleur'] = data['Sous-Thème'].map(subtheme_colors)
 
-# (Ce bloc sera complété avec :
-#   - chargement CSV (Auto-6e.csv)
-#   - initialisation des variables et états
-#   - calcul automatique des automatismes placés
-#   - affichage dynamique des pastilles et export Excel)
+# === INITIALISATION DES ÉTATS SESSION ===
+if 'sequences' not in st.session_state:
+    st.session_state.sequences = theme_sequence_custom.copy()
+
+if 'selection_by_week' not in st.session_state:
+    st.session_state.selection_by_week = [[] for _ in range(32)]
+
+# === INIT TRACKERS DE DISTRIBUTION ===
+auto_weeks = defaultdict(list)      # Semaines où chaque automatisme a été placé
+used_codes = defaultdict(int)       # Combien de fois chaque code a été utilisé
+next_index_by_theme = defaultdict(lambda: 1)  # Pour les automatismes ordonnés par thème
+
+
+# === CALCUL AUTOMATISMES PAR SEMAINE ===
+auto_weeks = defaultdict(list)
+used_codes = defaultdict(int)
+next_index_by_theme = defaultdict(lambda: 1)
+
+for i in range(32):
+    theme_semaine = st.session_state.sequences[i]
+    deja_abordes = [st.session_state.sequences[k] for k in range(i+1) if st.session_state.sequences[k]]
+    rappels = data[data['Rappel']]['Sous-Thème'].unique().tolist()
+    pool = list(set(deja_abordes + rappels))
+
+    candidats = data[data['Sous-Thème'].isin(pool)].copy()
+    candidats = candidats[(candidats['Rappel']) | (candidats['Sous-Thème'].isin(deja_abordes))]
+    candidats['Used'] = candidats['Code'].map(lambda c: used_codes[c])
+    candidats = candidats[candidats['Used'] < 4]
+    candidats = candidats[candidats['Code'].apply(lambda c: respecte_espacement(auto_weeks[c], i, data.set_index('Code').loc[c, 'Rappel']))]
+
+    selection = []
+    if theme_semaine:
+        theme_df = candidats[(candidats['Sous-Thème'] == theme_semaine) & (~candidats['Rappel'])].sort_values('Num')
+        attendu = next_index_by_theme[theme_semaine]
+        for _, row in theme_df.iterrows():
+            if int(row['Num']) == attendu:
+                selection.append(row.to_dict())
+                next_index_by_theme[theme_semaine] += 1
+                break
+
+    autres = candidats[~candidats['Code'].isin([r['Code'] for r in selection])]
+    groupes = autres.groupby('Sous-Thème')
+    divers = [g.sort_values('Num').iloc[0] for _, g in groupes if not g.empty]
+    random.shuffle(divers)
+    selection.extend(divers[:5])
+
+    essais = 0
+    while len(selection) < 6 and essais < 50:
+        restants = candidats[~candidats['Code'].isin([row['Code'] for row in selection])]
+        for _, row in restants.iterrows():
+            if row['Code'] not in [sel['Code'] for sel in selection]:
+                if respecte_espacement(auto_weeks[row['Code']], i, row['Rappel']):
+                    selection.append(row.to_dict())
+                    break
+        essais += 1
+
+    st.session_state.selection_by_week[i] = [row['Code'] for row in selection]
+    for row in selection:
+        code = row['Code']
+        auto_weeks[code].append(i)
+        used_codes[code] += 1
+
+#   Affichage dynamique des pastilles et export Excel)
