@@ -62,16 +62,15 @@ def charger_donnees():
         st.error(f"Erreur de lecture CSV : {e}")
         st.stop()
 
-def afficher_pastilles(selection_df):
+def afficher_pastilles_compacte(selection_df):
     if not selection_df.empty:
-        col1, col2 = st.columns(2)
-        for idx, (_, row) in enumerate(selection_df.iterrows()):
-            target_col = col1 if idx % 2 == 0 else col2
-            with target_col:
-                st.markdown(f"""
-                    <div title=\"{row['Automatisme']}\" style='padding:2px; margin:1px; border: 3px solid {row['Couleur']}; background:transparent; border-radius:4px; display:inline-block; width:100%; min-height:28px; font-size:0.75em; font-weight:bold; text-align:center; cursor:help;'>
-                        {row['Code']}
-                    </div>""", unsafe_allow_html=True)
+        pastilles = [
+            f"<div title=\"{row['Automatisme']}\" style='flex:1; padding:2px; border: 2px solid {row['Couleur']}; background:transparent; border-radius:4px; font-size:0.75em; font-weight:bold; text-align:center; cursor:help;'> {row['Code']} </div>"
+            for _, row in selection_df.iterrows()
+        ]
+        lignes = ["<div style='display:flex; gap:4px;'>" + "".join(pastilles[i:i+2]) + "</div>" for i in range(0, len(pastilles), 2)]
+        for ligne in lignes:
+            st.markdown(ligne, unsafe_allow_html=True)
 
 def selectionner_automatismes(data, semaine_idx, theme, auto_weeks, used_codes, next_index_by_theme):
     deja_abordes = [st.session_state.sequences[k] for k in range(semaine_idx+1) if st.session_state.sequences[k]]
@@ -139,9 +138,9 @@ for i in range(32):
     row = i // 8
     col = i % 8
     with rows[row][col]:
-        st.markdown(f"<b>{emoji_numeros[i]}</b>", unsafe_allow_html=True)
         emoji = st.session_state.sequences[i] if st.session_state.sequences[i] else "❓"
-        if st.button(emoji, key=f"pick_{i}"):
+        label = emoji_numeros[i]
+        if st.button(f"{label} {emoji}", key=f"pick_{i}"):
             st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
 
         if st.session_state.get(f"show_picker_{i}", False):
@@ -161,15 +160,13 @@ for i in range(32):
                                 st.session_state[f"show_picker_{i}"] = False
                                 st.rerun()
 
-        st.markdown(f"<div style='text-align:center; font-size:1.5em'>{emoji}</div>", unsafe_allow_html=True)
-
         if st.session_state.sequences[i]:
             codes = selectionner_automatismes(data, i, st.session_state.sequences[i], auto_weeks, used_codes, next_index_by_theme)
             st.session_state.selection_by_week[i] = codes
             for code in codes:
                 auto_weeks[code].append(i)
                 used_codes[code] += 1
-            afficher_pastilles(data[data['Code'].isin(codes)])
+            afficher_pastilles_compacte(data[data['Code'].isin(codes)])
 
 st.markdown("---")
 st.markdown("## 🔍 Lecture par automatisme")
