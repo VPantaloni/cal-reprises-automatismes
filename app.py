@@ -167,6 +167,7 @@ for i in range(32):
                 auto_weeks[code].append(i)
                 used_codes[code] += 1
             afficher_pastilles_compacte(data[data['Code'].isin(codes)])
+            st.markdown("---")
 
 st.markdown("---")
 st.markdown("## 🔍 Lecture par automatisme")
