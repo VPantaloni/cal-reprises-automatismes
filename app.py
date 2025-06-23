@@ -182,11 +182,11 @@ for i in range(32):
             st.markdown("---")
 st.markdown("---")
 st.markdown("## 🔍 Lecture par automatisme")
-#recap_data = []
-#for _, row in data.iterrows():
-#    code = row['Code']
-#    semaines = [f"S{i+1}" for i in auto_weeks.get(code, [])]
-#    recap_data.append({"Code": code, "Automatisme": row['Automatisme'], "Semaines": ", ".join(semaines), "Couleur": row['Couleur']})
+recap_data = []
+for _, row in data.iterrows():
+    code = row['Code']
+    semaines = [f"S{i+1}" for i in auto_weeks.get(code, [])]
+    recap_data.append({"Code": code, "Automatisme": row['Automatisme'], "Semaines": ", ".join(semaines), "Couleur": row['Couleur']})
 #for r in recap_data:
 #    st.markdown(f"<div style='padding:2px; margin:2px; border: 3px solid {r['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em;'><b>{r['Code']}</b> : {r['Automatisme']}<br><small><i>Semaine(s)</i> : {r['Semaines']}</small></div>", unsafe_allow_html=True)
 cols = st.columns(2)
