@@ -65,7 +65,7 @@ def charger_donnees():
 def afficher_pastilles_compacte(selection_df):
     if not selection_df.empty:
         pastilles = [
-            f"<div title=\"{row['Automatisme']}\" style='flex:1; padding:2px; border: 2.5px solid {row['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em; font-weight:bold; text-align:center; cursor:help;'> {row['Code']} </div>"
+            f"<div title=\"{row['Automatisme']}\" style='flex:1; padding:2px; border: 3px solid {row['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em; font-weight:bold; text-align:center; cursor:help;'> {row['Code']} </div>"
             for _, row in selection_df.iterrows()
         ]
         lignes = ["<div style='display:flex; gap:4px;'>" + "".join(pastilles[i:i+2]) + "</div>" for i in range(0, len(pastilles), 2)]
