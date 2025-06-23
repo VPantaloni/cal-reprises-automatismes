@@ -120,6 +120,8 @@ if 'sequences' not in st.session_state:
     st.session_state.sequences = ["🔢", "📐", "📊", "➗", "📐", "🔢", "📏", "🔷"] + [""] * 24
 if 'selection_by_week' not in st.session_state:
     st.session_state.selection_by_week = [[] for _ in range(32)]
+if 'picker_open' not in st.session_state:
+    st.session_state.picker_open = None
 
 data = charger_donnees()
 auto_weeks = defaultdict(list)
@@ -129,13 +131,14 @@ emoji_numeros = [f"S{i+1}" for i in range(32)]
 
 # Grille 4 lignes × 8 colonnes
 rows = [st.columns(8) for _ in range(4)]
-
 for i in range(32):
     row = i // 8
     col = i % 8
     with rows[row][col]:
         st.markdown(f"<b>{emoji_numeros[i]}</b>", unsafe_allow_html=True)
         emoji = st.session_state.sequences[i] if st.session_state.sequences[i] else "❓"
+        if st.button(emoji, key=f"btn_{i}"):
+            st.session_state.picker_open = i
         st.markdown(f"<div style='text-align:center; font-size:1.5em'>{emoji}</div>", unsafe_allow_html=True)
 
         if st.session_state.sequences[i]:
@@ -145,6 +148,26 @@ for i in range(32):
                 auto_weeks[code].append(i)
                 used_codes[code] += 1
             afficher_pastilles(data[data['Code'].isin(codes)])
+
+# Affichage du sélecteur de thème
+if st.session_state.picker_open is not None:
+    idx = st.session_state.picker_open
+    st.markdown(f"### Choisir un thème pour la semaine S{idx+1}")
+    layout = [
+        ["🔢", "➗", ""],
+        ["📏", "🔷", "⌚"],
+        ["📐", "🧊", ""],
+        ["📊", "🎲", "∝"]
+    ]
+    for row in layout:
+        cols = st.columns(3)
+        for col, emoji in zip(cols, row):
+            if emoji:
+                with col:
+                    if st.button(f"{emoji}", key=f"set_{idx}_{emoji}"):
+                        st.session_state.sequences[idx] = emoji
+                        st.session_state.picker_open = None
+                        st.rerun()
 
 st.markdown("---")
 st.markdown("## 🔍 Lecture par automatisme")
