@@ -181,6 +181,33 @@ for i in range(32):
             afficher_pastilles_compacte(data[data['Code'].isin(codes)])
             st.markdown("---")
 #
+# ===== RÉCAPITULATIF PAR AUTOMATISME EN 3 COLONNES FIXES =====
+data = charger_donnees()
+auto_weeks = defaultdict(list)
+used_codes = defaultdict(int)
+recap_data = []
+
+for i in range(32):
+    theme = st.session_state.sequences[i]
+    if theme != "❓":
+        possibles = data[(data['Sous-Thème'] == theme) & (~data['Rappel'])]
+        possibles = possibles.sort_values('Num')
+        for code in possibles['Code']:
+            if code not in st.session_state.selection_by_week[i]:
+                st.session_state.selection_by_week[i].append(code)
+                auto_weeks[code].append(i)
+                used_codes[code] += 1
+                break
+
+for _, row in data.iterrows():
+    code = row['Code']
+    semaines = [f"S{i+1}" for i in auto_weeks.get(code, [])]
+    recap_data.append({
+        "Code": code,
+        "Automatisme": row['Automatisme'],
+        "Semaines": ", ".join(semaines),
+        "Couleur": row['Couleur']
+    })
 ## === LECTURE AUTOMATISMES
 #
 st.markdown("---")
