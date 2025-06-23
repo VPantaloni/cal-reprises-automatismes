@@ -180,7 +180,6 @@ def selectionner_automatismes_pour_semaine(data, semaine_idx, theme_semaine,
 def afficher_grille_selection(data, auto_weeks, used_codes, next_index_by_theme):
     """
     Affiche la grille de sélection des thèmes pour chaque semaine.
-    Gère également les automatismes sélectionnés pour chaque semaine.
     """
     emoji_numeros = [f"S{i+1}" for i in range(32)]
     
@@ -236,22 +235,73 @@ def afficher_grille_selection(data, auto_weeks, used_codes, next_index_by_theme)
             for code in st.session_state.selection_by_week[i]:
                 auto_weeks[code].append(i)
                 used_codes[code] += 1
+
+def afficher_grille_automatismes_compacte():
+    """
+    Affiche la grille compacte des automatismes avec 16 colonnes et 3 lignes par bloc.
+    """
+    st.markdown("### 📋 Grille des automatismes")
+    
+    # Traitement par bloc de 8 semaines
+    for bloc in range(4):
+        debut_semaine = bloc * 8
+        fin_semaine = debut_semaine + 8
+        
+        st.markdown(f"**Semaines {debut_semaine + 1} à {fin_semaine}**")
+        
+        # Création de la grille 16 colonnes x 3 lignes
+        for ligne_auto in range(3):  # 3 lignes d'automatismes
+            cols = st.columns(16)  # 16 colonnes (2 par semaine)
             
-            # Affichage des automatismes en deux colonnes
-            if not selection_df.empty:
-                col1, col2 = st.columns(2)
-                for idx, (_, row) in enumerate(selection_df.iterrows()):
-                    target_col = col1 if idx % 2 == 0 else col2
-                    with target_col:
-                        st.markdown(f"""
-                            <div title="{row['Automatisme']}" 
-                                 style='padding:2px; margin:2px; border: 3px solid {row['Couleur']}; 
-                                        background:transparent; border-radius:4px; display:inline-block; 
-                                        width:100%; min-height:28px; font-size:0.75em; font-weight:bold; 
-                                        text-align:center; cursor:help;'>
-                                {row['Code']}
-                            </div>
-                        """, unsafe_allow_html=True)
+            for semaine_dans_bloc in range(8):  # 8 semaines dans le bloc
+                semaine_globale = debut_semaine + semaine_dans_bloc
+                
+                # Récupération des automatismes pour cette semaine
+                automatismes = st.session_state.selection_by_week[semaine_globale] if semaine_globale < len(st.session_state.selection_by_week) else []
+                
+                # Affichage de 2 automatismes par semaine (colonnes paires)
+                for col_auto in range(2):  # 2 colonnes par semaine
+                    col_index = semaine_dans_bloc * 2 + col_auto
+                    auto_index = ligne_auto * 2 + col_auto  # Index de l'automatisme (0-5)
+                    
+                    with cols[col_index]:
+                        if auto_index < len(automatismes):
+                            code = automatismes[auto_index]
+                            # Récupération de la couleur depuis les données
+                            couleur = "#666666"  # Couleur par défaut
+                            try:
+                                data = charger_donnees()
+                                row = data[data['Code'] == code]
+                                if not row.empty:
+                                    couleur = row.iloc[0]['Couleur']
+                                    automatisme_text = row.iloc[0]['Automatisme']
+                                else:
+                                    automatisme_text = code
+                            except:
+                                automatisme_text = code
+                            
+                            st.markdown(f"""
+                                <div title="{automatisme_text}" 
+                                     style='padding:1px; margin:1px; border: 2px solid {couleur}; 
+                                            background:transparent; border-radius:3px; 
+                                            font-size:0.7em; font-weight:bold; 
+                                            text-align:center; cursor:help; 
+                                            min-height:20px; line-height:18px;'>
+                                    {code}
+                                </div>
+                            """, unsafe_allow_html=True)
+                        else:
+                            # Case vide
+                            st.markdown(f"""
+                                <div style='padding:1px; margin:1px; border: 1px dashed #ccc; 
+                                            background:transparent; border-radius:3px; 
+                                            font-size:0.7em; text-align:center; 
+                                            min-height:20px; line-height:18px;'>
+                                    
+                                </div>
+                            """, unsafe_allow_html=True)
+        
+        st.markdown("---")  # Séparateur entre les blocs
 
 def generer_selection_aleatoire():
     """Génère une sélection aléatoire de thèmes pour toutes les semaines."""
@@ -313,8 +363,11 @@ def main():
     used_codes = defaultdict(int)   # {code: nb_utilisations}
     next_index_by_theme = defaultdict(lambda: 1)  # {theme: prochain_numero}
     
-    # Affichage de la grille avec traitement des automatismes
+    # Affichage de la grille de sélection des thèmes
     afficher_grille_selection(data, auto_weeks, used_codes, next_index_by_theme)
+    
+    # Affichage de la grille compacte des automatismes
+    afficher_grille_automatismes_compacte()
     
     # ===== SECTION RÉCAPITULATIF =====
     st.markdown("---")
