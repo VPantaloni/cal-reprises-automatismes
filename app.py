@@ -142,13 +142,13 @@ def selectionner_automatismes(data, semaine_idx, theme, auto_weeks, used_codes, 
                 auto1 = tous_candidats[0]['Code']
                 auto2 = tous_candidats[1]['Code'] if len(tous_candidats) > 1 else auto1
             
-            # PLACER OBLIGATOIREMENT en positions 1 et 4
+            # PLACER OBLIGATOIREMENT en positions 1 et 2 (première ligne)
             selection_finale[0] = auto1  # Position 1
-            selection_finale[3] = auto2  # Position 4
+            selection_finale[1] = auto2  # Position 2
             codes_selectionnes.add(auto1)
             codes_selectionnes.add(auto2)
     
-    # 2. AUTOMATISMES EN RAPPEL (POSITIONS 2, 3, 5, 6)
+    # 2. AUTOMATISMES EN RAPPEL (POSITIONS 3, 4, 5, 6)
     # Récupérer les thèmes déjà abordés les semaines précédentes
     themes_deja_abordes = set()
     for k in range(semaine_idx):
@@ -233,7 +233,7 @@ def selectionner_automatismes(data, semaine_idx, theme, auto_weeks, used_codes, 
                 selection_finale[i] = data.iloc[0]['Code']
     
     return selection_finale
-#
+    #
 ## FIN select
 st.set_page_config(layout="wide")
 st.title("📅 Reprises d'automatismes mathématiques en 6e")
