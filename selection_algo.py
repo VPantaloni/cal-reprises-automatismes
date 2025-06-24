@@ -59,3 +59,15 @@ def selectionner_automatismes_theme(
         selection_finale[3] = auto2
 
     return selection_finale
+  
+def selectionner_automatismes(
+    data, semaine, theme, auto_weeks, used_codes, next_index_by_theme,
+    min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
+    themes_passes
+):
+    # Simple appel à la fonction thème uniquement
+    return selectionner_automatismes_theme(
+        data, semaine, theme, auto_weeks, used_codes,
+        min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
+        themes_passes
+    )
