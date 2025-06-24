@@ -83,9 +83,9 @@ def bouton_recalcul():
         recalculer_toute_la_repartition()
         st.rerun()
 
+st.sidebar.markdown("### Actions")
 # Appel du bouton tout en haut
 bouton_recalcul()
-st.sidebar.markdown("### Actions")
 # -- bouton remplissage aléatoire
 if st.sidebar.button("🎲 Remplir aléatoirement les ❓"):
     new_seq = st.session_state.sequences.copy()
