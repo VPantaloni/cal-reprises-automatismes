@@ -13,12 +13,15 @@ def afficher_lecture_et_export(data, subtheme_legend):
         recap_data.append({"Code": code, "Automatisme": row['Automatisme'], "Semaines": ", ".join(semaines), "Couleur": row['Couleur']})
 
     cols = st.columns(3)
-    nb = len(recap_data)
-    chunk_size = (nb + 2) // 3 - 2
-    for j in range(3):
-        for r in recap_data[j*chunk_size:(j+1)*chunk_size]:
-            with cols[j]:
-                st.markdown(f"<div style='padding:2px; margin:2px; border: 3px solid {r['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em;'><b>{r['Code']}</b> : {r['Automatisme']}<br><small><i>Semaine(s)</i> : {r['Semaines']}</small></div>", unsafe_allow_html=True)
+nb = len(recap_data)
+chunk_size = (nb + 2) // 3 - 2
+
+for j in range(3):
+    start = j * chunk_size
+    end = (j + 1) * chunk_size if j < 2 else nb  # Pour la dernière colonne, on prend tout ce qui reste
+    for r in recap_data[start:end]:
+        with cols[j]:
+            st.markdown(f"<div style='padding:2px; margin:2px; border: 3px solid {r['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em;'><b>{r['Code']}</b> : {r['Automatisme']}<br><small><i>Semaine(s)</i> : {r['Semaines']}</small></div>", unsafe_allow_html=True)
 
     buffer = BytesIO()
     grille_data = []
