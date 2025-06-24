@@ -60,6 +60,22 @@ def afficher_pastilles_compacte(selection_df):
             f"<div title=\"{row['Automatisme']}\" style='flex:1; padding:2px; border: 3px solid {row['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em; font-weight:bold; text-align:center; cursor:help;'> {row['Code']} </div>"
             for _, row in selection_df.iterrows()
         ]
+
+        # Tri pour afficher ceux du thème de la semaine en 1re ligne
+        def ligne_ordre(code):
+            if len(selection_df) < 2:
+                return 2  # si bug
+            theme_emoji = code[0]
+            return 0 if code == selection_df.iloc[0]['Code'] else (1 if code == selection_df.iloc[1]['Code'] else 2)
+
+        selection_df['AffichageOrdre'] = selection_df['Code'].apply(ligne_ordre)
+        selection_df = selection_df.sort_values('AffichageOrdre')
+
+        pastilles = [
+            f"<div title=\"{row['Automatisme']}\" style='flex:1; padding:2px; border: 3px solid {row['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em; font-weight:bold; text-align:center; cursor:help;'> {row['Code']} </div>"
+            for _, row in selection_df.iterrows()
+        ]
+
         lignes = ["<div style='display:flex; gap:4px;'>" + "".join(pastilles[i:i+2]) + "</div>" for i in range(0, len(pastilles), 2)]
         for ligne in lignes:
             st.markdown(ligne, unsafe_allow_html=True)
