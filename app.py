@@ -84,8 +84,8 @@ top_button_placeholder = st.sidebar.empty()
 # -- bouton remplissage aléatoire
 if st.sidebar.button("🎲 Remplir aléatoirement les ❓"):
     new_seq = st.session_state.sequences.copy()
-    prev = new_seq[0]  # On part de la semaine 8
-    for i in range(32):
+    prev = new_seq[7]  # On part de la semaine 8
+    for i in range(8,32):
         options = [s for s in subtheme_emojis if s != prev]
         choice = random.choice(options)
         new_seq[i] = choice
