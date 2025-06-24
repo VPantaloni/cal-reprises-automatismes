@@ -22,7 +22,6 @@ def selectionner_automatismes_theme(
     themes_passes
 ):
     selection_finale = [None] * 6
-    codes_selectionnes = set()
 
     def peut_etre_place(code):
         row = data[data['Code'] == code].iloc[0]
@@ -61,7 +60,7 @@ def selectionner_automatismes(
     min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
     themes_passes
 ):
-    # Pour le moment, on fait juste appel à la fonction theme-only
+    # Simple appel à la fonction thème uniquement
     return selectionner_automatismes_theme(
         data, semaine, theme, auto_weeks, used_codes,
         min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
