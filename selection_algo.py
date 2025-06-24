@@ -47,10 +47,11 @@ def selectionner_automatismes(
                 auto1 = tous_candidats[0]['Code']
                 auto2 = tous_candidats[1]['Code'] if len(tous_candidats) > 1 else auto1
 
-            selection_finale[0] = auto1
-            selection_finale[3] = auto2
-            codes_selectionnes.add(auto1)
-            codes_selectionnes.add(auto2)
+            selection_finale = [None] * 6
+            selection_finale[0] = auto1  # 1er auto thème courant
+            selection_finale[3] = auto2  # 2e auto thème courant
+            #codes_selectionnes.add(auto1)
+            #codes_selectionnes.add(auto2)
 
     # 2. Automatisme rappels
     candidats_rappel = []
@@ -89,5 +90,7 @@ def selectionner_automatismes(
     assert selection_finale[0] and selection_finale[3], "Positions 1 et 4 doivent contenir les automatismes du thème courant."
 
     selection_finale = [code for code in selection_finale if code is not None]
-    # Retourner la liste finale d'automatismes (longueur <= 6)
+    assert selection_finale[0] == auto1, "Auto1 doit être en position 0"
+    assert selection_finale[3] == auto2, "Auto2 doit être en position 3"
+  # Retourner la liste finale d'automatismes (longueur <= 6)
     return selection_finale
