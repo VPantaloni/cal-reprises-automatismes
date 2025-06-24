@@ -144,6 +144,5 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
             if src[i]:
                 selection_finale[i] = src[i]
                 break
-    selection_finale[0] = auto1
-    selection_finale[3] = auto2
+    
     return selection_finale
