@@ -27,30 +27,6 @@ subtheme_legend = {
     "∝": "Proportionnalité"
 }
 
-# =====  SIDEBAR =====
-# -- bouton remplissage aléatoire
-if st.sidebar.button("🎲 Remplir aléatoirement les ❓"):
-    new_seq = st.session_state.sequences.copy()
-    prev = new_seq[7]  # On part de la semaine 8
-    for i in range(8, 32):
-        options = [s for s in subtheme_emojis if s != prev]
-        choice = random.choice(options)
-        new_seq[i] = choice
-        prev = choice
-    st.session_state.sequences = new_seq
-    st.rerun()
-# Bouton de redistribution :
-if st.sidebar.button("🔄 Recalculer la répartition"):
-    selectionner_automatismes(data, semaine_idx, theme, auto_weeks, used_codes, next_index_by_theme)
-    st.rerun()
-# parametres en sliders
-st.sidebar.markdown("### Paramètres d'espacement")
-min_espacement_rappel = st.sidebar.slider("Espacement min pour rappels", 1, 6, 1)
-espacement_min2 = st.sidebar.slider("1ère → 2e apparition (min)", 1, 6, 2)
-espacement_max2 = st.sidebar.slider("1ère → 2e apparition (max)", 2, 10, 6)
-espacement_min3 = st.sidebar.slider("2e → 3e apparition (min)", 2, 10, 4)
-espacement_max3 = st.sidebar.slider("2e → 3e apparition (max)", 2, 15, 10)
-
 # ===== FONCTIONS UTILITAIRES =====
 
 def respecte_espacement(semaines_precedentes, semaine_actuelle, est_rappel):
@@ -146,13 +122,13 @@ def selectionner_automatismes(data, semaine_idx, theme, auto_weeks, used_codes, 
                 auto1 = tous_candidats[0]['Code']
                 auto2 = tous_candidats[1]['Code'] if len(tous_candidats) > 1 else auto1
             
-            # PLACER OBLIGATOIREMENT en positions 1 et 2 (première ligne)
+            # PLACER en positions 1 et 4 (indices 0 et 3)
             selection_finale[0] = auto1  # Position 1
-            selection_finale[1] = auto2  # Position 2
+            selection_finale[3] = auto2  # Position 4
             codes_selectionnes.add(auto1)
             codes_selectionnes.add(auto2)
     
-    # 2. AUTOMATISMES EN RAPPEL (POSITIONS 3, 4, 5, 6)
+    # 2. AUTOMATISMES EN RAPPEL (POSITIONS 2, 3, 5, 6)
     # Récupérer les thèmes déjà abordés les semaines précédentes
     themes_deja_abordes = set()
     for k in range(semaine_idx):
@@ -236,11 +212,65 @@ def selectionner_automatismes(data, semaine_idx, theme, auto_weeks, used_codes, 
                 # Cas extrême : premier automatisme disponible
                 selection_finale[i] = data.iloc[0]['Code']
     
-    return selection_finale   
+    return selection_finale
+
+def recalculer_toute_la_repartition():
+    """
+    Recalcule complètement la répartition des automatismes pour toutes les semaines
+    """
+    # Réinitialiser les données de suivi
+    st.session_state.selection_by_week = [[] for _ in range(32)]
+    
+    # Recalculer pour chaque semaine ayant un thème défini
+    auto_weeks = defaultdict(list)
+    used_codes = defaultdict(int)
+    next_index_by_theme = defaultdict(lambda: 1)
+    
+    for i in range(32):
+        if st.session_state.sequences[i]:
+            codes = selectionner_automatismes(
+                data, i, st.session_state.sequences[i], 
+                auto_weeks, used_codes, next_index_by_theme
+            )
+            st.session_state.selection_by_week[i] = codes
+            for code in codes:
+                auto_weeks[code].append(i)
+                used_codes[code] += 1
+
 #--------------------------------------------------------------------------
-## FIN select
+## Configuration de la page
 st.set_page_config(layout="wide")
 st.title("📅 Reprises d'automatismes mathématiques en 6e")
+
+# =====  SIDEBAR =====
+# parametres en sliders
+st.sidebar.markdown("### Paramètres d'espacement")
+min_espacement_rappel = st.sidebar.slider("Espacement min pour rappels", 1, 6, 1)
+espacement_min2 = st.sidebar.slider("1ère → 2e apparition (min)", 1, 6, 2)
+espacement_max2 = st.sidebar.slider("1ère → 2e apparition (max)", 2, 10, 6)
+espacement_min3 = st.sidebar.slider("2e → 3e apparition (min)", 2, 10, 4)
+espacement_max3 = st.sidebar.slider("2e → 3e apparition (max)", 2, 15, 10)
+
+# -- bouton remplissage aléatoire
+if st.sidebar.button("🎲 Remplir aléatoirement les ❓"):
+    new_seq = st.session_state.sequences.copy()
+    prev = new_seq[7]  # On part de la semaine 8
+    for i in range(8, 32):
+        options = [s for s in subtheme_emojis if s != prev]
+        choice = random.choice(options)
+        new_seq[i] = choice
+        prev = choice
+    st.session_state.sequences = new_seq
+    st.rerun()
+
+# Chargement des données
+data = charger_donnees()
+
+# Bouton de redistribution :
+if st.sidebar.button("🔄 Recalculer la répartition"):
+    recalculer_toute_la_repartition()
+    st.rerun()
+
 ## LEGENDES
 with st.expander("\U0001F4D8 Légende des thèmes"):
     cols = st.columns(5)
@@ -249,6 +279,8 @@ with st.expander("\U0001F4D8 Légende des thèmes"):
             st.markdown(f"""<div style='background:{subtheme_colors[emoji]}; padding:4px; border-radius:6px; color:white; font-size:0.85em;'>
                 <b>{emoji}</b> {label}</div>""", unsafe_allow_html=True)
 #--- fin légendes
+
+# Initialisation des variables de session
 if 'sequences' not in st.session_state:
     st.session_state.sequences = ["🔢", "📐", "📊", "➗", "📐", "🔢", "📏", "🔷"] + [""] * 24
 if 'selection_by_week' not in st.session_state:
@@ -260,7 +292,7 @@ for i in range(32):
     if f"show_picker_{i}" not in st.session_state:
         st.session_state[f"show_picker_{i}"] = False
 
-data = charger_donnees()
+# Variables de suivi pour le calcul des automatismes
 auto_weeks = defaultdict(list)
 used_codes = defaultdict(int)
 next_index_by_theme = defaultdict(lambda: 1)
@@ -302,10 +334,8 @@ for i in range(32):
                 used_codes[code] += 1
             afficher_pastilles_compacte(data[data['Code'].isin(codes)])
             st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
-            #st.markdown("<hr style='margin-top:8px; margin-bottom:8px; border: none; border-top: 1px solid #ccc;' />", unsafe_allow_html=True)
-#
+
 ## === LECTURE AUTOMATISMES
-#
 st.markdown("---")
 st.markdown("## 🔍 Lecture par automatisme")
 recap_data = []
@@ -321,7 +351,6 @@ for j in range(3):
     for r in recap_data[j*chunk_size:(j+1)*chunk_size]:
         with cols[j]:
             st.markdown(f"<div style='padding:2px; margin:2px; border: 3px solid {r['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em;'><b>{r['Code']}</b> : {r['Automatisme']}<br><small><i>Semaine(s)</i> : {r['Semaines']}</small></div>", unsafe_allow_html=True)
-
 
 # ===== EXPORT EXCEL =====
 buffer = BytesIO()
