@@ -145,8 +145,7 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
                 selection_finale[i] = src[i]
                 break
 
-    # --- Étape 2 : Compléter les cases vides ---
-    # Recherche de candidats non utilisés ou vus moins de 3 fois
+    # --- Étape 2 : Compléter avec auto vus moins de 3 fois ---
     def peut_etre_place(code):
         row = data[data['Code'] == code].iloc[0]
         theme_code = row['Code'][0]
@@ -159,16 +158,35 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
             min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3
         )
 
-    # On remplit les cases vides avec des autos vus moins de 3 fois, qui ne sont pas déjà dans selection_finale
     for i in range(6):
         if selection_finale[i] is None:
-            # Chercher candidat
             candidats = [c for c in data['Code']
                         if peut_etre_place(c)
                         and used_codes[c] < 3
                         and c not in selection_finale]
             if candidats:
-                selection_finale[i] = candidats[0]  # On prend le premier candidat dispo
+                selection_finale[i] = candidats[0]
                 codes_selectionnes.add(candidats[0])
+
+    # --- Étape 3 : Compléter au hasard avec auto non-rappels si cases vides ---
+    for i in range(6):
+        if selection_finale[i] is None:
+            candidats = [c for c in data['Code']
+                        if not data.loc[data['Code'] == c, 'Rappel'].iloc[0]  # Non rappel
+                        and c not in selection_finale]
+            if candidats:
+                choix = random.choice(candidats)
+                selection_finale[i] = choix
+                codes_selectionnes.add(choix)
+
+    # Assure que 2 auto du thème courant sont toujours aux positions 0 et 3
+    # En cas de problème, on les remet (sécurité)
+    theme_autos = [c for c in selection_finale if c and c.startswith(theme)]
+    if len(theme_autos) < 2:
+        theme_autos_all = [c for c in data[data['Code'].str.startswith(theme)]['Code']]
+        # On remplace ce qu'il faut
+        if theme_autos_all:
+            selection_finale[0] = theme_autos_all[0]
+            selection_finale[3] = theme_autos_all[1] if len(theme_autos_all) > 1 else theme_autos_all[0]
 
     return selection_finale
