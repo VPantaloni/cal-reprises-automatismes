@@ -74,31 +74,27 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
         return respecte_espacement(semaines_precedentes, semaine, est_rappel,
                                    min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3)
 
+    # Choix complémentaires stricts par thème
     autres_themes = [t for t in sorted(set(data['Code'].str[0])) if t != theme]
     candidats = []
-
     for t in autres_themes:
-        lignes = data[(data['Code'].str.startswith(t)) & (data['Code'].apply(lambda c: peut_etre_place(c)))].sort_values('Num')
-        for _, row in lignes.iterrows():
-            code = row['Code']
-            if used_codes[code] < 3 and code not in codes_selectionnes:
-                candidats.append(code)
-            if len(candidats) >= 4:
-                break
+        auto_candidats = [c for c in data[data['Code'].str.startswith(t)]['Code']
+                          if peut_etre_place(c) and used_codes[c] < 3 and c not in codes_selectionnes]
+        if len(auto_candidats) >= 2:
+            candidats.extend(auto_candidats[:2])
+        elif len(auto_candidats) == 1:
+            candidats.append(auto_candidats[0])
         if len(candidats) >= 4:
             break
 
+    # Placement alternatif en A1 B1 C1 A2 B2 C2 → index [0, 1, 2, 3, 4, 5] donc thème courant déjà en 0 et 3
     placement_indices = [1, 2, 4, 5]
-    i = 0
-    for code in candidats:
-        while i < len(placement_indices) and selection_finale[placement_indices[i]] is not None:
-            i += 1
-        if i < len(placement_indices):
-            selection_finale[placement_indices[i]] = code
+    for idx, code in zip(placement_indices, candidats):
+        if selection_finale[idx] is None:
+            selection_finale[idx] = code
             codes_selectionnes.add(code)
-            i += 1
 
-    # Complément ultime si trous
+    # Complément ultime
     for _, row in data.iterrows():
         code = row['Code']
         if code in codes_selectionnes or used_codes[code] >= 3:
