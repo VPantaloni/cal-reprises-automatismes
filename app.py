@@ -26,12 +26,7 @@ subtheme_legend = {
     "🎲": "Probabilités", 
     "∝": "Proportionnalité"
 }
-with st.expander("\U0001F4D8 Légende des thèmes"):
-    cols = st.columns(5)
-    for idx, (emoji, label) in enumerate(subtheme_legend.items()):
-        with cols[idx % 5]:
-            st.markdown(f"""<div style='background:{subtheme_colors[emoji]}; padding:4px; border-radius:6px; color:white; font-size:0.85em;'>
-                <b>{emoji}</b> {label}</div>""", unsafe_allow_html=True)
+
 # =====  SIDEBAR =====
 # -- bouton remplissage aléatoire
 if st.sidebar.button("🎲 Remplir aléatoirement les ❓"):
@@ -131,7 +126,14 @@ def selectionner_automatismes(data, semaine_idx, theme, auto_weeks, used_codes, 
 
 st.set_page_config(layout="wide")
 st.title("📅 Reprises d'automatismes mathématiques en 6e")
-
+## LEGENDES
+with st.expander("\U0001F4D8 Légende des thèmes"):
+    cols = st.columns(5)
+    for idx, (emoji, label) in enumerate(subtheme_legend.items()):
+        with cols[idx % 5]:
+            st.markdown(f"""<div style='background:{subtheme_colors[emoji]}; padding:4px; border-radius:6px; color:white; font-size:0.85em;'>
+                <b>{emoji}</b> {label}</div>""", unsafe_allow_html=True)
+#--- fin légendes
 if 'sequences' not in st.session_state:
     st.session_state.sequences = ["🔢", "📐", "📊", "➗", "📐", "🔢", "📏", "🔷"] + [""] * 24
 if 'selection_by_week' not in st.session_state:
