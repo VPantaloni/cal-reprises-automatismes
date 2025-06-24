@@ -158,7 +158,7 @@ def selectionner_automatismes(data, semaine_idx, theme, auto_weeks, used_codes, 
     
     # Compléter avec d'autres automatismes si nécessaire
     tentatives = 0
-    while None in selection_finale and tentatives < 50:
+    while any(item is None for item in selection_finale) and tentatives < 50:
         restants = candidats[~candidats['Code'].isin(codes_selectionnes)]
         if restants.empty:
             break
