@@ -6,23 +6,37 @@ from io import BytesIO
 def afficher_lecture_et_export(data, subtheme_legend):
     st.markdown("---")
     st.markdown("## 🔍 Lecture par automatisme")
+
     recap_data = []
     for _, row in data.iterrows():
         code = row['Code']
         semaines = [f"S{i+1}" for i in st.session_state.auto_weeks.get(code, [])]
-        recap_data.append({"Code": code, "Automatisme": row['Automatisme'], "Semaines": ", ".join(semaines), "Couleur": row['Couleur']})
+        recap_data.append({
+            "Code": code,
+            "Automatisme": row['Automatisme'],
+            "Semaines": ", ".join(semaines),
+            "Couleur": row['Couleur']
+        })
 
+    # Affichage en 3 colonnes avec surplus dans la dernière
     cols = st.columns(3)
-nb = len(recap_data)
-chunk_size = (nb + 2) // 3 - 2
+    nb = len(recap_data)
+    chunk_size = nb // 3
 
-for j in range(3):
-    start = j * chunk_size
-    end = (j + 1) * chunk_size if j < 2 else nb  # Pour la dernière colonne, on prend tout ce qui reste
-    for r in recap_data[start:end]:
-        with cols[j]:
-            st.markdown(f"<div style='padding:2px; margin:2px; border: 3px solid {r['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em;'><b>{r['Code']}</b> : {r['Automatisme']}<br><small><i>Semaine(s)</i> : {r['Semaines']}</small></div>", unsafe_allow_html=True)
+    for j in range(3):
+        start = j * chunk_size
+        end = (j + 1) * chunk_size if j < 2 else nb  # Dernière colonne prend le reste
+        for r in recap_data[start:end]:
+            with cols[j]:
+                st.markdown(
+                    f"<div style='padding:2px; margin:2px; border: 3px solid {r['Couleur']}; "
+                    f"background:transparent; border-radius:4px; font-size:0.8em;'>"
+                    f"<b>{r['Code']}</b> : {r['Automatisme']}<br>"
+                    f"<small><i>Semaine(s)</i> : {r['Semaines']}</small></div>",
+                    unsafe_allow_html=True
+                )
 
+    # Génération export Excel
     buffer = BytesIO()
     grille_data = []
     for i in range(32):
