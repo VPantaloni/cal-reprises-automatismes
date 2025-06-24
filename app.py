@@ -186,7 +186,7 @@ for i in range(32):
                 auto_weeks[code].append(i)
                 used_codes[code] += 1
             afficher_pastilles_compacte(data[data['Code'].isin(codes)])
-            st.markdown("<div style='margin-top:11px;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
             #st.markdown("<hr style='margin-top:8px; margin-bottom:8px; border: none; border-top: 1px solid #ccc;' />", unsafe_allow_html=True)
             #st.markdown("---")
 #
