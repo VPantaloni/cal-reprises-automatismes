@@ -141,18 +141,22 @@ def selectionner_automatismes(
 
     selection_finale = [None] * 6
 
-    # Fixer auto1 et auto2 aux indices 0 et 3
+    # Placer auto1 et auto2 côte à côte en positions 0 et 1
     selection_finale[0] = base[0]
-    selection_finale[3] = base[3]
+    selection_finale[1] = base[3]  # ici on prend la deuxième auto du thème courant, dans base[3]
 
-    # Compléter les autres positions (1, 2, 4, 5) sans doublons
-    for i in range(6):
-        if i in (0, 3):
-            continue  # déjà assigné
-        for src in [base, compl1, compl2]:
-            code = src[i]
+    # Placer autres paires en (2,3) et (4,5)
+    # On fusionne compl1 et compl2 pour plus de simplicité
+    rest = []
+    for src in [base, compl1, compl2]:
+        for i, code in enumerate(src):
             if code and code not in selection_finale:
-                selection_finale[i] = code
-                break
+                rest.append(code)
+
+    # placer les codes restants dans les indices 2,3,4,5
+    rest = list(dict.fromkeys(rest))  # retirer doublons en gardant ordre
+    for pos in [2, 3, 4, 5]:
+        if rest:
+            selection_finale[pos] = rest.pop(0)
 
     return selection_finale
