@@ -78,11 +78,7 @@ with st.expander("\U0001F4D8 Légende des thèmes"):
 
 
 # =====  SIDEBAR =====
-def bouton_recalcul():
-    if st.sidebar.button("🔄 Recalculer la répartition"):
-        recalculer_toute_la_repartition()
-        st.rerun()
-
+top_button_placeholder = st.sidebar.empty()
 #st.sidebar.markdown("### Actions")
 # Appel du bouton tout en haut
 bouton_recalcul()
@@ -150,6 +146,10 @@ def recalculer_toute_la_repartition():
                 st.session_state.auto_weeks[code].append(i)
                 st.session_state.used_codes[code] += 1
 
+# === Affichage réel du bouton dans le placeholder ===
+if top_button_placeholder.button("🔄 Recalculer la répartition"):
+    recalculer_toute_la_repartition()
+    st.rerun()
 #if st.sidebar.button("🔄 Recalculer la répartition"):
 #    recalculer_toute_la_repartition()
 #    st.rerun()
