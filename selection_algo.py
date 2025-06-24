@@ -42,22 +42,14 @@ def selectionner_automatismes(
                      if respecte_espacement(auto_weeks.get(row['Code'], []), semaine, row['Rappel'],
                                             min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3)
                      and used_codes[row['Code']] < 3]
-        if candidats:
-            auto1 = candidats[0]
-            codes_selectionnes.add(auto1)
-        if len(candidats) > 1:
-            auto2 = candidats[1]
-            codes_selectionnes.add(auto2)
-
-    # Placer auto1 et auto2 en position 0 et 3 (ligne 1)
-    if auto1:
-        selection_finale[0] = auto1
-    if auto2:
-        selection_finale[3] = auto2
+        if len(candidats) >= 2:
+            auto1, auto2 = candidats[:2]
+            codes_selectionnes.update([auto1, auto2])
 
     # Étape 2 : choisir 2 autres thèmes différents
     autres_themes = [t for t in set(data['Code'].str[0]) if t != theme]
     random.shuffle(autres_themes)
+    autres_groupes = []
     for t in autres_themes:
         autos = data[data['Code'].str.startswith(t)].sort_values('Num')
         valides = [row['Code'] for _, row in autos.iterrows()
@@ -65,18 +57,27 @@ def selectionner_automatismes(
                    and peut_etre_place(row['Code'])
                    and used_codes[row['Code']] < 3]
         if len(valides) >= 2:
-            # Choisir 2 et les placer dans les cases libres suivantes
-            ajoutés = 0
-            for code in valides[:2]:
-                for pos in range(6):
-                    if selection_finale[pos] is None:
-                        selection_finale[pos] = code
-                        codes_selectionnes.add(code)
-                        ajoutés += 1
-                        break
-                if ajoutés >= 2:
-                    break
-        if sum(x is not None for x in selection_finale) >= 6:
+            autres_groupes.append(valides[:2])
+        if len(autres_groupes) == 2:
             break
+
+    # Placement : A1, B1, C1, A2, B2, C2
+    index_map = [0, 1, 2, 3, 4, 5]
+    codes_to_place = []
+    if auto1 and auto2:
+        codes_to_place = [auto1]
+        if autres_groupes:
+            codes_to_place.append(autres_groupes[0][0])
+        if len(autres_groupes) > 1:
+            codes_to_place.append(autres_groupes[1][0])
+        codes_to_place.append(auto2)
+        if autres_groupes:
+            codes_to_place.append(autres_groupes[0][1])
+        if len(autres_groupes) > 1:
+            codes_to_place.append(autres_groupes[1][1])
+
+    for idx, code in zip(index_map, codes_to_place):
+        selection_finale[idx] = code
+        codes_selectionnes.add(code)
 
     return selection_finale
