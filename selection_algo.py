@@ -23,13 +23,19 @@ def selectionner_automatismes_theme(
 ):
     selection_finale = [None] * 6
 
+    # Pré-calcul des thèmes avec rappels dans les données
+    themes_avec_rappel = set(data[data['Rappel'] == True]['Code'].str[0].unique())
+
     def peut_etre_place(code):
         row = data[data['Code'] == code].iloc[0]
         theme_code = row['Code'][0]
         est_rappel = row['Rappel']
         semaines_precedentes = auto_weeks.get(code, [])
-        if not est_rappel and theme_code not in themes_passes:
-            return False
+        if not est_rappel:
+            if theme_code not in themes_passes:
+                if theme_code in themes_avec_rappel:
+                    return False
+                # thème sans rappel => autorisé même si pas encore passé
         return respecte_espacement(
             semaines_precedentes, semaine, est_rappel,
             min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3
@@ -53,16 +59,3 @@ def selectionner_automatismes_theme(
         selection_finale[3] = auto2
 
     return selection_finale
-
-
-def selectionner_automatismes(
-    data, semaine, theme, auto_weeks, used_codes, next_index_by_theme,
-    min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
-    themes_passes
-):
-    # Simple appel à la fonction thème uniquement
-    return selectionner_automatismes_theme(
-        data, semaine, theme, auto_weeks, used_codes,
-        min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
-        themes_passes
-    )
