@@ -22,7 +22,7 @@ subtheme_legend = {
     "⌚": "Temps", 
     "📐": "Étude de configurations planes",
     "🧊": "La vision dans l'espace", 
-    "📊": "Organisation et gestion de données",
+    "📊": "Orga. et gestion de données",
     "🎲": "Probabilités", 
     "∝": "Proportionnalité"
 }
