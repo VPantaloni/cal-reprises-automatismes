@@ -56,8 +56,13 @@ def selectionner_automatismes(
         row = data[data['Code'] == code].iloc[0]
         est_rappel = row['Rappel']
         nb = used_codes[code]
-        est_prioritaire = (est_rappel and semaine < 17)
-        return (0 if est_prioritaire else 1, nb)
+        if est_rappel:
+            if semaine < 17:
+                return (0, nb)  # priorité haute pour ↩ avant S17
+            else:
+                return (2, nb)  # ↩ après S17 = basse priorité
+        else:
+            return (1, nb)  # priorité normale pour les automatismes "ordinaires"
 
     candidats = []
     for _, row in data.iterrows():
@@ -69,10 +74,14 @@ def selectionner_automatismes(
 
     candidats.sort(key=priorité)
 
+    # Vérification que chaque automatisme ne dépasse pas 3 occurrences
     for i in range(6):
-        if selection_finale[i] is None and candidats:
-            choix = candidats.pop(0)
-            selection_finale[i] = choix
-            codes_selectionnes.add(choix)
+        if selection_finale[i] is None:
+            while candidats:
+                choix = candidats.pop(0)
+                if used_codes[choix] < 3:
+                    selection_finale[i] = choix
+                    codes_selectionnes.add(choix)
+                    break
 
     return selection_finale
