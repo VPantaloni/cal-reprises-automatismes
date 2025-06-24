@@ -83,7 +83,7 @@ def bouton_recalcul():
         recalculer_toute_la_repartition()
         st.rerun()
 
-st.sidebar.markdown("### Actions")
+#st.sidebar.markdown("### Actions")
 # Appel du bouton tout en haut
 bouton_recalcul()
 # -- bouton remplissage aléatoire
