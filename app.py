@@ -81,7 +81,6 @@ with st.expander("\U0001F4D8 Légende des thèmes"):
 top_button_placeholder = st.sidebar.empty()
 #st.sidebar.markdown("### Actions")
 # Appel du bouton tout en haut
-bouton_recalcul()
 # -- bouton remplissage aléatoire
 if st.sidebar.button("🎲 Remplir aléatoirement les ❓"):
     new_seq = st.session_state.sequences.copy()
