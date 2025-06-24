@@ -98,46 +98,54 @@ def selectionner_automatismes(data, semaine_idx, theme, auto_weeks, used_codes, 
     selection_finale = [None] * 6
     codes_selectionnes = set()
     
-    # 1. AUTOMATISMES DU THÈME COURANT (POSITIONS 1 ET 4)
+    # 1. AUTOMATISMES DU THÈME COURANT (POSITIONS 1 ET 4) - OBLIGATOIRES
     if theme:
         # Récupérer tous les automatismes du thème (y compris rappels ↩)
         theme_autos = data[data['Code'].str.startswith(theme)].sort_values('Num')
         
-        # Séparer selon le besoin de vues minimales
-        candidats_theme = []
-        for _, row in theme_autos.iterrows():
-            code = row['Code']
-            nb_vues = used_codes[code]
+        if not theme_autos.empty:
+            # Séparer selon le besoin de vues minimales pour prioriser
+            candidats_prioritaires = []
+            tous_candidats = []
             
-            # Vérifier si l'automatisme a besoin d'être encore vu
-            if row['Rappel']:  # Rappel (↩) : minimum 2 vues
-                if nb_vues < 2:
-                    candidats_theme.append(row)
-            else:  # Non-rappel : minimum 3 vues
-                if nb_vues < 3:
-                    candidats_theme.append(row)
-        
-        # Si pas assez de candidats prioritaires, prendre tous les automatismes du thème
-        if len(candidats_theme) < 2:
-            candidats_theme = list(theme_autos.itertuples(index=False))
-        
-        # Prendre les 2 premiers par ordre Num
-        if len(candidats_theme) >= 2:
-            auto1 = candidats_theme[0]['Code']
-            auto2 = candidats_theme[1]['Code']
-        elif len(candidats_theme) == 1:
-            auto1 = candidats_theme[0]['Code']
-            auto2 = candidats_theme[0]['Code']  # Répéter
-        else:
-            # Cas extrême : prendre les 2 premiers du thème même sans priorité
-            auto1 = theme_autos.iloc[0]['Code'] if not theme_autos.empty else None
-            auto2 = theme_autos.iloc[1]['Code'] if len(theme_autos) > 1 else auto1
-        
-        if auto1:
+            for _, row in theme_autos.iterrows():
+                code = row['Code']
+                nb_vues = used_codes[code]
+                tous_candidats.append(row)
+                
+                # Vérifier si l'automatisme a encore besoin d'être vu
+                if row['Rappel']:  # Rappel (↩) : minimum 2 vues
+                    if nb_vues < 2:
+                        candidats_prioritaires.append(row)
+                else:  # Non-rappel : minimum 3 vues
+                    if nb_vues < 3:
+                        candidats_prioritaires.append(row)
+            
+            # Choisir les 2 premiers automatismes du thème
+            # Priorité 1 : Ceux qui ont encore besoin d'être vus (par ordre Num)
+            # Priorité 2 : Tous les automatismes du thème (par ordre Num)
+            if len(candidats_prioritaires) >= 2:
+                auto1 = candidats_prioritaires[0]['Code']
+                auto2 = candidats_prioritaires[1]['Code']
+            elif len(candidats_prioritaires) == 1:
+                auto1 = candidats_prioritaires[0]['Code']
+                # Prendre le 2e dans tous les candidats (en évitant le doublon)
+                auto2 = None
+                for candidat in tous_candidats:
+                    if candidat['Code'] != auto1:
+                        auto2 = candidat['Code']
+                        break
+                if auto2 is None:  # Si tous sont identiques, répéter
+                    auto2 = auto1
+            else:
+                # Aucun candidat prioritaire : prendre les 2 premiers du thème
+                auto1 = tous_candidats[0]['Code']
+                auto2 = tous_candidats[1]['Code'] if len(tous_candidats) > 1 else auto1
+            
+            # PLACER OBLIGATOIREMENT en positions 1 et 4
             selection_finale[0] = auto1  # Position 1
-            codes_selectionnes.add(auto1)
-        if auto2:
             selection_finale[3] = auto2  # Position 4
+            codes_selectionnes.add(auto1)
             codes_selectionnes.add(auto2)
     
     # 2. AUTOMATISMES EN RAPPEL (POSITIONS 2, 3, 5, 6)
@@ -225,6 +233,7 @@ def selectionner_automatismes(data, semaine_idx, theme, auto_weeks, used_codes, 
                 selection_finale[i] = data.iloc[0]['Code']
     
     return selection_finale
+#
 ## FIN select
 st.set_page_config(layout="wide")
 st.title("📅 Reprises d'automatismes mathématiques en 6e")
