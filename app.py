@@ -85,166 +85,123 @@ def afficher_pastilles_compacte(selection_df):
             st.markdown(ligne, unsafe_allow_html=True)
 
 def selectionner_automatismes(data, semaine_idx, theme, auto_weeks, used_codes, next_index_by_theme):
-    # Initialiser la sélection avec exactement 6 positions
+    """
+    Sélectionne exactement 6 automatismes selon les règles :
+    - Positions 1 et 4 : automatismes du thème courant
+    - Tous les non-rappels (≠↩) doivent être vus au moins 3 fois
+    - Les rappels (↩) peuvent n'être vus que 2 fois
+    """
     selection_finale = [None] * 6
     codes_selectionnes = set()
     
-    # 1. AUTOMATISMES PRINCIPAUX DU THÈME (POSITIONS 1 ET 4 OBLIGATOIRES)
+    # 1. POSITIONS 1 ET 4 : AUTOMATISMES DU THÈME COURANT
     if theme:
-        # Récupérer tous les automatismes qui commencent par l'emoji du thème (non-rappels)
         theme_autos = data[
             (data['Code'].str.startswith(theme)) & 
             (~data['Rappel'])
-        ].sort_values('Num').copy()
+        ].sort_values('Num')
         
-        # Filtrer ceux qui respectent les contraintes d'espacement
-        theme_disponibles = []
-        for _, row in theme_autos.iterrows():
-            code = row['Code']
-            if respecte_espacement(auto_weeks[code], semaine_idx, row['Rappel']):
-                theme_disponibles.append(row)
+        # Filtrer selon contraintes d'espacement
+        theme_disponibles = [
+            row for _, row in theme_autos.iterrows()
+            if respecte_espacement(auto_weeks[row['Code']], semaine_idx, row['Rappel'])
+        ]
         
-        # IMPÉRATIF : Placer exactement 2 automatismes du thème en positions 1 et 4
         if len(theme_disponibles) >= 2:
-            # Cas normal : au moins 2 automatismes disponibles
-            selection_finale[0] = theme_disponibles[0]['Code']  # Position 1
-            selection_finale[3] = theme_disponibles[1]['Code']  # Position 4
-            codes_selectionnes.add(theme_disponibles[0]['Code'])
-            codes_selectionnes.add(theme_disponibles[1]['Code'])
+            # Cas normal : 2 automatismes différents
+            selection_finale[0] = theme_disponibles[0]['Code']
+            selection_finale[3] = theme_disponibles[1]['Code']
+            codes_selectionnes.update([theme_disponibles[0]['Code'], theme_disponibles[1]['Code']])
         elif len(theme_disponibles) == 1:
-            # Cas limite : 1 seul disponible -> LE RÉPÉTER
-            selection_finale[0] = theme_disponibles[0]['Code']  # Position 1
-            selection_finale[3] = theme_disponibles[0]['Code']  # Position 4 (même automatisme)
-            codes_selectionnes.add(theme_disponibles[0]['Code'])
+            # Répéter le seul disponible
+            code = theme_disponibles[0]['Code']
+            selection_finale[0] = selection_finale[3] = code
+            codes_selectionnes.add(code)
         else:
-            # Cas extrême : aucun automatisme du thème disponible
-            # Chercher parmi tous les automatismes du thème (même déjà utilisés plusieurs fois)
-            tous_theme_autos = data[
-                (data['Code'].str.startswith(theme)) & 
-                (~data['Rappel'])
-            ].sort_values('Num')
-            
-            if not tous_theme_autos.empty:
-                # Prendre le premier automatisme du thème, même s'il dépasse les limites d'usage
-                premier_theme = tous_theme_autos.iloc[0]['Code']
-                selection_finale[0] = premier_theme  # Position 1
-                selection_finale[3] = premier_theme  # Position 4 (répéter)
-                codes_selectionnes.add(premier_theme)
+            # Forcer avec le premier du thème (même si contraintes non respectées)
+            if not theme_autos.empty:
+                code = theme_autos.iloc[0]['Code']
+                selection_finale[0] = selection_finale[3] = code
+                codes_selectionnes.add(code)
     
-    # 2. COMPLÉTER LES POSITIONS RESTANTES (2, 3, 4 si vide, 5, 6)
-    positions_a_completer = [i for i in range(6) if selection_finale[i] is None]
+    # 2. POSITIONS RESTANTES (2, 3, 5, 6)
+    positions_libres = [i for i in range(6) if selection_finale[i] is None]
     
-    if positions_a_completer:
-        # Pool autorisé : thèmes déjà abordés + rappels années antérieures (↩)
-        themes_deja_abordes = set()
-        for k in range(semaine_idx):
-            if st.session_state.sequences[k]:
-                themes_deja_abordes.add(st.session_state.sequences[k])
+    if positions_libres:
+        # Pool autorisé : thèmes déjà abordés + rappels
+        themes_abordes = {
+            st.session_state.sequences[k] for k in range(semaine_idx)
+            if st.session_state.sequences[k]
+        }
         
-        # Candidats autorisés
-        candidats_autorises = data[
-            (~data['Code'].isin(codes_selectionnes)) &  # Pas de doublon
+        candidats = data[
+            (~data['Code'].isin(codes_selectionnes)) &
             (
-                # Automatismes des thèmes déjà abordés
-                (data['Code'].str[0].isin(themes_deja_abordes)) |
-                # Rappels années antérieures (↩)
+                (data['Code'].str[0].isin(themes_abordes)) |
                 (data['Rappel'])
             )
-        ].copy()
+        ]
         
-        # Filtrer selon espacement
+        # Filtrer selon espacement et contraintes de vues
         candidats_valides = []
-        for _, row in candidats_autorises.iterrows():
-            code = row['Code']
-            if respecte_espacement(auto_weeks[code], semaine_idx, row['Rappel']):
-                candidats_valides.append(row)
-        
-        # PRIORITÉ ABSOLUE : automatismes non-rappels vus moins de 3 fois
-        def priorite_selection(row):
+        for _, row in candidats.iterrows():
             code = row['Code']
             nb_vues = used_codes[code]
-            est_rappel_ancien = row['Rappel']
-            theme_auto = row['Code'][0]
             
-            return (
-                # Priorité 1 : Les non-rappels qui ont moins de 3 vues (IMPÉRATIF)
-                0 if (not est_rappel_ancien and nb_vues < 3) else 1,
-                # Priorité 2 : Nombre de vues (moins vus en premier)
-                nb_vues,
-                # Priorité 3 : Éviter le thème courant pour diversité
-                theme_auto == theme,
-                # Priorité 4 : Préférer non-rappels aux rappels anciens
-                est_rappel_ancien,
-                # Priorité 5 : Ordre numérique
-                row['Num']
-            )
+            # Vérifier espacement
+            if not respecte_espacement(auto_weeks[code], semaine_idx, row['Rappel']):
+                continue
+            
+            # Vérifier contraintes de vues selon le type
+            if row['Rappel']:  # Rappel (↩) : minimum 2 vues
+                if nb_vues < 2:
+                    candidats_valides.append(row)
+            else:  # Non-rappel : minimum 3 vues
+                if nb_vues < 3:
+                    candidats_valides.append(row)
         
-        candidats_valides.sort(key=priorite_selection)
+        # Tri par priorité : moins vus d'abord, puis éviter thème courant
+        candidats_valides.sort(key=lambda r: (
+            used_codes[r['Code']],
+            r['Code'][0] == theme,  # Éviter thème courant pour diversité
+            r['Rappel'],  # Préférer non-rappels
+            r['Num']
+        ))
         
-        # Compléter les positions une par une
-        for pos in positions_a_completer:
+        # Remplir positions une par une
+        for pos in positions_libres:
             if candidats_valides:
-                # Prendre le meilleur candidat
-                meilleur = candidats_valides.pop(0)
-                selection_finale[pos] = meilleur['Code']
-                codes_selectionnes.add(meilleur['Code'])
-                
-                # Retirer tous les autres automatismes avec le même code
-                candidats_valides = [c for c in candidats_valides if c['Code'] != meilleur['Code']]
-    
-    # 3. COMPLÉTER D'URGENCE SI DES POSITIONS RESTENT VIDES
-    positions_encore_vides = [i for i in range(6) if selection_finale[i] is None]
-    
-    if positions_encore_vides:
-        # Relâcher les contraintes : accepter tous les automatismes disponibles
-        tous_candidats = data[~data['Code'].isin(codes_selectionnes)].copy()
-        
-        candidats_urgence = []
-        for _, row in tous_candidats.iterrows():
-            code = row['Code']
-            # Permettre jusqu'à 5 utilisations en cas d'urgence
-            if (used_codes[code] < 5 and 
-                respecte_espacement(auto_weeks[code], semaine_idx, row['Rappel'])):
-                candidats_urgence.append(row)
-        
-        # Trier par priorité (toujours favoriser les moins vus)
-        candidats_urgence.sort(key=lambda r: (used_codes[r['Code']], r['Rappel'], r['Num']))
-        
-        for pos in positions_encore_vides:
-            if candidats_urgence:
-                candidat = candidats_urgence.pop(0)
+                candidat = candidats_valides.pop(0)
                 selection_finale[pos] = candidat['Code']
                 codes_selectionnes.add(candidat['Code'])
-                # Retirer les doublons
-                candidats_urgence = [c for c in candidats_urgence if c['Code'] != candidat['Code']]
+                # Supprimer doublons
+                candidats_valides = [c for c in candidats_valides if c['Code'] != candidat['Code']]
     
-    # 4. DERNIER RECOURS : SI ENCORE DES POSITIONS VIDES
-    # Répéter des automatismes déjà utilisés cette semaine ou prendre n'importe quoi
+    # 3. COMPLÉTER LES POSITIONS ENCORE VIDES (relâcher contraintes)
     for i in range(6):
         if selection_finale[i] is None:
-            if codes_selectionnes:
-                # Répéter un automatisme déjà sélectionné
-                selection_finale[i] = list(codes_selectionnes)[0]
+            # Prendre n'importe quel automatisme disponible (limite 5 vues max)
+            candidats_urgence = [
+                row for _, row in data.iterrows()
+                if (row['Code'] not in codes_selectionnes and 
+                    used_codes[row['Code']] < 5 and
+                    respecte_espacement(auto_weeks[row['Code']], semaine_idx, row['Rappel']))
+            ]
+            
+            if candidats_urgence:
+                # Prendre le moins vu
+                candidat = min(candidats_urgence, key=lambda r: used_codes[r['Code']])
+                selection_finale[i] = candidat['Code']
+                codes_selectionnes.add(candidat['Code'])
+            elif codes_selectionnes:
+                # Répéter un code déjà sélectionné
+                selection_finale[i] = next(iter(codes_selectionnes))
             else:
-                # Cas extrême : prendre le premier automatisme disponible
-                premier_auto = data.iloc[0]['Code']
-                selection_finale[i] = premier_auto
+                # Cas extrême : premier automatisme de la base
+                selection_finale[i] = data.iloc[0]['Code']
     
-    # 5. VÉRIFICATION FINALE : S'assurer qu'on a exactement 6 codes valides
-    codes_finaux = []
-    for code in selection_finale:
-        if code is not None and code != "":
-            codes_finaux.append(code)
-    
-    # Compléter à 6 si nécessaire
-    while len(codes_finaux) < 6:
-        if codes_finaux:
-            codes_finaux.append(codes_finaux[0])  # Répéter le premier
-        else:
-            codes_finaux.append(data.iloc[0]['Code'])  # Cas extrême
-    
-    return codes_finaux[:6]  # Exactement 6 automatismes# ===== POINT D'ENTRÉE =====
-
+    return selection_finale
+## FIN select
 st.set_page_config(layout="wide")
 st.title("📅 Reprises d'automatismes mathématiques en 6e")
 ## LEGENDES
