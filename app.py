@@ -52,20 +52,15 @@ def charger_donnees():
 def afficher_pastilles_compacte(selection_df):
     if not selection_df.empty:
         codes = list(selection_df['Code'])
-        ligne_1 = codes[:1] + codes[3:4]
-        ligne_2 = [c for c in codes if c not in ligne_1]
-        ordered = ligne_1 + ligne_2
-        selection_df['OrdreAffichage'] = selection_df['Code'].apply(lambda x: ordered.index(x) if x in ordered else 99)
-        selection_df = selection_df.sort_values('OrdreAffichage')
-
+        # Affichage dans l’ordre naturel des indices : 0&1, 2&3, 4&5
         pastilles = [
             f"<div title=\"{row['Automatisme']}\" style='flex:1; padding:2px; border: 3px solid {row['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em; font-weight:bold; text-align:center; cursor:help;'> {row['Code']} </div>"
             for _, row in selection_df.iterrows()
         ]
-
         lignes = ["<div style='display:flex; gap:4px;'>" + "".join(pastilles[i:i+2]) + "</div>" for i in range(0, len(pastilles), 2)]
         for ligne in lignes:
             st.markdown(ligne, unsafe_allow_html=True)
+
 
 #--- début du corps principal ---
 
