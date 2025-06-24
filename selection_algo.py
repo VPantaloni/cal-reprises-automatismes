@@ -145,39 +145,30 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
                 selection_finale[i] = src[i]
                 break
 
-    # --- Étape 2 : Compléter avec auto vus moins de 3 fois ---
-    def peut_etre_place(code):
-        row = data[data['Code'] == code].iloc[0]
-        theme_code = row['Code'][0]
-        est_rappel = row['Rappel']
-        semaines_precedentes = auto_weeks.get(code, [])
-        if not est_rappel and theme_code not in themes_passes:
-            return False
-        return respecte_espacement(
-            semaines_precedentes, semaine, est_rappel,
-            min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3
-        )
+   # Étape 2 : Compléter avec auto vus moins de 3 fois (limite stricte)
+for i in range(6):
+    if selection_finale[i] is None:
+        candidats = [c for c in data['Code']
+                    if peut_etre_place(c)
+                    and used_codes[c] < 3
+                    and c not in selection_finale]
+        if candidats:
+            selection_finale[i] = candidats[0]
+            codes_selectionnes.add(candidats[0])
 
-    for i in range(6):
-        if selection_finale[i] is None:
-            candidats = [c for c in data['Code']
-                        if peut_etre_place(c)
-                        and used_codes[c] < 3
-                        and c not in selection_finale]
-            if candidats:
-                selection_finale[i] = candidats[0]
-                codes_selectionnes.add(candidats[0])
+# Étape 3 : Compléter au hasard avec auto non-rappels, sans limite de reprises
+for i in range(6):
+    if selection_finale[i] is None:
+        candidats = [c for c in data['Code']
+                    if not data.loc[data['Code'] == c, 'Rappel'].iloc[0]  # Non rappel
+                    and c not in selection_finale]
+        if candidats:
+            choix = random.choice(candidats)
+            selection_finale[i] = choix
+            # Important : ici on dépasse volontairement la limite 3 reprises
+            codes_selectionnes.add(choix)
+            used_codes[choix] += 1  # Incrémente manuellement au-delà de 3 reprises
 
-    # --- Étape 3 : Compléter au hasard avec auto non-rappels si cases vides ---
-    for i in range(6):
-        if selection_finale[i] is None:
-            candidats = [c for c in data['Code']
-                        if not data.loc[data['Code'] == c, 'Rappel'].iloc[0]  # Non rappel
-                        and c not in selection_finale]
-            if candidats:
-                choix = random.choice(candidats)
-                selection_finale[i] = choix
-                codes_selectionnes.add(choix)
 
     # Assure que 2 auto du thème courant sont toujours aux positions 0 et 3
     # En cas de problème, on les remet (sécurité)
