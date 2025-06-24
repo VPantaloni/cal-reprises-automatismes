@@ -90,140 +90,160 @@ def selectionner_automatismes(data, semaine_idx, theme, auto_weeks, used_codes, 
     
     # 1. AUTOMATISMES PRINCIPAUX DU THÈME DE LA SEMAINE
     if theme:
-        # Récupérer tous les automatismes du thème (non-rappels) triés par Num
+        # Récupérer tous les automatismes qui commencent par l'emoji du thème (non-rappels)
         theme_autos = data[
-            (data['Sous-Thème'] == theme) & 
+            (data['Code'].str.startswith(theme)) & 
             (~data['Rappel'])
         ].sort_values('Num').copy()
         
-        # Filtrer ceux qui respectent les contraintes d'espacement
+        # Filtrer ceux qui respectent les contraintes d'espacement et peuvent encore être utilisés
         theme_disponibles = []
         for _, row in theme_autos.iterrows():
             code = row['Code']
-            if (used_codes[code] < 4 and 
-                respecte_espacement(auto_weeks[code], semaine_idx, row['Rappel'])):
+            # Permettre jusqu'à 4 utilisations pour compléter les 32 semaines
+            if respecte_espacement(auto_weeks[code], semaine_idx, row['Rappel']):
                 theme_disponibles.append(row)
         
         # Sélectionner selon les règles :
-        # - Si >= 2 disponibles : prendre les 2 premiers
-        # - Si 1 disponible : prendre celui-ci
-        # - Si 0 disponible : aucun
+        # - Prendre les 2 premiers disponibles (positions 1 et 4 finales)
         nb_theme_a_prendre = min(2, len(theme_disponibles))
         for i in range(nb_theme_a_prendre):
             selection_finale.append(theme_disponibles[i]['Code'])
             codes_selectionnes.add(theme_disponibles[i]['Code'])
     
-    # 2. COMPLÉTER AVEC DES RAPPELS (jusqu'à 6 automatismes total)
+    # 2. COMPLÉTER AVEC DES RAPPELS/RÉVISIONS
     slots_restants = 6 - len(selection_finale)
     
     if slots_restants > 0:
-        # Identifier tous les automatismes déjà vus (pour les rappels)
+        # Pool autorisé : thèmes déjà abordés + rappels années antérieures (↩)
         themes_deja_abordes = set()
         for k in range(semaine_idx):
             if st.session_state.sequences[k]:
                 themes_deja_abordes.add(st.session_state.sequences[k])
         
-        # Ajouter les thèmes qui ont des automatismes de rappel
-        themes_rappel = set(data[data['Rappel']]['Sous-Thème'].unique())
-        pool_themes = themes_deja_abordes.union(themes_rappel)
-        
-        # Candidats pour les rappels
-        candidats_rappel = data[
-            (data['Sous-Thème'].isin(pool_themes)) &
-            (~data['Code'].isin(codes_selectionnes))  # Pas de doublon
+        # Candidats autorisés pour compléter
+        candidats_autorises = data[
+            (~data['Code'].isin(codes_selectionnes)) &  # Pas de doublon dans la semaine
+            (
+                # Soit le thème a déjà été abordé
+                (data['Code'].str[0].isin(themes_deja_abordes)) |
+                # Soit c'est un rappel année antérieure (↩)
+                (data['Rappel'])
+            )
         ].copy()
         
-        # Filtrer selon les contraintes d'espacement et d'usage
+        # Filtrer selon les contraintes d'espacement
         rappels_possibles = []
-        for _, row in candidats_rappel.iterrows():
+        for _, row in candidats_autorises.iterrows():
             code = row['Code']
-            if (used_codes[code] < 4 and 
-                respecte_espacement(auto_weeks[code], semaine_idx, row['Rappel'])):
+            if respecte_espacement(auto_weeks[code], semaine_idx, row['Rappel']):
                 rappels_possibles.append(row)
         
-        # Trier les rappels par priorité :
-        # 1. Ceux qui n'ont jamais été vus (used_codes = 0)
-        # 2. Ceux qui ont été vus le moins souvent
-        # 3. Diversifier par thème
-        rappels_possibles.sort(key=lambda x: (
-            used_codes[x['Code']],  # Moins utilisés en priorité
-            x['Sous-Thème'] == theme,  # Éviter le thème courant sauf si nécessaire
-            x['Num']  # Ordre dans le thème
-        ))
+        # Priorité de sélection des rappels :
+        # 1. Automatismes vus moins de 3 fois (impératif de voir 3 fois minimum)
+        # 2. Automatismes non-rappels (↩) avant les rappels
+        # 3. Diversité des thèmes
+        # 4. Ordre numérique dans le thème
         
-        # Sélectionner les rappels en évitant les doublons de thème quand possible
+        def priorite_rappel(row):
+            code = row['Code']
+            nb_vues = used_codes[code]
+            theme_auto = row['Code'][0]
+            est_rappel_ancien = row['Rappel']
+            
+            return (
+                # Priorité 1 : ceux vus moins de 3 fois (plus urgent)
+                -(3 - nb_vues) if nb_vues < 3 else nb_vues,
+                # Priorité 2 : éviter les rappels anciens sauf si nécessaire
+                est_rappel_ancien,
+                # Priorité 3 : éviter le thème courant pour diversifier
+                theme_auto == theme,
+                # Priorité 4 : ordre numérique
+                row['Num']
+            )
+        
+        rappels_possibles.sort(key=priorite_rappel)
+        
+        # Sélectionner les rappels
         themes_rappel_selectionnes = set()
         for row in rappels_possibles:
             if len(selection_finale) >= 6:
                 break
                 
             code = row['Code']
-            sous_theme = row['Sous-Thème']
+            theme_auto = row['Code'][0]
             
-            # Préférer la diversité des thèmes, mais accepter les doublons si nécessaire
-            if (sous_theme not in themes_rappel_selectionnes or 
-                len(themes_rappel_selectionnes) >= len(pool_themes)):
-                selection_finale.append(code)
-                codes_selectionnes.add(code)
-                themes_rappel_selectionnes.add(sous_theme)
+            # Accepter l'automatisme
+            selection_finale.append(code)
+            codes_selectionnes.add(code)
+            themes_rappel_selectionnes.add(theme_auto)
     
-    # 3. COMPLÉTER SI NÉCESSAIRE (cas d'urgence)
-    # Si on n'a pas 6 automatismes, prendre ce qui reste
+    # 3. COMPLÉTER D'URGENCE SI NÉCESSAIRE
+    # Si on n'a toujours pas 6 automatismes, prendre n'importe quoi de disponible
     if len(selection_finale) < 6:
         tous_candidats = data[~data['Code'].isin(codes_selectionnes)].copy()
-        candidats_urgence = []
         
+        # Même les automatismes utilisés 4 fois peuvent être repris si vraiment nécessaire
         for _, row in tous_candidats.iterrows():
             code = row['Code']
-            if (used_codes[code] < 4 and 
+            # Relâcher la contrainte d'usage si nécessaire pour compléter
+            if (used_codes[code] < 5 and  # Maximum 5 fois au lieu de 4
                 respecte_espacement(auto_weeks[code], semaine_idx, row['Rappel'])):
-                candidats_urgence.append(row)
-        
-        # Prendre les premiers disponibles
-        for row in candidats_urgence:
-            if len(selection_finale) >= 6:
-                break
-            selection_finale.append(row['Code'])
+                if len(selection_finale) >= 6:
+                    break
+                selection_finale.append(code)
+                codes_selectionnes.add(code)
     
-    # 4. RÉORGANISER SELON LA CONTRAINTE DE POSITION
-    # Les automatismes du thème doivent être en positions 1 et 4
-    if theme and len(selection_finale) >= 2:
+    # 4. RÉORGANISATION FINALE : POSITIONS 1 ET 4 POUR LE THÈME
+    if theme and len(selection_finale) >= 1:
         # Identifier les automatismes du thème dans la sélection
         autos_theme = [code for code in selection_finale 
-                      if data.set_index('Code').loc[code, 'Sous-Thème'] == theme]
+                      if code.startswith(theme)]
+        autres_autos = [code for code in selection_finale 
+                       if not code.startswith(theme)]
         
-        # Réorganiser pour mettre les automatismes du thème en positions 1 et 4
-        autres_autos = [code for code in selection_finale if code not in autos_theme]
-        
-        # Nouvelle organisation
-        selection_reordonnee = []
+        # Réorganiser selon le pattern souhaité
+        nouvelle_selection = [""] * 6
         
         # Position 1 : premier auto du thème
         if len(autos_theme) >= 1:
-            selection_reordonnee.append(autos_theme[0])
-        
-        # Positions 2-3 : autres automatismes
-        for i in range(min(2, len(autres_autos))):
-            selection_reordonnee.append(autres_autos[i])
+            nouvelle_selection[0] = autos_theme[0]
         
         # Position 4 : deuxième auto du thème (si disponible)
         if len(autos_theme) >= 2:
-            selection_reordonnee.append(autos_theme[1])
+            nouvelle_selection[3] = autos_theme[1]
         
-        # Positions 5-6 : compléter avec le reste
-        restants = autres_autos[2:] + autos_theme[2:]
-        for auto in restants:
-            if len(selection_reordonnee) < 6:
-                selection_reordonnee.append(auto)
+        # Compléter les autres positions avec les autres automatismes
+        autres_positions = [1, 2, 4, 5]  # Positions disponibles
+        if nouvelle_selection[3] == "":  # Si pas de 2e auto du thème
+            autres_positions.append(3)
         
-        selection_finale = selection_reordonnee
+        idx_autres = 0
+        for pos in autres_positions:
+            if nouvelle_selection[pos] == "" and idx_autres < len(autres_autos):
+                nouvelle_selection[pos] = autres_autos[idx_autres]
+                idx_autres += 1
+        
+        # Ajouter les automatismes restants du thème s'il y en a
+        for i in range(2, len(autos_theme)):
+            for pos in range(6):
+                if nouvelle_selection[pos] == "":
+                    nouvelle_selection[pos] = autos_theme[i]
+                    break
+        
+        # Nettoyer et retourner
+        selection_finale = [code for code in nouvelle_selection if code != ""]
     
-    # S'assurer qu'on a exactement 6 automatismes (compléter ou tronquer)
+    # S'assurer qu'on a exactement 6 automatismes
     while len(selection_finale) < 6:
-        selection_finale.append("")  # Placeholder vide si vraiment rien n'est disponible
+        # Dernier recours : répéter des automatismes déjà sélectionnés cette semaine
+        # (normalement ne devrait pas arriver)
+        if selection_finale:
+            selection_finale.append(selection_finale[0])
+        else:
+            selection_finale.append("")  # Cas extrême
     
     return selection_finale[:6]
-
 # ===== POINT D'ENTRÉE =====
 
 st.set_page_config(layout="wide")
