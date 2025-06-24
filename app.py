@@ -72,10 +72,7 @@ st.title("📅 Reprises d'automatismes mathématiques en 6e")
 
 # =====  SIDEBAR =====
 st.sidebar.markdown("### Actions de calcul")
-# -- bouton 🔄
-if st.sidebar.button("🔄 Recalculer la répartition"):
-    recalculer_toute_la_repartition()
-    st.rerun()
+
 # -- bouton remplissage aléatoire
 if st.sidebar.button("🎲 Remplir aléatoirement les ❓"):
     new_seq = st.session_state.sequences.copy()
@@ -121,7 +118,10 @@ def recalculer_toute_la_repartition():
             for code in codes:
                 auto_weeks[code].append(i)
                 used_codes[code] += 1
-
+# -- bouton 🔄
+if st.sidebar.button("🔄 Recalculer la répartition"):
+    recalculer_toute_la_repartition()
+    st.rerun()
 # Affichage de la grille
 emoji_numeros = [f"Semaine {i+1}:" for i in range(32)]
 rows = [st.columns(8) for _ in range(4)]
