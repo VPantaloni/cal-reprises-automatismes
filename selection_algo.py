@@ -112,9 +112,11 @@ def selectionner_automatismes_theme_56(data, semaine, theme, auto_weeks, used_co
 
     return selection
 
-def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next_index_by_theme,
-                               min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
-                               themes_passes):
+def selectionner_automatismes(
+    data, semaine, theme, auto_weeks, used_codes, next_index_by_theme,
+    min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
+    themes_passes
+):
 
     base = selectionner_automatismes_theme(
         data, semaine, theme, auto_weeks, used_codes,
@@ -137,12 +139,20 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
     )
     codes_selectionnes.update([c for c in compl2 if c])
 
-    # Fusion finale
     selection_finale = [None] * 6
+
+    # Fixer auto1 et auto2 aux indices 0 et 3
+    selection_finale[0] = base[0]
+    selection_finale[3] = base[3]
+
+    # Compléter les autres positions (1, 2, 4, 5) sans doublons
     for i in range(6):
+        if i in (0, 3):
+            continue  # déjà assigné
         for src in [base, compl1, compl2]:
-            if src[i]:
-                selection_finale[i] = src[i]
+            code = src[i]
+            if code and code not in selection_finale:
+                selection_finale[i] = code
                 break
-    
+
     return selection_finale
