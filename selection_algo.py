@@ -48,7 +48,7 @@ def selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes
     if auto1:
         selection_theme[0] = auto1
     if auto2:
-        selection_theme[3] = auto2
+        selection_theme[1] = auto2
 
     return selection_theme
 
