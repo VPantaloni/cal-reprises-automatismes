@@ -52,17 +52,10 @@ def selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes
 
     return selection_theme
 
-def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next_index_by_theme,
-                               min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
-                               themes_passes):
-
-    selection_finale = selectionner_automatismes_theme(
-        data, semaine, theme, auto_weeks, used_codes,
-        min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
-        themes_passes
-    )
-
-    codes_selectionnes = set([code for code in selection_finale if code])
+def selectionner_automatismes_34(data, semaine, theme, auto_weeks, used_codes, codes_selectionnes,
+                                 min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
+                                 themes_passes):
+    selection = [None] * 6
 
     def peut_etre_place(code):
         row = data[data['Code'] == code].iloc[0]
@@ -74,39 +67,82 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
         return respecte_espacement(semaines_precedentes, semaine, est_rappel,
                                    min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3)
 
-    # Choix complémentaires stricts par thème
     autres_themes = [t for t in sorted(set(data['Code'].str[0])) if t != theme]
+    random.shuffle(autres_themes)
     candidats = []
     for t in autres_themes:
         auto_candidats = [c for c in data[data['Code'].str.startswith(t)]['Code']
                           if peut_etre_place(c) and used_codes[c] < 3 and c not in codes_selectionnes]
         if len(auto_candidats) >= 2:
             candidats.extend(auto_candidats[:2])
-        elif len(auto_candidats) == 1:
-            candidats.append(auto_candidats[0])
-        if len(candidats) >= 4:
             break
 
-    # Placement alternatif en A1 B1 C1 A2 B2 C2 → index [0, 1, 2, 3, 4, 5] donc thème courant déjà en 0 et 3
-    placement_indices = [1, 2, 4, 5]
-    for idx, code in zip(placement_indices, candidats):
-        if selection_finale[idx] is None:
-            selection_finale[idx] = code
-            codes_selectionnes.add(code)
+    if len(candidats) >= 2:
+        selection[1], selection[4] = candidats[:2]
 
-    # Complément ultime
-    for _, row in data.iterrows():
-        code = row['Code']
-        if code in codes_selectionnes or used_codes[code] >= 3:
-            continue
-        if not peut_etre_place(code):
-            continue
-        for j in range(6):
-            if selection_finale[j] is None:
-                selection_finale[j] = code
-                codes_selectionnes.add(code)
+    return selection
+
+def selectionner_automatismes_theme_56(data, semaine, theme, auto_weeks, used_codes, codes_selectionnes,
+                                       min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
+                                       themes_passes):
+    selection = [None] * 6
+
+    def peut_etre_place(code):
+        row = data[data['Code'] == code].iloc[0]
+        theme_code = row['Code'][0]
+        est_rappel = row['Rappel']
+        semaines_precedentes = auto_weeks.get(code, [])
+        if not est_rappel and theme_code not in themes_passes:
+            return False
+        return respecte_espacement(semaines_precedentes, semaine, est_rappel,
+                                   min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3)
+
+    autres_themes = [t for t in sorted(set(data['Code'].str[0])) if t != theme]
+    random.shuffle(autres_themes)
+    candidats = []
+    for t in autres_themes:
+        auto_candidats = [c for c in data[data['Code'].str.startswith(t)]['Code']
+                          if peut_etre_place(c) and used_codes[c] < 3 and c not in codes_selectionnes]
+        if len(auto_candidats) >= 2:
+            candidats.extend(auto_candidats[:2])
+            break
+
+    if len(candidats) >= 2:
+        selection[2], selection[5] = candidats[:2]
+
+    return selection
+
+def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next_index_by_theme,
+                               min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
+                               themes_passes):
+
+    base = selectionner_automatismes_theme(
+        data, semaine, theme, auto_weeks, used_codes,
+        min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
+        themes_passes
+    )
+    codes_selectionnes = set([c for c in base if c])
+
+    compl1 = selectionner_automatismes_34(
+        data, semaine, theme, auto_weeks, used_codes, codes_selectionnes,
+        min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
+        themes_passes
+    )
+    codes_selectionnes.update([c for c in compl1 if c])
+
+    compl2 = selectionner_automatismes_theme_56(
+        data, semaine, theme, auto_weeks, used_codes, codes_selectionnes,
+        min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
+        themes_passes
+    )
+    codes_selectionnes.update([c for c in compl2 if c])
+
+    # Fusion finale
+    selection_finale = [None] * 6
+    for i in range(6):
+        for src in [base, compl1, compl2]:
+            if src[i]:
+                selection_finale[i] = src[i]
                 break
-        if None not in selection_finale:
-            break
 
     return selection_finale
