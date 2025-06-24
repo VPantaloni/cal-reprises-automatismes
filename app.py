@@ -200,7 +200,7 @@ for _, row in data.iterrows():
 
 cols = st.columns(3)
 nb = len(recap_data)
-chunk_size = (nb + 2) // 3
+chunk_size = (nb + 2) // 3 -2
 for j in range(3):
     for r in recap_data[j*chunk_size:(j+1)*chunk_size]:
         with cols[j]:
