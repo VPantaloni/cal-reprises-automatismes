@@ -15,8 +15,8 @@ def respecte_espacement(semaines_precedentes, semaine_actuelle, est_rappel,
     return False
 
 def selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes,
-                                     min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
-                                     themes_passes):
+                                   min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
+                                   themes_passes):
     selection_theme = [None] * 6
 
     themes_avec_rappel = set(data[data['Rappel'] == True]['Code'].str[0].unique())
@@ -48,7 +48,7 @@ def selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes
     if auto1:
         selection_theme[0] = auto1
     if auto2:
-        selection_theme[3] = auto2
+        selection_theme[1] = auto2
 
     return selection_theme
 
@@ -78,7 +78,7 @@ def selectionner_automatismes_34(data, semaine, theme, auto_weeks, used_codes, c
             break
 
     if len(candidats) >= 2:
-        selection[1], selection[2] = candidats[:2]  # positions 1 et 2 (ligne 2)
+        selection[2], selection[4] = candidats[:2]
 
     return selection
 
@@ -108,7 +108,7 @@ def selectionner_automatismes_theme_56(data, semaine, theme, auto_weeks, used_co
             break
 
     if len(candidats) >= 2:
-        selection[4], selection[5] = candidats[:2]  # positions 4 et 5 (ligne 3)
+        selection[3], selection[5] = candidats[:2]
 
     return selection
 
