@@ -78,7 +78,7 @@ def selectionner_automatismes_34(data, semaine, theme, auto_weeks, used_codes, c
             break
 
     if len(candidats) >= 2:
-        selection[1], selection[4] = candidats[:2]
+        selection[1], selection[2] = candidats[:2]  # positions 1 et 2 (ligne 2)
 
     return selection
 
@@ -108,15 +108,13 @@ def selectionner_automatismes_theme_56(data, semaine, theme, auto_weeks, used_co
             break
 
     if len(candidats) >= 2:
-        selection[2], selection[5] = candidats[:2]
+        selection[4], selection[5] = candidats[:2]  # positions 4 et 5 (ligne 3)
 
     return selection
 
-def selectionner_automatismes(
-    data, semaine, theme, auto_weeks, used_codes, next_index_by_theme,
-    min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
-    themes_passes
-):
+def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next_index_by_theme,
+                               min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
+                               themes_passes):
 
     base = selectionner_automatismes_theme(
         data, semaine, theme, auto_weeks, used_codes,
@@ -139,24 +137,12 @@ def selectionner_automatismes(
     )
     codes_selectionnes.update([c for c in compl2 if c])
 
+    # Fusion finale
     selection_finale = [None] * 6
-
-    # Placer auto1 et auto2 côte à côte en positions 0 et 1
-    selection_finale[0] = base[0]
-    selection_finale[1] = base[3]  # ici on prend la deuxième auto du thème courant, dans base[3]
-
-    # Placer autres paires en (2,3) et (4,5)
-    # On fusionne compl1 et compl2 pour plus de simplicité
-    rest = []
-    for src in [base, compl1, compl2]:
-        for i, code in enumerate(src):
-            if code and code not in selection_finale:
-                rest.append(code)
-
-    # placer les codes restants dans les indices 2,3,4,5
-    rest = list(dict.fromkeys(rest))  # retirer doublons en gardant ordre
-    for pos in [2, 3, 4, 5]:
-        if rest:
-            selection_finale[pos] = rest.pop(0)
+    for i in range(6):
+        for src in [base, compl1, compl2]:
+            if src[i]:
+                selection_finale[i] = src[i]
+                break
 
     return selection_finale
