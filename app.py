@@ -78,6 +78,9 @@ with st.expander("\U0001F4D8 Légende des thèmes"):
 # =====  SIDEBAR =====
 
 st.sidebar.markdown("### Actions")
+if st.sidebar.button("🔄 Recalculer la répartition"):
+    recalculer_toute_la_repartition()
+    st.rerun()
 # -- bouton remplissage aléatoire
 if st.sidebar.button("🎲 Remplir aléatoirement les ❓"):
     new_seq = st.session_state.sequences.copy()
@@ -142,9 +145,6 @@ def recalculer_toute_la_repartition():
                 st.session_state.auto_weeks[code].append(i)
                 st.session_state.used_codes[code] += 1
 
-if st.sidebar.button("🔄 Recalculer la répartition"):
-    recalculer_toute_la_repartition()
-    st.rerun()
 
 # Affichage de la grille
 emoji_numeros = [f"Semaine {i+1}:" for i in range(32)]
