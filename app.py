@@ -72,7 +72,14 @@ def afficher_pastilles_compacte(selection_df):
 # Configuration de la page
 st.set_page_config(layout="wide")
 st.title("📅 Reprises d'automatismes mathématiques en 6e")
-
+## LEGENDES
+with st.expander("\U0001F4D8 Légende des thèmes"):
+    cols = st.columns(5)
+    for idx, (emoji, label) in enumerate(subtheme_legend.items()):
+        with cols[idx % 5]:
+            st.markdown(f"""<div style='background:{subtheme_colors[emoji]}; padding:4px; border-radius:6px; color:white; font-size:0.85em;'>
+                <b>{emoji}</b> {label}</div>""", unsafe_allow_html=True)
+#--- fin légendes
 # =====  SIDEBAR =====
 st.sidebar.markdown("### Paramètres d'espacement")
 min_espacement_rappel = st.sidebar.slider("Espacement min pour rappels", 1, 6, 1)
