@@ -236,8 +236,8 @@ def selectionner_automatismes(data, semaine_idx, theme, auto_weeks, used_codes, 
                 # Cas extrême : premier automatisme disponible
                 selection_finale[i] = data.iloc[0]['Code']
     
-    return selection_finale
-    #
+    return selection_finale   
+#--------------------------------------------------------------------------
 ## FIN select
 st.set_page_config(layout="wide")
 st.title("📅 Reprises d'automatismes mathématiques en 6e")
