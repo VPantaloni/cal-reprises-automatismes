@@ -34,16 +34,18 @@ def selectionner_automatismes(
         return respecte_espacement(semaines_precedentes, semaine, est_rappel,
                                    min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3)
 
+    def choisir_2_auto_valide(theme_prefix):
+        candidats = data[data['Code'].str.startswith(theme_prefix)].sort_values('Num')
+        valides = [row['Code'] for _, row in candidats.iterrows()
+                   if peut_etre_place(row['Code']) and used_codes[row['Code']] < 3 and row['Code'] not in codes_selectionnes]
+        return valides[:2] if len(valides) >= 2 else []
+
     # Étape 1 : choisir auto1 et auto2 (thème courant)
     auto1, auto2 = None, None
     if theme:
-        theme_autos = data[data['Code'].str.startswith(theme)].sort_values('Num')
-        candidats = [row['Code'] for _, row in theme_autos.iterrows()
-                     if respecte_espacement(auto_weeks.get(row['Code'], []), semaine, row['Rappel'],
-                                            min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3)
-                     and used_codes[row['Code']] < 3]
-        if len(candidats) >= 2:
-            auto1, auto2 = candidats[:2]
+        theme_autos = choisir_2_auto_valide(theme)
+        if len(theme_autos) == 2:
+            auto1, auto2 = theme_autos
             codes_selectionnes.update([auto1, auto2])
 
     # Étape 2 : choisir 2 autres thèmes différents
@@ -51,32 +53,28 @@ def selectionner_automatismes(
     random.shuffle(autres_themes)
     autres_groupes = []
     for t in autres_themes:
-        autos = data[data['Code'].str.startswith(t)].sort_values('Num')
-        valides = [row['Code'] for _, row in autos.iterrows()
-                   if row['Code'] not in codes_selectionnes
-                   and peut_etre_place(row['Code'])
-                   and used_codes[row['Code']] < 3]
-        if len(valides) >= 2:
-            autres_groupes.append(valides[:2])
+        groupe = choisir_2_auto_valide(t)
+        if len(groupe) == 2:
+            autres_groupes.append(groupe)
         if len(autres_groupes) == 2:
             break
 
     # Placement : A1, B1, C1, A2, B2, C2
-    index_map = [0, 1, 2, 3, 4, 5]
-    codes_to_place = []
-    if auto1 and auto2:
-        codes_to_place = [auto1]
-        if autres_groupes:
-            codes_to_place.append(autres_groupes[0][0])
-        if len(autres_groupes) > 1:
-            codes_to_place.append(autres_groupes[1][0])
-        codes_to_place.append(auto2)
-        if autres_groupes:
-            codes_to_place.append(autres_groupes[0][1])
-        if len(autres_groupes) > 1:
-            codes_to_place.append(autres_groupes[1][1])
+    placement = []
+    if auto1:
+        placement.append(auto1)
+    if len(autres_groupes) > 0:
+        placement.append(autres_groupes[0][0])
+    if len(autres_groupes) > 1:
+        placement.append(autres_groupes[1][0])
+    if auto2:
+        placement.append(auto2)
+    if len(autres_groupes) > 0:
+        placement.append(autres_groupes[0][1])
+    if len(autres_groupes) > 1:
+        placement.append(autres_groupes[1][1])
 
-    for idx, code in zip(index_map, codes_to_place):
+    for idx, code in enumerate(placement[:6]):
         selection_finale[idx] = code
         codes_selectionnes.add(code)
 
