@@ -60,22 +60,6 @@ def afficher_pastilles_compacte(selection_df):
             f"<div title=\"{row['Automatisme']}\" style='flex:1; padding:2px; border: 3px solid {row['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em; font-weight:bold; text-align:center; cursor:help;'> {row['Code']} </div>"
             for _, row in selection_df.iterrows()
         ]
-
-        # Tri pour afficher ceux du thème de la semaine en 1re ligne
-        def ligne_ordre(code):
-            if len(selection_df) < 2:
-                return 2  # si bug
-            theme_emoji = code[0]
-            return 0 if code == selection_df.iloc[0]['Code'] else (1 if code == selection_df.iloc[1]['Code'] else 2)
-
-        selection_df['AffichageOrdre'] = selection_df['Code'].apply(ligne_ordre)
-        selection_df = selection_df.sort_values('AffichageOrdre')
-
-        pastilles = [
-            f"<div title=\"{row['Automatisme']}\" style='flex:1; padding:2px; border: 3px solid {row['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em; font-weight:bold; text-align:center; cursor:help;'> {row['Code']} </div>"
-            for _, row in selection_df.iterrows()
-        ]
-
         lignes = ["<div style='display:flex; gap:4px;'>" + "".join(pastilles[i:i+2]) + "</div>" for i in range(0, len(pastilles), 2)]
         for ligne in lignes:
             st.markdown(ligne, unsafe_allow_html=True)
@@ -87,13 +71,10 @@ st.set_page_config(layout="wide")
 st.title("📅 Reprises d'automatismes mathématiques en 6e")
 
 # =====  SIDEBAR =====
-st.sidebar.markdown("### Paramètres d'espacement")
-min_espacement_rappel = st.sidebar.slider("Espacement min pour rappels", 1, 6, 1)
-espacement_min2 = st.sidebar.slider("1ère → 2e apparition (min)", 1, 6, 2)
-espacement_max2 = st.sidebar.slider("1ère → 2e apparition (max)", 2, 10, 6)
-espacement_min3 = st.sidebar.slider("2e → 3e apparition (min)", 2, 10, 4)
-espacement_max3 = st.sidebar.slider("2e → 3e apparition (max)", 2, 15, 10)
-
+# -- bouton 🔄
+if st.sidebar.button("🔄 Recalculer la répartition"):
+    recalculer_toute_la_repartition()
+    st.rerun()
 # -- bouton remplissage aléatoire
 if st.sidebar.button("🎲 Remplir aléatoirement les ❓"):
     new_seq = st.session_state.sequences.copy()
@@ -105,7 +86,13 @@ if st.sidebar.button("🎲 Remplir aléatoirement les ❓"):
         prev = choice
     st.session_state.sequences = new_seq
     st.rerun()
-
+## 
+st.sidebar.markdown("### Paramètres d'espacement")
+min_espacement_rappel = st.sidebar.slider("Espacement min pour rappels", 1, 6, 1)
+espacement_min2 = st.sidebar.slider("1ère → 2e apparition (min)", 1, 6, 2)
+espacement_max2 = st.sidebar.slider("1ère → 2e apparition (max)", 2, 10, 6)
+espacement_min3 = st.sidebar.slider("2e → 3e apparition (min)", 2, 10, 4)
+espacement_max3 = st.sidebar.slider("2e → 3e apparition (max)", 2, 15, 10)
 # Chargement des données
 data = charger_donnees()
 
