@@ -21,7 +21,7 @@ def selectionner_automatismes(
     min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
     themes_passes
 ):
-    selection_finale = [None] * 6
+    selection_finale = [None]*6
     codes_selectionnes = set()
 
     def peut_etre_place(code):
@@ -34,76 +34,57 @@ def selectionner_automatismes(
         return respecte_espacement(semaines_precedentes, semaine, est_rappel,
                                    min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3)
 
-    def choisir_2_auto_valide(theme_prefix):
-        candidats = data[data['Code'].str.startswith(theme_prefix)].sort_values('Num')
-        valides = [row['Code'] for _, row in candidats.iterrows()
-                   if peut_etre_place(row['Code']) and used_codes[row['Code']] < 3 and row['Code'] not in codes_selectionnes]
-        return valides
+    # Choix des 2 auto du thème courant
+    theme_autos = [c for c in data[data['Code'].str.startswith(theme)]['Code'] if peut_etre_place(c) and used_codes[c] < 3]
+    if len(theme_autos) >= 2:
+        auto1, auto2 = theme_autos[:2]
+    elif len(theme_autos) == 1:
+        auto1 = auto2 = theme_autos[0]
+    else:
+        # Aucun auto valide thème courant, choisir au moins 1 auto (stratégie à affiner)
+        auto1 = auto2 = None
 
-    # Étape 1 : sélection des automatismes du thème courant
-    auto1, auto2 = None, None
-    if theme:
-        theme_autos = choisir_2_auto_valide(theme)
-        if len(theme_autos) >= 2:
-            auto1, auto2 = theme_autos[:2]
-        elif len(theme_autos) == 1:
-            auto1 = auto2 = theme_autos[0]  # répéter si un seul
-        if auto1:
-            codes_selectionnes.add(auto1)
-        if auto2:
-            codes_selectionnes.add(auto2)
+    if auto1:
+        selection_finale[0] = auto1
+        codes_selectionnes.add(auto1)
+    if auto2:
+        selection_finale[3] = auto2
+        codes_selectionnes.add(auto2)
 
-    # Étape 2 : choix de 2 autres thèmes
+    # Remplissage des autres positions avec autres thèmes
+    autres_positions = [1,2,4,5]
     autres_themes = [t for t in set(data['Code'].str[0]) if t != theme]
     random.shuffle(autres_themes)
-    candidats_groupes = []
 
     for t in autres_themes:
-        valides = choisir_2_auto_valide(t)
-        if len(valides) >= 2:
-            candidats_groupes.append((t, valides[:2]))
-        elif len(valides) == 1:
-            candidats_groupes.append((t, [valides[0]]))
-        if sum(len(g[1]) for g in candidats_groupes) >= 4:
+        candidats = [c for c in data[data['Code'].str.startswith(t)]['Code']
+                     if peut_etre_place(c) and used_codes[c] < 3 and c not in codes_selectionnes]
+        for c in candidats:
+            if autres_positions:
+                pos = autres_positions.pop(0)
+                selection_finale[pos] = c
+                codes_selectionnes.add(c)
+            else:
+                break
+        if not autres_positions:
             break
 
-    # Compléter avec autres automatismes peu vus si insuffisants
-    if sum(len(g[1]) for g in candidats_groupes) < 4:
-        reste = data[data['Code'].apply(lambda c: peut_etre_place(c) and used_codes[c] < 3 and c not in codes_selectionnes)]
-        for _, row in reste.iterrows():
-            t = row['Code'][0]
-            if t != theme:
-                candidats_groupes.append((t, [row['Code']]))
-                codes_selectionnes.add(row['Code'])
-                if sum(len(g[1]) for g in candidats_groupes) >= 4:
-                    break
+    # Compléter encore si cases vides
+    if any(x is None for x in selection_finale):
+        candidats_restants = [c for c in data['Code']
+                             if peut_etre_place(c) and used_codes[c] < 3 and c not in codes_selectionnes]
+        for c in candidats_restants:
+            if None not in selection_finale:
+                break
+            pos = selection_finale.index(None)
+            selection_finale[pos] = c
+            codes_selectionnes.add(c)
 
-    # Étape 3 : placement strict A1, B1, C1, A2, B2, C2 avec A = thème semaine
-    ordered = [None] * 6
-    if auto1:
-        ordered[0] = auto1
-    if auto2:
-        ordered[3] = auto2
+    # En dernier recours, remplir les cases vides avec doublons autorisés si thème a peu d'autos
+    for i, val in enumerate(selection_finale):
+        if val is None:
+            # Mettre auto1 ou auto2 (si défini) en doublon ici
+            selection_finale[i] = auto1 if auto1 else (auto2 if auto2 else None)
 
-    pos = [1, 2, 4, 5]
-    i = 0
-    for _, groupe in candidats_groupes:
-        for code in groupe:
-            while i < len(pos) and ordered[pos[i]] is not None:
-                i += 1
-            if i < len(pos):
-                ordered[pos[i]] = code
-                codes_selectionnes.add(code)
-                i += 1
+    return selection_finale
 
-    # Dernier remplissage si trous
-    if None in ordered:
-        reste_final = data[data['Code'].apply(lambda c: peut_etre_place(c) and used_codes[c] < 3 and c not in codes_selectionnes)]
-        for _, row in reste_final.iterrows():
-            for i in range(6):
-                if ordered[i] is None:
-                    ordered[i] = row['Code']
-                    codes_selectionnes.add(row['Code'])
-                    break
-
-    return ordered
