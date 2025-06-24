@@ -56,7 +56,8 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
     def peut_etre_place(code):
         semaines_precedentes = auto_weeks.get(code, [])
         est_rappel = data.loc[data['Code'] == code, 'Rappel'].iloc[0]
-        return respecte_espacement(semaines_precedentes, semaine, est_rappel)
+        return respecte_espacement(semaines_precedentes, semaine, est_rappel,
+                                   min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3)
 
     # Compléter les autres positions avec automatismes respectant l’espacement
     for code in autres_autos:
