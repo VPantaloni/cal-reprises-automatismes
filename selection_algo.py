@@ -46,7 +46,12 @@ def selectionner_automatismes(
         theme_autos = choisir_2_auto_valide(theme)
         if len(theme_autos) >= 2:
             auto1, auto2 = theme_autos[:2]
-            codes_selectionnes.update([auto1, auto2])
+        elif len(theme_autos) == 1:
+            auto1 = auto2 = theme_autos[0]  # Cas unique : 📊 par exemple
+        if auto1:
+            codes_selectionnes.add(auto1)
+        if auto2:
+            codes_selectionnes.add(auto2)
 
     # Étape 2 : choisir d'autres thèmes pour compléter les paires
     autres_themes = [t for t in set(data['Code'].str[0]) if t != theme]
@@ -93,6 +98,16 @@ def selectionner_automatismes(
     elif len(groupes) > 3 and len(groupes[3]) >= 1:
         placement.append(groupes[3][0])
 
+    # Remplissage final s'il manque des auto (priorité à ceux vus < 3 fois)
+    if len(placement) < 6:
+        candidats_restants = data[data['Code'].apply(lambda c: peut_etre_place(c) and used_codes[c] < 3 and c not in codes_selectionnes)]
+        for _, row in candidats_restants.iterrows():
+            placement.append(row['Code'])
+            codes_selectionnes.add(row['Code'])
+            if len(placement) == 6:
+                break
+
+    # Placement forcé dans les 6 cases
     for idx, code in enumerate(placement[:6]):
         selection_finale[idx] = code
         codes_selectionnes.add(code)
