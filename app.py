@@ -36,18 +36,6 @@ if 'next_index_by_theme' not in st.session_state:
     
 # ===== FONCTIONS UTILITAIRES =====
 
-def respecte_espacement(semaines_precedentes, semaine_actuelle, est_rappel):
-    if not semaines_precedentes:
-        return True
-    ecart = semaine_actuelle - max(semaines_precedentes)
-    if est_rappel:
-        return ecart >= min_espacement_rappel
-    if len(semaines_precedentes) == 1:
-        return espacement_min2 <= ecart <= espacement_max2
-    elif len(semaines_precedentes) == 2:
-        return espacement_min3 <= ecart <= espacement_max3
-    return False
-
 def charger_donnees():
     try:
         df = pd.read_csv("Auto-6e.csv", sep=';', encoding='utf-8')
