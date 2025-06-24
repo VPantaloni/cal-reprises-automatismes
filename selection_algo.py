@@ -77,17 +77,24 @@ def selectionner_automatismes(
                 break
 
     ordered = [None] * 6
-    ordered[0] = auto1
-    ordered[3] = auto2
+    if auto1:
+        ordered[0] = auto1
+    if auto2:
+        if auto2 != auto1:
+            ordered[3] = auto2
+        else:
+            ordered[3] = auto1  # cas du thème avec un seul automatisme, répété 2 fois
 
-    placement_index = [1, 2, 4, 5]
+    placement_index = [i for i in range(6) if ordered[i] is None]
     p = 0
     for g in groupes:
         for code in g:
             if p < len(placement_index):
                 ordered[placement_index[p]] = code
+                codes_selectionnes.add(code)
                 p += 1
 
+    # Compléter les cases restantes avec des automatismes peu vus (< 3 fois)
     candidats_restants = data[data['Code'].apply(lambda c: peut_etre_place(c) and used_codes[c] < 3 and c not in codes_selectionnes)]
     for _, row in candidats_restants.iterrows():
         for i in range(6):
