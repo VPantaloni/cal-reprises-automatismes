@@ -38,41 +38,60 @@ def selectionner_automatismes(
         candidats = data[data['Code'].str.startswith(theme_prefix)].sort_values('Num')
         valides = [row['Code'] for _, row in candidats.iterrows()
                    if peut_etre_place(row['Code']) and used_codes[row['Code']] < 3 and row['Code'] not in codes_selectionnes]
-        return valides[:2] if len(valides) >= 2 else []
+        return valides
 
     # Étape 1 : choisir auto1 et auto2 (thème courant)
     auto1, auto2 = None, None
     if theme:
         theme_autos = choisir_2_auto_valide(theme)
-        if len(theme_autos) == 2:
-            auto1, auto2 = theme_autos
+        if len(theme_autos) >= 2:
+            auto1, auto2 = theme_autos[:2]
             codes_selectionnes.update([auto1, auto2])
 
-    # Étape 2 : choisir 2 autres thèmes différents
+    # Étape 2 : choisir d'autres thèmes pour compléter les paires
     autres_themes = [t for t in set(data['Code'].str[0]) if t != theme]
     random.shuffle(autres_themes)
-    autres_groupes = []
+    groupes = []
+
     for t in autres_themes:
-        groupe = choisir_2_auto_valide(t)
-        if len(groupe) == 2:
-            autres_groupes.append(groupe)
-        if len(autres_groupes) == 2:
+        valides = choisir_2_auto_valide(t)
+        if len(valides) >= 2:
+            groupes.append(valides[:2])
+        elif len(valides) == 1:
+            groupes.append([valides[0]])
+        if sum(len(g) for g in groupes) >= 4:
             break
+
+    # Complétion si nécessaire avec un 4e thème
+    if sum(len(g) for g in groupes) < 4:
+        for t in autres_themes:
+            valides = choisir_2_auto_valide(t)
+            for v in valides:
+                if v not in codes_selectionnes:
+                    groupes.append([v])
+                    if sum(len(g) for g in groupes) >= 4:
+                        break
+            if sum(len(g) for g in groupes) >= 4:
+                break
 
     # Placement : A1, B1, C1, A2, B2, C2
     placement = []
     if auto1:
         placement.append(auto1)
-    if len(autres_groupes) > 0:
-        placement.append(autres_groupes[0][0])
-    if len(autres_groupes) > 1:
-        placement.append(autres_groupes[1][0])
+    if len(groupes) > 0 and len(groupes[0]) >= 1:
+        placement.append(groupes[0][0])
+    if len(groupes) > 1 and len(groupes[1]) >= 1:
+        placement.append(groupes[1][0])
     if auto2:
         placement.append(auto2)
-    if len(autres_groupes) > 0:
-        placement.append(autres_groupes[0][1])
-    if len(autres_groupes) > 1:
-        placement.append(autres_groupes[1][1])
+    if len(groupes) > 0 and len(groupes[0]) >= 2:
+        placement.append(groupes[0][1])
+    elif len(groupes) > 2 and len(groupes[2]) >= 1:
+        placement.append(groupes[2][0])
+    if len(groupes) > 1 and len(groupes[1]) >= 2:
+        placement.append(groupes[1][1])
+    elif len(groupes) > 3 and len(groupes[3]) >= 1:
+        placement.append(groupes[3][0])
 
     for idx, code in enumerate(placement[:6]):
         selection_finale[idx] = code
