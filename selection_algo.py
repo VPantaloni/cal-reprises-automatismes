@@ -1,7 +1,6 @@
 from collections import defaultdict
 import random
 
-
 def respecte_espacement(semaines_precedentes, semaine_actuelle, est_rappel,
                         min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3):
     if not semaines_precedentes:
@@ -15,12 +14,9 @@ def respecte_espacement(semaines_precedentes, semaine_actuelle, est_rappel,
         return espacement_min3 <= ecart <= espacement_max3
     return False
 
-
-def selectionner_automatismes_theme(
-    data, semaine, theme, auto_weeks, used_codes,
-    min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
-    themes_passes
-):
+def selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes,
+                                     min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
+                                     themes_passes):
     selection_theme = [None] * 6
 
     themes_avec_rappel = set(data[data['Rappel'] == True]['Code'].str[0].unique())
@@ -39,10 +35,8 @@ def selectionner_automatismes_theme(
             min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3
         )
 
-    theme_autos = [
-        c for c in data[data['Code'].str.startswith(theme)]['Code']
-        if peut_etre_place(c) and used_codes[c] < 3
-    ]
+    theme_autos = [c for c in data[data['Code'].str.startswith(theme)]['Code']
+                   if peut_etre_place(c) and used_codes[c] < 3]
 
     if len(theme_autos) >= 2:
         auto1, auto2 = theme_autos[:2]
@@ -58,12 +52,10 @@ def selectionner_automatismes_theme(
 
     return selection_theme
 
+def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next_index_by_theme,
+                               min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
+                               themes_passes):
 
-def selectionner_automatismes(
-    data, semaine, theme, auto_weeks, used_codes, next_index_by_theme,
-    min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
-    themes_passes
-):
     selection_finale = selectionner_automatismes_theme(
         data, semaine, theme, auto_weeks, used_codes,
         min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
@@ -82,41 +74,43 @@ def selectionner_automatismes(
         return respecte_espacement(semaines_precedentes, semaine, est_rappel,
                                    min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3)
 
-    autres_themes = [t for t in set(data['Code'].str[0]) if t != theme]
-    random.shuffle(autres_themes)
-    candidats_groupes = []
+    autres_themes = [t for t in sorted(set(data['Code'].str[0])) if t != theme]
+    candidats = []
 
     for t in autres_themes:
-        candidats = data[data['Code'].str.startswith(t)].sort_values('Num')
-        valides = [row['Code'] for _, row in candidats.iterrows()
-                   if peut_etre_place(row['Code']) and used_codes[row['Code']] < 3 and row['Code'] not in codes_selectionnes]
-        if len(valides) >= 2:
-            candidats_groupes.append(valides[:2])
-        elif len(valides) == 1:
-            candidats_groupes.append([valides[0]])
-        if sum(len(g) for g in candidats_groupes) >= 4:
+        lignes = data[(data['Code'].str.startswith(t)) & (data['Code'].apply(lambda c: peut_etre_place(c)))].sort_values('Num')
+        for _, row in lignes.iterrows():
+            code = row['Code']
+            if used_codes[code] < 3 and code not in codes_selectionnes:
+                candidats.append(code)
+            if len(candidats) >= 4:
+                break
+        if len(candidats) >= 4:
             break
 
-    # Placement aux positions 1, 2, 4, 5
-    pos = [1, 2, 4, 5]
+    placement_indices = [1, 2, 4, 5]
     i = 0
-    for groupe in candidats_groupes:
-        for code in groupe:
-            while i < len(pos) and selection_finale[pos[i]] is not None:
-                i += 1
-            if i < len(pos):
-                selection_finale[pos[i]] = code
-                codes_selectionnes.add(code)
-                i += 1
+    for code in candidats:
+        while i < len(placement_indices) and selection_finale[placement_indices[i]] is not None:
+            i += 1
+        if i < len(placement_indices):
+            selection_finale[placement_indices[i]] = code
+            codes_selectionnes.add(code)
+            i += 1
 
-    # Complément final si encore vide
-    if None in selection_finale:
-        reste = data[data['Code'].apply(lambda c: peut_etre_place(c) and used_codes[c] < 3 and c not in codes_selectionnes)]
-        for _, row in reste.iterrows():
-            for j in range(6):
-                if selection_finale[j] is None:
-                    selection_finale[j] = row['Code']
-                    codes_selectionnes.add(row['Code'])
-                    break
+    # Complément ultime si trous
+    for _, row in data.iterrows():
+        code = row['Code']
+        if code in codes_selectionnes or used_codes[code] >= 3:
+            continue
+        if not peut_etre_place(code):
+            continue
+        for j in range(6):
+            if selection_finale[j] is None:
+                selection_finale[j] = code
+                codes_selectionnes.add(code)
+                break
+        if None not in selection_finale:
+            break
 
     return selection_finale
