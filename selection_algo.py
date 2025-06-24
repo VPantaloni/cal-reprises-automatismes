@@ -76,27 +76,24 @@ def selectionner_automatismes(
             if sum(len(g) for g in groupes) >= 4:
                 break
 
-    placement = [None] * 6
-    try:
-        placement[0] = auto1
-        placement[3] = auto2
-        if len(groupes) > 0:
-            placement[1] = groupes[0][0]
-            if len(groupes[0]) > 1:
-                placement[4] = groupes[0][1]
-        if len(groupes) > 1:
-            placement[2] = groupes[1][0]
-            if len(groupes[1]) > 1:
-                placement[5] = groupes[1][1]
-    except:
-        pass
+    ordered = [None] * 6
+    ordered[0] = auto1
+    ordered[3] = auto2
+
+    placement_index = [1, 2, 4, 5]
+    p = 0
+    for g in groupes:
+        for code in g:
+            if p < len(placement_index):
+                ordered[placement_index[p]] = code
+                p += 1
 
     candidats_restants = data[data['Code'].apply(lambda c: peut_etre_place(c) and used_codes[c] < 3 and c not in codes_selectionnes)]
     for _, row in candidats_restants.iterrows():
         for i in range(6):
-            if placement[i] is None:
-                placement[i] = row['Code']
+            if ordered[i] is None:
+                ordered[i] = row['Code']
                 codes_selectionnes.add(row['Code'])
                 break
 
-    return placement
+    return ordered
