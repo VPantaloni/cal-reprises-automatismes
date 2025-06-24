@@ -81,6 +81,20 @@ with st.expander("\U0001F4D8 Légende des thèmes"):
                 <b>{emoji}</b> {label}</div>""", unsafe_allow_html=True)
 #--- fin légendes
 # =====  SIDEBAR =====
+
+st.sidebar.markdown("### Actions")
+# -- bouton remplissage aléatoire
+if st.sidebar.button("🎲 Remplir aléatoirement les ❓"):
+    new_seq = st.session_state.sequences.copy()
+    prev = new_seq[]  # On part de la semaine 8
+    for i in range(32):
+        options = [s for s in subtheme_emojis if s != prev]
+        choice = random.choice(options)
+        new_seq[i] = choice
+        prev = choice
+    st.session_state.sequences = new_seq
+    st.rerun()
+    ##########
 st.sidebar.markdown("### Paramètres d'espacement")
 min_espacement_rappel = st.sidebar.slider("Espacement min pour rappels", 1, 6, 1)
 espacement_min2 = st.sidebar.slider("1ère → 2e apparition (min)", 1, 6, 2)
@@ -88,17 +102,7 @@ espacement_max2 = st.sidebar.slider("1ère → 2e apparition (max)", 2, 10, 6)
 espacement_min3 = st.sidebar.slider("2e → 3e apparition (min)", 2, 10, 4)
 espacement_max3 = st.sidebar.slider("2e → 3e apparition (max)", 2, 15, 10)
 
-# -- bouton remplissage aléatoire
-if st.sidebar.button("🎲 Remplir aléatoirement les ❓"):
-    new_seq = st.session_state.sequences.copy()
-    prev = new_seq[7]  # On part de la semaine 8
-    for i in range(8, 32):
-        options = [s for s in subtheme_emojis if s != prev]
-        choice = random.choice(options)
-        new_seq[i] = choice
-        prev = choice
-    st.session_state.sequences = new_seq
-    st.rerun()
+
 
 # Chargement des données
 data = charger_donnees()
