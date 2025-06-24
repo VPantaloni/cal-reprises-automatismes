@@ -40,20 +40,18 @@ def selectionner_automatismes(
                    if peut_etre_place(row['Code']) and used_codes[row['Code']] < 3 and row['Code'] not in codes_selectionnes]
         return valides
 
-    # Étape 1 : choisir auto1 et auto2 (thème courant)
     auto1, auto2 = None, None
     if theme:
         theme_autos = choisir_2_auto_valide(theme)
         if len(theme_autos) >= 2:
             auto1, auto2 = theme_autos[:2]
         elif len(theme_autos) == 1:
-            auto1 = auto2 = theme_autos[0]  # Cas unique : 📊 par exemple
+            auto1 = auto2 = theme_autos[0]
         if auto1:
             codes_selectionnes.add(auto1)
         if auto2:
             codes_selectionnes.add(auto2)
 
-    # Étape 2 : choisir d'autres thèmes pour compléter les paires
     autres_themes = [t for t in set(data['Code'].str[0]) if t != theme]
     random.shuffle(autres_themes)
     groupes = []
@@ -67,7 +65,6 @@ def selectionner_automatismes(
         if sum(len(g) for g in groupes) >= 4:
             break
 
-    # Complétion si nécessaire avec un 4e thème
     if sum(len(g) for g in groupes) < 4:
         for t in autres_themes:
             valides = choisir_2_auto_valide(t)
@@ -79,37 +76,27 @@ def selectionner_automatismes(
             if sum(len(g) for g in groupes) >= 4:
                 break
 
-    # Placement : A1, B1, C1, A2, B2, C2
-    placement = []
-    if auto1:
-        placement.append(auto1)
-    if len(groupes) > 0 and len(groupes[0]) >= 1:
-        placement.append(groupes[0][0])
-    if len(groupes) > 1 and len(groupes[1]) >= 1:
-        placement.append(groupes[1][0])
-    if auto2:
-        placement.append(auto2)
-    if len(groupes) > 0 and len(groupes[0]) >= 2:
-        placement.append(groupes[0][1])
-    elif len(groupes) > 2 and len(groupes[2]) >= 1:
-        placement.append(groupes[2][0])
-    if len(groupes) > 1 and len(groupes[1]) >= 2:
-        placement.append(groupes[1][1])
-    elif len(groupes) > 3 and len(groupes[3]) >= 1:
-        placement.append(groupes[3][0])
+    placement = [None] * 6
+    try:
+        placement[0] = auto1
+        placement[3] = auto2
+        if len(groupes) > 0:
+            placement[1] = groupes[0][0]
+            if len(groupes[0]) > 1:
+                placement[4] = groupes[0][1]
+        if len(groupes) > 1:
+            placement[2] = groupes[1][0]
+            if len(groupes[1]) > 1:
+                placement[5] = groupes[1][1]
+    except:
+        pass
 
-    # Remplissage final s'il manque des auto (priorité à ceux vus < 3 fois)
-    if len(placement) < 6:
-        candidats_restants = data[data['Code'].apply(lambda c: peut_etre_place(c) and used_codes[c] < 3 and c not in codes_selectionnes)]
-        for _, row in candidats_restants.iterrows():
-            placement.append(row['Code'])
-            codes_selectionnes.add(row['Code'])
-            if len(placement) == 6:
+    candidats_restants = data[data['Code'].apply(lambda c: peut_etre_place(c) and used_codes[c] < 3 and c not in codes_selectionnes)]
+    for _, row in candidats_restants.iterrows():
+        for i in range(6):
+            if placement[i] is None:
+                placement[i] = row['Code']
+                codes_selectionnes.add(row['Code'])
                 break
 
-    # Placement forcé dans les 6 cases
-    for idx, code in enumerate(placement[:6]):
-        selection_finale[idx] = code
-        codes_selectionnes.add(code)
-
-    return selection_finale
+    return placement
