@@ -86,7 +86,7 @@ st.sidebar.markdown("### Actions")
 # -- bouton remplissage aléatoire
 if st.sidebar.button("🎲 Remplir aléatoirement les ❓"):
     new_seq = st.session_state.sequences.copy()
-    prev = new_seq[]  # On part de la semaine 8
+    prev = new_seq[0]  # On part de la semaine 8
     for i in range(32):
         options = [s for s in subtheme_emojis if s != prev]
         choice = random.choice(options)
