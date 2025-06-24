@@ -26,7 +26,14 @@ subtheme_legend = {
     "🎲": "Probabilités", 
     "∝": "Proportionnalité"
 }
-
+#  INIT
+if 'auto_weeks' not in st.session_state:
+    st.session_state.auto_weeks = defaultdict(list)
+if 'used_codes' not in st.session_state:
+    st.session_state.used_codes = defaultdict(int)
+if 'next_index_by_theme' not in st.session_state:
+    st.session_state.next_index_by_theme = defaultdict(lambda: 1)
+    
 # ===== FONCTIONS UTILITAIRES =====
 
 def respecte_espacement(semaines_precedentes, semaine_actuelle, est_rappel):
@@ -117,16 +124,27 @@ from selection_algo import selectionner_automatismes
 
 def recalculer_toute_la_repartition():
     st.session_state.selection_by_week = [[] for _ in range(32)]
-    auto_weeks = defaultdict(list)
-    used_codes = defaultdict(int)
-    next_index_by_theme = defaultdict(lambda: 1)
+    st.session_state.auto_weeks.clear()
+    st.session_state.used_codes.clear()
+    st.session_state.next_index_by_theme = defaultdict(lambda: 1)
+
     for i in range(32):
         if st.session_state.sequences[i]:
-            codes = selectionner_automatismes(data, i, st.session_state.sequences[i], auto_weeks, used_codes, next_index_by_theme)
+            codes = selectionner_automatismes(
+                data, i, st.session_state.sequences[i],
+                st.session_state.auto_weeks,
+                st.session_state.used_codes,
+                st.session_state.next_index_by_theme,
+                min_espacement_rappel=min_espacement_rappel,
+                espacement_min2=espacement_min2,
+                espacement_max2=espacement_max2,
+                espacement_min3=espacement_min3,
+                espacement_max3=espacement_max3
+            )
             st.session_state.selection_by_week[i] = codes
             for code in codes:
-                auto_weeks[code].append(i)
-                used_codes[code] += 1
+                st.session_state.auto_weeks[code].append(i)
+                st.session_state.used_codes[code] += 1
 
 if st.sidebar.button("🔄 Recalculer la répartition"):
     recalculer_toute_la_repartition()
@@ -171,7 +189,7 @@ st.markdown("## 🔍 Lecture par automatisme")
 recap_data = []
 for _, row in data.iterrows():
     code = row['Code']
-    semaines = [f"S{i+1}" for i in auto_weeks.get(code, [])]
+    semaines = [f"S{i+1}" for i in st.session_state.auto_weeks.get(code, [])]
     recap_data.append({"Code": code, "Automatisme": row['Automatisme'], "Semaines": ", ".join(semaines), "Couleur": row['Couleur']})
 
 cols = st.columns(3)
