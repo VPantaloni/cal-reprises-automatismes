@@ -34,67 +34,49 @@ def selectionner_automatismes(
         return respecte_espacement(semaines_precedentes, semaine, est_rappel,
                                    min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3)
 
-    def priorité(code):
-        row = data[data['Code'] == code].iloc[0]
-        est_rappel = row['Rappel']
-        nb = used_codes[code]
-        if est_rappel:
-            if semaine < 17:
-                return (0, nb)
-            else:
-                return (2, nb)
-        else:
-            return (1, nb)
-
     # Étape 1 : choisir auto1 et auto2 (thème courant)
-    auto_theme = []
+    auto1, auto2 = None, None
     if theme:
         theme_autos = data[data['Code'].str.startswith(theme)].sort_values('Num')
-        for _, row in theme_autos.iterrows():
-            code = row['Code']
-            est_rappel = row['Rappel']
-            semaines_precedentes = auto_weeks.get(code, [])
-            if respecte_espacement(semaines_precedentes, semaine, est_rappel,
-                                   min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3):
-                auto_theme.append((code, used_codes[code]))
+        candidats = [row['Code'] for _, row in theme_autos.iterrows()
+                     if respecte_espacement(auto_weeks.get(row['Code'], []), semaine, row['Rappel'],
+                                            min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3)
+                     and used_codes[row['Code']] < 3]
+        if candidats:
+            auto1 = candidats[0]
+            codes_selectionnes.add(auto1)
+        if len(candidats) > 1:
+            auto2 = candidats[1]
+            codes_selectionnes.add(auto2)
 
-        auto_theme = sorted(auto_theme, key=lambda x: x[1])[:2]
-        if len(auto_theme) > 0:
-            selection_finale[0] = auto_theme[0][0]
-            codes_selectionnes.add(auto_theme[0][0])
-        if len(auto_theme) > 1:
-            selection_finale[3] = auto_theme[1][0]
-            codes_selectionnes.add(auto_theme[1][0])
+    # Placer auto1 et auto2 en position 0 et 3 (ligne 1)
+    if auto1:
+        selection_finale[0] = auto1
+    if auto2:
+        selection_finale[3] = auto2
 
     # Étape 2 : choisir 2 autres thèmes différents
     autres_themes = [t for t in set(data['Code'].str[0]) if t != theme]
     random.shuffle(autres_themes)
-    themes_choisis = []
     for t in autres_themes:
         autos = data[data['Code'].str.startswith(t)].sort_values('Num')
-        valides = []
-        for _, row in autos.iterrows():
-            code = row['Code']
-            if code in codes_selectionnes:
-                continue
-            if not peut_etre_place(code):
-                continue
-            if used_codes[code] >= 3:
-                continue
-            valides.append(code)
+        valides = [row['Code'] for _, row in autos.iterrows()
+                   if row['Code'] not in codes_selectionnes
+                   and peut_etre_place(row['Code'])
+                   and used_codes[row['Code']] < 3]
         if len(valides) >= 2:
-            themes_choisis.append((t, valides[:2]))
-        if len(themes_choisis) == 2:
+            # Choisir 2 et les placer dans les cases libres suivantes
+            ajoutés = 0
+            for code in valides[:2]:
+                for pos in range(6):
+                    if selection_finale[pos] is None:
+                        selection_finale[pos] = code
+                        codes_selectionnes.add(code)
+                        ajoutés += 1
+                        break
+                if ajoutés >= 2:
+                    break
+        if sum(x is not None for x in selection_finale) >= 6:
             break
-
-    # Étape 3 : les placer dans la grille
-    pos = 0
-    for codes in [auto_theme[:1], auto_theme[1:2]] + [t[1] for t in themes_choisis]:
-        for code in codes:
-            while selection_finale[pos] is not None:
-                pos += 1
-            if pos < 6:
-                selection_finale[pos] = code
-                codes_selectionnes.add(code)
 
     return selection_finale
