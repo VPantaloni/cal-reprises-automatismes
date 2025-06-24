@@ -21,45 +21,27 @@ def selectionner_automatismes(
     selection_finale = [None] * 6
     codes_selectionnes = set()
 
-    # 1. Automatisme du thème courant
-    auto1, auto2 = None, None
+    # 1. Sélection des deux automatismes du thème courant
+    auto_theme = []
     if theme:
         theme_autos = data[data['Code'].str.startswith(theme)].sort_values('Num')
+        for _, row in theme_autos.iterrows():
+            code = row['Code']
+            est_rappel = row['Rappel']
+            semaines_precedentes = auto_weeks.get(code, [])
+            if respecte_espacement(semaines_precedentes, semaine, est_rappel,
+                                   min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3):
+                auto_theme.append((code, used_codes[code]))
 
-        if not theme_autos.empty:
-            candidats_prioritaires = []
-            tous_candidats = []
-            for _, row in theme_autos.iterrows():
-                code = row['Code']
-                nb_vues = used_codes[code]
-                tous_candidats.append(row)
-                if row['Rappel']:
-                    if nb_vues < 2:
-                        candidats_prioritaires.append(row)
-                else:
-                    if nb_vues < 3:
-                        candidats_prioritaires.append(row)
+        auto_theme = sorted(auto_theme, key=lambda x: x[1])[:2]  # les 2 moins utilisés
+        if len(auto_theme) > 0:
+            selection_finale[0] = auto_theme[0][0]
+            codes_selectionnes.add(auto_theme[0][0])
+        if len(auto_theme) > 1:
+            selection_finale[3] = auto_theme[1][0]
+            codes_selectionnes.add(auto_theme[1][0])
 
-            if len(candidats_prioritaires) >= 2:
-                auto1 = candidats_prioritaires[0]['Code']
-                auto2 = candidats_prioritaires[1]['Code']
-            elif len(candidats_prioritaires) == 1:
-                auto1 = candidats_prioritaires[0]['Code']
-                auto2 = next((c['Code'] for c in tous_candidats if c['Code'] != auto1), auto1)
-            elif len(tous_candidats) >= 2:
-                auto1 = tous_candidats[0]['Code']
-                auto2 = tous_candidats[1]['Code']
-            elif len(tous_candidats) == 1:
-                auto1 = auto2 = tous_candidats[0]['Code']
-
-            if auto1:
-                selection_finale[0] = auto1
-                codes_selectionnes.add(auto1)
-            if auto2:
-                selection_finale[3] = auto2
-                codes_selectionnes.add(auto2)
-
-    # 2. Automatisme rappels
+    # 2. Compléter avec les autres candidats admissibles
     def peut_etre_place(code):
         row = data[data['Code'] == code].iloc[0]
         theme_code = row['Code'][0]
@@ -76,16 +58,14 @@ def selectionner_automatismes(
         if code in codes_selectionnes:
             continue
         if peut_etre_place(code):
-            candidats.append(row)
+            candidats.append((code, used_codes[code]))
 
-    candidats.sort(key=lambda r: used_codes[r['Code']])
+    candidats.sort(key=lambda x: x[1])
 
     for i in range(6):
         if selection_finale[i] is None and candidats:
-            choix = candidats.pop(0)['Code']
+            choix = candidats.pop(0)[0]
             selection_finale[i] = choix
             codes_selectionnes.add(choix)
 
-    # Nettoyage et retour
-    selection_finale = [code for code in selection_finale if code is not None]
     return selection_finale
