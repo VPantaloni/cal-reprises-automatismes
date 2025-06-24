@@ -39,6 +39,10 @@ if st.sidebar.button("🎲 Remplir aléatoirement les ❓"):
         prev = choice
     st.session_state.sequences = new_seq
     st.rerun()
+# Bouton de redistribution :
+if st.sidebar.button("🔄 Recalculer la répartition"):
+    selectionner_automatismes(data, semaine_idx, theme, auto_weeks, used_codes, next_index_by_theme)
+    st.rerun()
 # parametres en sliders
 st.sidebar.markdown("### Paramètres d'espacement")
 min_espacement_rappel = st.sidebar.slider("Espacement min pour rappels", 1, 6, 1)
