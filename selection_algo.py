@@ -40,67 +40,70 @@ def selectionner_automatismes(
                    if peut_etre_place(row['Code']) and used_codes[row['Code']] < 3 and row['Code'] not in codes_selectionnes]
         return valides
 
+    # Étape 1 : sélection des automatismes du thème courant
     auto1, auto2 = None, None
     if theme:
         theme_autos = choisir_2_auto_valide(theme)
         if len(theme_autos) >= 2:
             auto1, auto2 = theme_autos[:2]
         elif len(theme_autos) == 1:
-            auto1 = auto2 = theme_autos[0]
+            auto1 = auto2 = theme_autos[0]  # répéter si un seul
         if auto1:
             codes_selectionnes.add(auto1)
         if auto2:
             codes_selectionnes.add(auto2)
 
+    # Étape 2 : choix de 2 autres thèmes
     autres_themes = [t for t in set(data['Code'].str[0]) if t != theme]
     random.shuffle(autres_themes)
-    groupes = []
+    candidats_groupes = []
 
     for t in autres_themes:
         valides = choisir_2_auto_valide(t)
         if len(valides) >= 2:
-            groupes.append(valides[:2])
+            candidats_groupes.append((t, valides[:2]))
         elif len(valides) == 1:
-            groupes.append([valides[0]])
-        if sum(len(g) for g in groupes) >= 4:
+            candidats_groupes.append((t, [valides[0]]))
+        if sum(len(g[1]) for g in candidats_groupes) >= 4:
             break
 
-    if sum(len(g) for g in groupes) < 4:
-        for t in autres_themes:
-            valides = choisir_2_auto_valide(t)
-            for v in valides:
-                if v not in codes_selectionnes:
-                    groupes.append([v])
-                    if sum(len(g) for g in groupes) >= 4:
-                        break
-            if sum(len(g) for g in groupes) >= 4:
-                break
+    # Compléter avec autres automatismes peu vus si insuffisants
+    if sum(len(g[1]) for g in candidats_groupes) < 4:
+        reste = data[data['Code'].apply(lambda c: peut_etre_place(c) and used_codes[c] < 3 and c not in codes_selectionnes)]
+        for _, row in reste.iterrows():
+            t = row['Code'][0]
+            if t != theme:
+                candidats_groupes.append((t, [row['Code']]))
+                codes_selectionnes.add(row['Code'])
+                if sum(len(g[1]) for g in candidats_groupes) >= 4:
+                    break
 
+    # Étape 3 : placement strict A1, B1, C1, A2, B2, C2 avec A = thème semaine
     ordered = [None] * 6
     if auto1:
         ordered[0] = auto1
     if auto2:
-        if auto2 != auto1:
-            ordered[3] = auto2
-        else:
-            ordered[3] = auto1  # cas du thème avec un seul automatisme, répété 2 fois
+        ordered[3] = auto2
 
-    placement_index = [i for i in range(6) if ordered[i] is None]
-    p = 0
-    for g in groupes:
-        for code in g:
-            if p < len(placement_index):
-                ordered[placement_index[p]] = code
+    pos = [1, 2, 4, 5]
+    i = 0
+    for _, groupe in candidats_groupes:
+        for code in groupe:
+            while i < len(pos) and ordered[pos[i]] is not None:
+                i += 1
+            if i < len(pos):
+                ordered[pos[i]] = code
                 codes_selectionnes.add(code)
-                p += 1
+                i += 1
 
-    # Compléter les cases restantes avec des automatismes peu vus (< 3 fois)
-    candidats_restants = data[data['Code'].apply(lambda c: peut_etre_place(c) and used_codes[c] < 3 and c not in codes_selectionnes)]
-    for _, row in candidats_restants.iterrows():
-        for i in range(6):
-            if ordered[i] is None:
-                ordered[i] = row['Code']
-                codes_selectionnes.add(row['Code'])
-                break
+    # Dernier remplissage si trous
+    if None in ordered:
+        reste_final = data[data['Code'].apply(lambda c: peut_etre_place(c) and used_codes[c] < 3 and c not in codes_selectionnes)]
+        for _, row in reste_final.iterrows():
+            for i in range(6):
+                if ordered[i] is None:
+                    ordered[i] = row['Code']
+                    codes_selectionnes.add(row['Code'])
+                    break
 
     return ordered
