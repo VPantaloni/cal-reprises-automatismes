@@ -1,16 +1,25 @@
 from collections import defaultdict
+def respecte_espacement(semaines_precedentes, semaine_actuelle, est_rappel,
+                        min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3):
+    if not semaines_precedentes:
+        return True
+    ecart = semaine_actuelle - max(semaines_precedentes)
+    if est_rappel:
+        return ecart >= min_espacement_rappel
+    if len(semaines_precedentes) == 1:
+        return espacement_min2 <= ecart <= espacement_max2
+    elif len(semaines_precedentes) == 2:
+        return espacement_min3 <= ecart <= espacement_max3
+    return False
 
-def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next_index_by_theme):
-    """
-    Sélectionne les 6 automatismes pour la semaine donnée,
-    en s'assurant que les 2 automatismes du thème courant
-    sont en positions 0 et 3 dans la liste finale.
-    """
-
+def selectionner_automatismes(
+    data, semaine, theme, auto_weeks, used_codes, next_index_by_theme,
+    min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3
+):
     selection_finale = [None] * 6
     codes_selectionnes = set()
 
-    # --- 1. AUTOMATISMES DU THÈME COURANT (positions 1 et 4) ---
+    # 1. Automatisme du thème courant
     if theme:
         theme_autos = data[data['Code'].str.startswith(theme)].sort_values('Num')
 
@@ -28,7 +37,6 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
                     if nb_vues < 3:
                         candidats_prioritaires.append(row)
 
-            # Choisir 2 distincts
             if len(candidats_prioritaires) >= 2:
                 auto1 = candidats_prioritaires[0]['Code']
                 auto2 = candidats_prioritaires[1]['Code']
@@ -44,8 +52,7 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
             codes_selectionnes.add(auto1)
             codes_selectionnes.add(auto2)
 
-    # --- 2. AUTOMATISMES RAPPELS (positions restantes) ---
-    # Collecter candidats rappels (hors déjà sélectionnés)
+    # 2. Automatisme rappels
     candidats_rappel = []
     for _, row in data.iterrows():
         code = row['Code']
@@ -53,13 +60,12 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
             continue
         if row['Rappel']:
             semaines_precedentes = auto_weeks.get(code, [])
-            if respecte_espacement(semaines_precedentes, semaine, True):
+            if respecte_espacement(semaines_precedentes, semaine, True,
+                                   min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3):
                 candidats_rappel.append(row)
 
-    # Trier candidats rappels par priorité (peu vus)
     candidats_rappel.sort(key=lambda r: used_codes[r['Code']])
 
-    # Remplir positions restantes (indices 1,2,4,5 sauf 3 réservé)
     positions_libres = [i for i in range(6) if selection_finale[i] is None]
     for pos in positions_libres:
         if candidats_rappel:
@@ -67,13 +73,11 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
             selection_finale[pos] = choix
             codes_selectionnes.add(choix)
         else:
-            # Pas assez de rappels, on peut compléter avec d'autres non-rappels peu vus
             candidats_autres = []
             for _, row in data.iterrows():
                 code = row['Code']
-                if code not in codes_selectionnes:
-                    if not row['Rappel']:
-                        candidats_autres.append(row)
+                if code not in codes_selectionnes and not row['Rappel']:
+                    candidats_autres.append(row)
             candidats_autres.sort(key=lambda r: used_codes[r['Code']])
             if candidats_autres:
                 choix = candidats_autres.pop(0)['Code']
@@ -82,11 +86,8 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
             else:
                 selection_finale[pos] = None
 
-    # --- 3. CONTRÔLE final ---
     assert selection_finale[0] and selection_finale[3], "Positions 1 et 4 doivent contenir les automatismes du thème courant."
 
-    # Nettoyer None (si présents)
     selection_finale = [code for code in selection_finale if code is not None]
-
     # Retourner la liste finale d'automatismes (longueur <= 6)
     return selection_finale
