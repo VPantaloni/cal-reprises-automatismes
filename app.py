@@ -112,11 +112,24 @@ def selectionner_automatismes(data, semaine_idx, theme, auto_weeks, used_codes, 
             codes_selectionnes.add(theme_disponibles[0]['Code'])
             codes_selectionnes.add(theme_disponibles[1]['Code'])
         elif len(theme_disponibles) == 1:
-            # Cas limite : 1 seul disponible
+            # Cas limite : 1 seul disponible -> LE RÉPÉTER
             selection_finale[0] = theme_disponibles[0]['Code']  # Position 1
+            selection_finale[3] = theme_disponibles[0]['Code']  # Position 4 (même automatisme)
             codes_selectionnes.add(theme_disponibles[0]['Code'])
-            # Position 4 sera complétée plus tard si possible
-        # Si aucun automatisme du thème disponible, les positions restent None pour l'instant
+        else:
+            # Cas extrême : aucun automatisme du thème disponible
+            # Chercher parmi tous les automatismes du thème (même déjà utilisés plusieurs fois)
+            tous_theme_autos = data[
+                (data['Code'].str.startswith(theme)) & 
+                (~data['Rappel'])
+            ].sort_values('Num')
+            
+            if not tous_theme_autos.empty:
+                # Prendre le premier automatisme du thème, même s'il dépasse les limites d'usage
+                premier_theme = tous_theme_autos.iloc[0]['Code']
+                selection_finale[0] = premier_theme  # Position 1
+                selection_finale[3] = premier_theme  # Position 4 (répéter)
+                codes_selectionnes.add(premier_theme)
     
     # 2. COMPLÉTER LES POSITIONS RESTANTES (2, 3, 4 si vide, 5, 6)
     positions_a_completer = [i for i in range(6) if selection_finale[i] is None]
@@ -230,8 +243,7 @@ def selectionner_automatismes(data, semaine_idx, theme, auto_weeks, used_codes, 
         else:
             codes_finaux.append(data.iloc[0]['Code'])  # Cas extrême
     
-    return codes_finaux[:6]  # Exactement 6 automatismes
-# ===== POINT D'ENTRÉE =====
+    return codes_finaux[:6]  # Exactement 6 automatismes# ===== POINT D'ENTRÉE =====
 
 st.set_page_config(layout="wide")
 st.title("📅 Reprises d'automatismes mathématiques en 6e")
