@@ -99,35 +99,46 @@ def selectionner_automatismes(data, semaine_idx, theme, auto_weeks, used_codes, 
     codes_selectionnes = set()
     
     # 1. AUTOMATISMES DU THÈME COURANT (POSITIONS 1 ET 4)
-    # Ce sont des introductions (nouveaux automatismes)
     if theme:
-        # Récupérer automatismes du thème (non-rappels d'années antérieures)
-        theme_autos = data[
-            (data['Code'].str.startswith(theme)) & 
-            (~data['Rappel'])  # Exclure les rappels d'années antérieures (↩)
-        ].sort_values('Num')
+        # Récupérer tous les automatismes du thème (y compris rappels ↩)
+        theme_autos = data[data['Code'].str.startswith(theme)].sort_values('Num')
         
-        # Prendre le 1er et le 4e (ou 2e si moins de 4 disponibles)
-        if len(theme_autos) >= 4:
-            auto1 = theme_autos.iloc[0]['Code']  # 1er
-            auto4 = theme_autos.iloc[3]['Code']  # 4e
-        elif len(theme_autos) >= 2:
-            auto1 = theme_autos.iloc[0]['Code']  # 1er
-            auto4 = theme_autos.iloc[1]['Code']  # 2e à défaut
-        elif len(theme_autos) >= 1:
-            auto1 = theme_autos.iloc[0]['Code']  # 1er
-            auto4 = theme_autos.iloc[0]['Code']  # Répéter faute de mieux
+        # Séparer selon le besoin de vues minimales
+        candidats_theme = []
+        for _, row in theme_autos.iterrows():
+            code = row['Code']
+            nb_vues = used_codes[code]
+            
+            # Vérifier si l'automatisme a besoin d'être encore vu
+            if row['Rappel']:  # Rappel (↩) : minimum 2 vues
+                if nb_vues < 2:
+                    candidats_theme.append(row)
+            else:  # Non-rappel : minimum 3 vues
+                if nb_vues < 3:
+                    candidats_theme.append(row)
+        
+        # Si pas assez de candidats prioritaires, prendre tous les automatismes du thème
+        if len(candidats_theme) < 2:
+            candidats_theme = list(theme_autos.itertuples(index=False))
+        
+        # Prendre les 2 premiers par ordre Num
+        if len(candidats_theme) >= 2:
+            auto1 = candidats_theme[0]['Code']
+            auto2 = candidats_theme[1]['Code']
+        elif len(candidats_theme) == 1:
+            auto1 = candidats_theme[0]['Code']
+            auto2 = candidats_theme[0]['Code']  # Répéter
         else:
-            auto1 = auto4 = None
+            # Cas extrême : prendre les 2 premiers du thème même sans priorité
+            auto1 = theme_autos.iloc[0]['Code'] if not theme_autos.empty else None
+            auto2 = theme_autos.iloc[1]['Code'] if len(theme_autos) > 1 else auto1
         
         if auto1:
             selection_finale[0] = auto1  # Position 1
             codes_selectionnes.add(auto1)
-        if auto4 and auto4 != auto1:
-            selection_finale[3] = auto4  # Position 4
-            codes_selectionnes.add(auto4)
-        elif auto4 == auto1:
-            selection_finale[3] = auto4  # Position 4 (même code)
+        if auto2:
+            selection_finale[3] = auto2  # Position 4
+            codes_selectionnes.add(auto2)
     
     # 2. AUTOMATISMES EN RAPPEL (POSITIONS 2, 3, 5, 6)
     # Récupérer les thèmes déjà abordés les semaines précédentes
@@ -139,39 +150,29 @@ def selectionner_automatismes(data, semaine_idx, theme, auto_weeks, used_codes, 
     # Pool de candidats pour les rappels
     candidats_rappel = []
     
-    # Candidats 1 : Automatismes des thèmes déjà abordés
+    # Parcourir tous les automatismes pour trouver ceux qui ont besoin d'être revus
     for _, row in data.iterrows():
         code = row['Code']
+        nb_vues = used_codes[code]
         
         # Éviter les doublons avec les automatismes du thème courant
         if code in codes_selectionnes:
             continue
-            
-        # Vérifier si c'est un automatisme d'un thème déjà abordé
-        theme_de_lauto = code[0]  # Premier caractère = emoji du thème
-        if theme_de_lauto in themes_deja_abordes:
-            # Vérifier qu'il a déjà été vu (used_codes > 0)
-            if used_codes[code] > 0:
+        
+        # Vérifier si l'automatisme a besoin d'être encore vu
+        besoin_revu = False
+        if row['Rappel']:  # Rappel (↩) : minimum 2 vues
+            besoin_revu = (nb_vues > 0 and nb_vues < 2)
+        else:  # Non-rappel : minimum 3 vues
+            besoin_revu = (nb_vues > 0 and nb_vues < 3)
+        
+        if besoin_revu:
+            # Vérifier si c'est d'un thème déjà abordé OU un rappel ancien
+            theme_de_lauto = code[0]
+            if (theme_de_lauto in themes_deja_abordes) or row['Rappel']:
                 # Vérifier contraintes d'espacement
                 if respecte_espacement(auto_weeks[code], semaine_idx, row['Rappel']):
-                    # Vérifier limite de 3 occurrences
-                    if used_codes[code] < 3:
-                        candidats_rappel.append(row)
-    
-    # Candidats 2 : Rappels d'années antérieures (marqués ↩)
-    rappels_anciens = data[data['Rappel'] == True]
-    for _, row in rappels_anciens.iterrows():
-        code = row['Code']
-        
-        # Éviter les doublons
-        if code in codes_selectionnes:
-            continue
-            
-        # Vérifier contraintes d'espacement
-        if respecte_espacement(auto_weeks[code], semaine_idx, True):
-            # Vérifier limite de 3 occurrences
-            if used_codes[code] < 3:
-                candidats_rappel.append(row)
+                    candidats_rappel.append(row)
     
     # Trier les candidats par priorité
     # Priorité 1 : Moins d'occurrences
