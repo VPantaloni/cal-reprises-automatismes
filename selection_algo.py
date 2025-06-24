@@ -115,7 +115,7 @@ def selectionner_automatismes_theme_56(data, semaine, theme, auto_weeks, used_co
 def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next_index_by_theme,
                                min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
                                themes_passes):
-
+    # Étape 1 : sélection initiale comme avant
     base = selectionner_automatismes_theme(
         data, semaine, theme, auto_weeks, used_codes,
         min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
@@ -137,12 +137,38 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
     )
     codes_selectionnes.update([c for c in compl2 if c])
 
-    # Fusion finale
+    # Fusion initiale
     selection_finale = [None] * 6
     for i in range(6):
         for src in [base, compl1, compl2]:
             if src[i]:
                 selection_finale[i] = src[i]
                 break
+
+    # --- Étape 2 : Compléter les cases vides ---
+    # Recherche de candidats non utilisés ou vus moins de 3 fois
+    def peut_etre_place(code):
+        row = data[data['Code'] == code].iloc[0]
+        theme_code = row['Code'][0]
+        est_rappel = row['Rappel']
+        semaines_precedentes = auto_weeks.get(code, [])
+        if not est_rappel and theme_code not in themes_passes:
+            return False
+        return respecte_espacement(
+            semaines_precedentes, semaine, est_rappel,
+            min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3
+        )
+
+    # On remplit les cases vides avec des autos vus moins de 3 fois, qui ne sont pas déjà dans selection_finale
+    for i in range(6):
+        if selection_finale[i] is None:
+            # Chercher candidat
+            candidats = [c for c in data['Code']
+                        if peut_etre_place(c)
+                        and used_codes[c] < 3
+                        and c not in selection_finale]
+            if candidats:
+                selection_finale[i] = candidats[0]  # On prend le premier candidat dispo
+                codes_selectionnes.add(candidats[0])
 
     return selection_finale
