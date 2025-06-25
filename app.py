@@ -68,13 +68,20 @@ def afficher_pastilles_compacte(selection_df):
 st.set_page_config(layout="wide")
 st.title("📅 Reprises d'automatismes mathématiques en 6e")
 ## LEGENDES
-with st.expander("\U0001F4D8 Légende des thèmes"):
+with st.expander("\U0001F4D8 Légende des thèmes ⤵  Ouvrir le menu latéral pour plus d'actions !"):
     cols = st.columns(5)
     for idx, (emoji, label) in enumerate(subtheme_legend.items()):
         with cols[idx % 5]:
             st.markdown(f"""<div style='background:{subtheme_colors[emoji]}; padding:4px; border-radius:6px; color:white; font-size:0.85em;'>
                 <b>{emoji}</b> {label}</div>""", unsafe_allow_html=True)
 #--- fin légendes
+#Fonction de mélange sans répétition consecutive
+def melanger_sans_consecutifs(liste):
+    for _ in range(1000):  # on essaie jusqu’à trouver une permutation valide
+        melange = random.sample(liste, len(liste))
+        if all(melange[i] != melange[i+1] for i in range(len(melange)-1)):
+            return melange
+    return liste  # fallback si on n'y arrive pas
 
 
 # =====  SIDEBAR =====
@@ -89,10 +96,15 @@ progression_1 = [
 if st.sidebar.button("📘 Progression n°1"):
     st.session_state.sequences = progression_1.copy()
     st.rerun()
+# Prog. Aléa :
+if st.sidebar.button("🔀 Progression aléatoire"):
+    progression_random = melanger_sans_consecutifs(progression_1)
+    st.session_state.sequences = progression_random
+    st.rerun()
 # -- Recalcul
 top_button_placeholder = st.sidebar.empty()
 # -- bouton remplissage aléatoire
-if st.sidebar.button("🎲 Remplir aléatoirement les ❓"):
+if st.sidebar.button("🎲 Compléter "❓"):
     new_seq = st.session_state.sequences.copy()
     prev = new_seq[7]  # On part de la semaine 8
     for i in range(8,32):
