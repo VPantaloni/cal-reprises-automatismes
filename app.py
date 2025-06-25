@@ -102,7 +102,7 @@ progression_2 = [
     "∝", "🎲", "📐", "🔢", "🧊", "⌚", "➗", "🔢",
     "📏", "📐", "➗", "🔷", "🧊", "📊", "📐", "🔷"
 ]
-if st.sidebar.button("🧭 Progression n°2"):
+if st.sidebar.button("📙 Progression n°2"):
     st.session_state.sequences = progression_2
     st.rerun()
 # Prog. Aléa :
