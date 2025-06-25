@@ -68,7 +68,7 @@ def afficher_pastilles_compacte(selection_df):
 st.set_page_config(layout="wide")
 st.title("📅 Reprises d'automatismes mathématiques en 6e")
 ## LEGENDES
-with st.expander("📘 Légende des thèmes ⤵" + " " + "\u00A0"* 5 + ">> Ouvrir le menu latéral pour plus d'actions !"):
+with st.expander("📘 Légende des thèmes ⤵" + " " + " " + " " + "\u00A0"* 5 + ">> Ouvrir le menu latéral pour plus d'actions !"):
     cols = st.columns(5)
     for idx, (emoji, label) in enumerate(subtheme_legend.items()):
         with cols[idx % 5]:
