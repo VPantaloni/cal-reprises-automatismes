@@ -164,7 +164,7 @@ if st.sidebar.button("🎲 Compléter les ❓"):
     st.session_state.sequences = new_seq
     st.rerun()
     ########## TUTO ######
-st.sidebar.markdown(
+if st.sidebar.markdown(
     "<a href='https://codimd.apps.education.fr/s/xd2gxRA1m' target='_blank' style='text-decoration: none;'>"
     "📚 Tuto. </a>",
     unsafe_allow_html=True
