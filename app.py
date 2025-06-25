@@ -104,7 +104,7 @@ if st.sidebar.button("🔀 Progression aléatoire"):
 # -- Recalcul
 top_button_placeholder = st.sidebar.empty()
 # -- bouton remplissage aléatoire
-if st.sidebar.button("🎲 Compléter "❓"):
+if st.sidebar.button("🎲 Compléter les ❓"):
     new_seq = st.session_state.sequences.copy()
     prev = new_seq[7]  # On part de la semaine 8
     for i in range(8,32):
