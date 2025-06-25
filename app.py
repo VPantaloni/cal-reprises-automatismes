@@ -68,7 +68,7 @@ def afficher_pastilles_compacte(selection_df):
 st.set_page_config(layout="wide")
 st.title("📅 Reprises d'automatismes mathématiques en 6e")
 ## LEGENDES
-with st.expander("\U0001F4D8 Légende des thèmes ⤵  Ouvrir le menu latéral pour plus d'actions !"):
+with st.expander("\U0001F4D8 Légende des thèmes ⤵    |   >> Ouvrir le menu latéral pour plus d'actions !"):
     cols = st.columns(5)
     for idx, (emoji, label) in enumerate(subtheme_legend.items()):
         with cols[idx % 5]:
@@ -106,7 +106,7 @@ if st.sidebar.button("📙 Progression n°2"):
     st.session_state.sequences = progression_2
     st.rerun()
 # Prog. Aléa :
-if st.sidebar.button("🔀 Progression aléatoire"):
+if st.sidebar.button("🔀 Progression aléa."):
     progression_random = melanger_sans_consecutifs(progression_1)
     st.session_state.sequences = progression_random
     st.rerun()
