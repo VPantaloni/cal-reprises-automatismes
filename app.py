@@ -78,8 +78,7 @@ with st.expander("\U0001F4D8 Légende des thèmes"):
 
 
 # =====  SIDEBAR =====
-top_button_placeholder = st.sidebar.empty()
-#st.sidebar.markdown("### Actions")
+st.sidebar.markdown("### Actions")
 # Progressons pré-définies :
 progression_1 = [
     "🔢", "📐", "📊", "➗", "📐", "🔢", "📏", "🔷",
@@ -90,6 +89,8 @@ progression_1 = [
 if st.sidebar.button("📘 Progression n°1"):
     st.session_state.sequences = progression_1.copy()
     st.rerun()
+# -- Recalcul
+top_button_placeholder = st.sidebar.empty()
 # -- bouton remplissage aléatoire
 if st.sidebar.button("🎲 Remplir aléatoirement les ❓"):
     new_seq = st.session_state.sequences.copy()
