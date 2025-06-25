@@ -108,6 +108,18 @@ if st.session_state.dark_mode:
         .css-1v0mbdj:hover, .css-1d391kg:hover {
             background-color: #2c2e36 !important;
         }
+        /* Pour le texte des éléments dans les selectbox */
+        .stSelectbox div[role="combobox"] {
+        background-color: #2c2e36 !important;
+        color: #FAFAFA !important;
+    }
+        .stSelectbox div[role="listbox"] {
+        background-color: #2c2e36 !important;
+        color: #FAFAFA !important;
+    }
+        .stSelectbox label {
+        color: #FAFAFA !important;
+    }
         </style>
         """,
         unsafe_allow_html=True
