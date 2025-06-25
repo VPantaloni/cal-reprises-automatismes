@@ -3,6 +3,21 @@
 ## Outil de planification des automatismes mathématiques en 6e
 
 Cet outil permet aux enseignants de cycle 3 de construire une **grille annuelle de réactivation des automatismes** en lien avec la courbe d’Ebbinghaus, à partir d’un fichier CSV listant les automatismes.
+
+## Fichiers utiles
+fabrication d'une appli StreamLit qui appelle `app.py`
+https://cal-reprises-automatismes-6e.streamlit.app/
+* app.py 
+Mise en forme générale
+* selection_algo.py
+algo de répartition des automatismes
+* volet2.py
+Mise en forme de la 2e page avec liste des textes des automatismes
+* Auto-6e.csv
+Fichier source appelé avec la liste des automatismes et codes (Deux colonnes)
+
+#### Les autres fichiers sont des versions antérieures en backup.
+
 ### 🎨 Légende des thèmes par couleur et icones pour une vue compacte.
 
 <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.9em">
