@@ -96,6 +96,15 @@ progression_1 = [
 if st.sidebar.button("📘 Progression n°1"):
     st.session_state.sequences = progression_1.copy()
     st.rerun()
+progression_2 = [
+    "🔢", "📐", "🔢", "📐", "∝", "🎲", "📐", "🔢",
+    "⌚", "📐", "➗", "🔢", "📊", "📏", "📐", "➗",
+    "∝", "🎲", "📐", "🔢", "🧊", "⌚", "➗", "🔢",
+    "📏", "📐", "➗", "🔷", "🧊", "📊", "📐", "🔷"
+]
+if st.sidebar.button("🧭 Progression n°2"):
+    st.session_state.sequences = progression_2
+    st.rerun()
 # Prog. Aléa :
 if st.sidebar.button("🔀 Progression aléatoire"):
     progression_random = melanger_sans_consecutifs(progression_1)
@@ -190,7 +199,7 @@ for i in range(32):
         if st.session_state.get(f"show_picker_{i}", False):
             picker_rows = [st.columns(3) for _ in range(4)]
             layout = [
-                ["🔢", "➗", ""],
+                ["❓", "🔢", "➗"],
                 ["📏", "🔷", "⌚"],
                 ["📐", "🧊", ""],
                 ["📊", "🎲", "∝"]
