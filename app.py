@@ -163,7 +163,13 @@ if st.sidebar.button("🎲 Compléter les ❓"):
         prev = choice
     st.session_state.sequences = new_seq
     st.rerun()
-    ##########
+    ########## TUTO ######
+st.sidebar.markdown(
+    "<a href='https://codimd.apps.education.fr/s/xd2gxRA1m' target='_blank' style='text-decoration: none;'>"
+    "📚 Tuto. </a>",
+    unsafe_allow_html=True
+)
+#######################""
 st.sidebar.markdown("### Paramètres d'espacement")
 min_espacement_rappel = st.sidebar.slider("Espacement min pour rappels", 1, 6, 1)
 espacement_min2 = st.sidebar.slider("1ère → 2e apparition (min)", 1, 6, 2)
