@@ -85,6 +85,34 @@ def melanger_sans_consecutifs(liste):
 
 
 # =====  SIDEBAR =====
+# === MODE NUIT ===
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = False
+
+if st.sidebar.button("🌙 Mode nuit" if not st.session_state.dark_mode else "☀️ Mode clair"):
+    st.session_state.dark_mode = not st.session_state.dark_mode
+    st.rerun()
+
+if st.session_state.dark_mode:
+    st.markdown(
+        """
+        <style>
+        body, .stApp {
+            background-color: #0e1117 !important;
+            color: #FAFAFA !important;
+        }
+        .css-1v0mbdj, .css-1d391kg, .st-bc {
+            background-color: #1c1e26 !important;
+            color: #FAFAFA !important;
+        }
+        .css-1v0mbdj:hover, .css-1d391kg:hover {
+            background-color: #2c2e36 !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+ #---------------------------   
 st.sidebar.markdown("### Actions")
 # Progressons pré-définies :
 progression_1 = [
