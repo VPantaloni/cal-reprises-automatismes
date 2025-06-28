@@ -9,26 +9,24 @@ def get_espacement_fibonacci(occurrence):
         return fibonacci[occurrence - 1]
     return fibonacci[-1]  # Dernier espacement si on dépasse
 
-def respecte_espacement(semaines_precedentes, semaine_actuelle, est_rappel,
-                        min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3):
+def respecte_espacement(semaines_precedentes, semaine_actuelle, est_rappel, min_espacement_rappel):
     if not semaines_precedentes:
         return True
     
-    # Pour les rappels, utiliser l'ancien système
+    ecart = semaine_actuelle - max(semaines_precedentes)
+    
+    # Pour les rappels, utiliser l'espacement minimum fixe
     if est_rappel:
-        ecart = semaine_actuelle - max(semaines_precedentes)
         return ecart >= min_espacement_rappel
     
     # Pour les automatismes normaux, utiliser Fibonacci
     occurrence = len(semaines_precedentes) + 1  # Prochaine occurrence
     espacement_requis = get_espacement_fibonacci(occurrence)
-    ecart = semaine_actuelle - max(semaines_precedentes)
     
     return ecart >= espacement_requis
 
 def peut_etre_place(code, data, semaine, auto_weeks, used_codes, themes_passes, 
-                   min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
-                   nb_automatismes):
+                   min_espacement_rappel, nb_automatismes):
     """Fonction utilitaire pour vérifier si un automatisme peut être placé"""
     row = data[data['Code'] == code].iloc[0]
     theme_code = row['Code'][0]
@@ -48,25 +46,17 @@ def peut_etre_place(code, data, semaine, auto_weeks, used_codes, themes_passes,
         return False
     
     # Vérifier l'espacement
-    return respecte_espacement(
-        semaines_precedentes, semaine, est_rappel,
-        min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3
-    )
+    return respecte_espacement(semaines_precedentes, semaine, est_rappel, min_espacement_rappel)
 
 def selectionner_automatismes_theme(
-    data, semaine, theme, auto_weeks, used_codes,
-    min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
-    themes_passes, nb_automatismes=6
+    data, semaine, theme, auto_weeks, used_codes, min_espacement_rappel, themes_passes, nb_automatismes=6
 ):
     selection_finale = [None] * nb_automatismes
-
-    themes_avec_rappel = set(data[data['Rappel'] == True]['Code'].str[0].unique())
 
     theme_autos = [
         c for c in data[data['Code'].str.startswith(theme)]['Code']
         if peut_etre_place(c, data, semaine, auto_weeks, used_codes, themes_passes,
-                          min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
-                          nb_automatismes)
+                          min_espacement_rappel, nb_automatismes)
     ]
 
     # Placement selon le nombre d'automatismes
@@ -99,8 +89,7 @@ def selectionner_automatismes_theme(
 
 def selectionner_automatismes_autres_themes(
     data, semaine, theme, auto_weeks, used_codes, codes_selectionnes,
-    min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
-    themes_passes, positions, nb_automatismes=6
+    min_espacement_rappel, themes_passes, positions, nb_automatismes=6
 ):
     """Version modifiée : sélectionne individuellement chaque automatisme parmi tous les candidats valides"""
     selection = [None] * nb_automatismes
@@ -110,8 +99,7 @@ def selectionner_automatismes_autres_themes(
     for code in data['Code']:
         if (code not in codes_selectionnes and 
             peut_etre_place(code, data, semaine, auto_weeks, used_codes, themes_passes,
-                           min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
-                           nb_automatismes)):
+                           min_espacement_rappel, nb_automatismes)):
             
             row = data[data['Code'] == code].iloc[0]
             theme_code = row['Code'][0]
@@ -139,11 +127,12 @@ def selectionner_automatismes(
     min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
     themes_passes, nb_automatismes=6
 ):
+    # Note: espacement_min2, max2, min3, max3 ne sont plus utilisés avec Fibonacci
+    # mais gardés pour compatibilité avec l'interface
+    
     # Sélection des automatismes du thème principal
     base = selectionner_automatismes_theme(
-        data, semaine, theme, auto_weeks, used_codes,
-        min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
-        themes_passes, nb_automatismes
+        data, semaine, theme, auto_weeks, used_codes, min_espacement_rappel, themes_passes, nb_automatismes
     )
     codes_selectionnes = set([c for c in base if c])
 
@@ -158,8 +147,7 @@ def selectionner_automatismes(
     # Compléter avec d'autres automatismes (rappels ou thèmes déjà vus)
     complement = selectionner_automatismes_autres_themes(
         data, semaine, theme, auto_weeks, used_codes, codes_selectionnes,
-        min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
-        themes_passes, positions_autres, nb_automatismes
+        min_espacement_rappel, themes_passes, positions_autres, nb_automatismes
     )
 
     # Fusion finale
@@ -177,8 +165,7 @@ def selectionner_automatismes(
                 c for c in data['Code']
                 if c not in selection_finale and
                 peut_etre_place(c, data, semaine, auto_weeks, used_codes, themes_passes,
-                              min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
-                              nb_automatismes)
+                              min_espacement_rappel, nb_automatismes)
             ]
             if candidats:
                 choix = random.choice(candidats)
