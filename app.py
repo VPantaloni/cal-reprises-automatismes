@@ -35,7 +35,7 @@ if 'used_codes' not in st.session_state:
 if 'next_index_by_theme' not in st.session_state:
     st.session_state.next_index_by_theme = defaultdict(lambda: 1)
 if 'mode_affichage' not in st.session_state:
-    st.session_state.mode_affichage = "32_semaines"  # ou "35_semaines"
+    st.session_state.mode_affichage = "35_semaines"  # ou "32_semaines"
 
 # ===== FONCTIONS UTILITAIRES =====
 
@@ -255,8 +255,7 @@ data = charger_donnees()
 # Initialisation session state
 nb_semaines = get_nb_semaines()
 nb_automatismes = get_nb_automatismes()
-nb_semaines = 35
-nb_automatismes = 9
+
 if 'sequences' not in st.session_state:
     st.session_state.sequences = initialiser_sequences()
 if 'selection_by_week' not in st.session_state:
