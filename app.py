@@ -72,10 +72,10 @@ def melanger_sans_consecutifs(liste):
     return liste
 
 def get_nb_semaines():
-    return 32 if st.session_state.mode_affichage == "32_semaines" else 35
+    return 35 if st.session_state.mode_affichage == "35_semaines" else 32
 
 def get_nb_automatismes():
-    return 6 if st.session_state.mode_affichage == "32_semaines" else 9
+    return 9 if st.session_state.mode_affichage == "35_semaines" else 6
 
 def initialiser_sequences():
     nb_semaines = get_nb_semaines()
