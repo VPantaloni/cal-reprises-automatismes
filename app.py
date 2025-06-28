@@ -78,14 +78,14 @@ def get_nb_automatismes():
     return 9 if st.session_state.mode_affichage == "35_semaines" else 6
 
 def initialiser_sequences():
-    nb_semaines = get_nb_semaines()
+    nb_semaines = 35
     if st.session_state.mode_affichage == "32_semaines":
         return ["🔢", "📐", "📊", "➗", "📐", "🔢", "📏", "🔷"] + [""] * (nb_semaines - 8)
     else:  # 35 semaines
         return ["🔢", "📐", "📊", "➗", "📐", "🔢", "📏", "🔷", "⌚", "🧊"] + [""] * (nb_semaines - 10)
 
 def initialiser_selection_by_week():
-    nb_semaines = get_nb_semaines()
+    nb_semaines = 35
     return [[] for _ in range(nb_semaines)]
 
 # Configuration de la page
