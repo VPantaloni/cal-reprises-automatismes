@@ -92,10 +92,9 @@ def initialiser_selection_by_week():
 st.set_page_config(layout="wide")
 st.title("📅 Reprises d'automatismes mathématiques en 6e")
 
-# ===== CHOIX DU MODE D'AFFICHAGE =====
 # Affichage du mode actuel
-mode_text = "32 semaines (4×8) - 6 automatismes par semaine" if st.session_state.mode_affichage == "32_semaines" else "35 semaines (5×7) - 9 automatismes par semaine"
-st.info(f"Mode actuel : {mode_text}")
+#mode_text = "32 semaines (4×8) - 6 automatismes par semaine" if st.session_state.mode_affichage == "32_semaines" else "35 semaines (5×7) - 9 automatismes par semaine"
+#st.info(f"Mode actuel : {mode_text}")
 
 ## LEGENDES
 with st.expander("📘 Légende des thèmes ⤵" + " " + " " + " " + "\u00A0"* 15 + ">> Ouvrir le menu latéral pour plus d'actions !"):
@@ -236,10 +235,10 @@ st.sidebar.markdown(
 
 st.sidebar.markdown("### Paramètres d'espacement")
 min_espacement_rappel = st.sidebar.slider("Espacement min pour rappels", 1, 6, 1)
-espacement_min2 = st.sidebar.slider("1ère → 2e apparition (min)", 1, 6, 2)
-espacement_max2 = st.sidebar.slider("1ère → 2e apparition (max)", 2, 10, 6)
-espacement_min3 = st.sidebar.slider("2e → 3e apparition (min)", 2, 10, 4)
-espacement_max3 = st.sidebar.slider("2e → 3e apparition (max)", 2, 15, 10)
+#espacement_min2 = st.sidebar.slider("1ère → 2e apparition (min)", 1, 6, 2)
+#espacement_max2 = st.sidebar.slider("1ère → 2e apparition (max)", 2, 10, 6)
+#espacement_min3 = st.sidebar.slider("2e → 3e apparition (min)", 2, 10, 4)
+#espacement_max3 = st.sidebar.slider("2e → 3e apparition (max)", 2, 15, 10)
 
 # Chargement des données
 data = charger_donnees()
