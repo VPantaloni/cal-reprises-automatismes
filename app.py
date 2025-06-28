@@ -155,17 +155,18 @@ if st.sidebar.button("📆 35 sem. (3×3)",
             if f"show_picker_{i}" in st.session_state:
                 st.session_state[f"show_picker_{i}"] = False
         st.rerun()
+        
 if st.sidebar.button("🗓 32 sem. (2×3)", 
-         type="primary" if st.session_state.mode_affichage == "32_semaines" else "secondary"):
-if st.session_state.mode_affichage != "32_semaines":
-    st.session_state.mode_affichage = "32_semaines"
-    st.session_state.sequences = initialiser_sequences()
-    st.session_state.selection_by_week = initialiser_selection_by_week()
-    # Réinitialiser les états des pickers
-    for i in range(50):  # Sécurité pour tous les pickers possibles
-        if f"show_picker_{i}" in st.session_state:
-            st.session_state[f"show_picker_{i}"] = False
-    st.rerun()
+             type="primary" if st.session_state.mode_affichage == "32_semaines" else "secondary"):
+    if st.session_state.mode_affichage != "32_semaines":
+        st.session_state.mode_affichage = "32_semaines"
+        st.session_state.sequences = initialiser_sequences()
+        st.session_state.selection_by_week = initialiser_selection_by_week()
+        # Réinitialiser les états des pickers
+        for i in range(50):  # Sécurité pour tous les pickers possibles
+            if f"show_picker_{i}" in st.session_state:
+                st.session_state[f"show_picker_{i}"] = False
+        st.rerun()
 
 
 st.sidebar.markdown("### Actions")
