@@ -311,7 +311,7 @@ def recalculer_toute_la_repartition():
                 st.session_state.used_codes[code] += 1
 
 # Bouton recalcul
-if top_button_placeholder.button("🔄 Recalculer la répartition"):
+if top_button_placeholder.button("🔄 (Re)calculer la distribution des automatismes"):
     recalculer_toute_la_repartition()
     st.rerun()
 
