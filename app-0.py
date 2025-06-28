@@ -196,7 +196,7 @@ for i in range(32):
         st.session_state[f"show_picker_{i}"] = False
 
 # Bouton de redistribution :
-from selection_algo import selectionner_automatismes
+from selection_algo-0 import selectionner_automatismes
 
 def recalculer_toute_la_repartition():
     st.session_state.selection_by_week = [[] for _ in range(32)]
@@ -266,7 +266,7 @@ for i in range(32):
             afficher_pastilles_compacte(data[data['Code'].isin(codes)])
             st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
 ## Volet 2 :
-import volet2
+import volet2-0
 
 # plus bas dans ton script principal, après calcul et affichage des semaines
-volet2.afficher_lecture_et_export(data, subtheme_legend)
+volet2-0.afficher_lecture_et_export(data, subtheme_legend)
