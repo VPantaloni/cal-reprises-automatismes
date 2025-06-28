@@ -73,36 +73,20 @@ def selectionner_automatismes_theme(
     # Placement selon le nombre d'automatismes
     if nb_automatismes == 6:
         # Mode 2x3 : positions 0 et 3 - TOUJOURS remplir
-        if len(theme_autos) >= 2:
-            selection_finale[0] = theme_autos[0]
-            selection_finale[3] = theme_autos[1]
-        elif len(theme_autos) == 1:
-            # Répéter le même automatisme
-            selection_finale[0] = theme_autos[0]
-            selection_finale[3] = theme_autos[0]
-        else:
-            # Cas extrême : pas d'automatisme du tout pour ce thème
-            # (ne devrait pas arriver si les données sont correctes)
-            pass
+        positions_theme = [0, 3]
+        nb_positions = 2
     else:
         # Mode 3x3 : positions 0, 3, 6 - TOUJOURS remplir
-        if len(theme_autos) >= 3:
-            selection_finale[0] = theme_autos[0]
-            selection_finale[3] = theme_autos[1]
-            selection_finale[6] = theme_autos[2]
-        elif len(theme_autos) == 2:
-            selection_finale[0] = theme_autos[0]
-            selection_finale[3] = theme_autos[1]
-            # Répéter le premier pour la 3ème position
-            selection_finale[6] = theme_autos[0]
-        elif len(theme_autos) == 1:
-            # Répéter le même automatisme 3 fois
-            selection_finale[0] = theme_autos[0]
-            selection_finale[3] = theme_autos[0]
-            selection_finale[6] = theme_autos[0]
+        positions_theme = [0, 3, 6]
+        nb_positions = 3
+    
+    # Remplir les positions en répétant cycliquement les automatismes disponibles
+    if theme_autos:
+        for i, pos in enumerate(positions_theme):
+            # Utiliser l'opérateur modulo pour répéter cycliquement
+            selection_finale[pos] = theme_autos[i % len(theme_autos)]
 
     return selection_finale
-
 def selectionner_automatismes_autres_themes(
     data, semaine, theme, auto_weeks, used_codes, codes_selectionnes,
     min_espacement_rappel, themes_passes, positions, nb_automatismes=6
