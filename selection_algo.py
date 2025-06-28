@@ -53,28 +53,39 @@ def selectionner_automatismes_theme(
 ):
     selection_finale = [None] * nb_automatismes
 
-    theme_autos = [
+    # D'abord, essayer avec les automatismes qui respectent l'espacement
+    theme_autos_optimaux = [
         c for c in data[data['Code'].str.startswith(theme)]['Code']
         if peut_etre_place(c, data, semaine, auto_weeks, used_codes, themes_passes,
                           min_espacement_rappel, nb_automatismes)
     ]
+    
+    # Si pas assez d'automatismes optimaux, prendre tous ceux du thème (sans contrainte d'espacement)
+    if len(theme_autos_optimaux) < (2 if nb_automatismes == 6 else 3):
+        tous_theme_autos = data[data['Code'].str.startswith(theme)]['Code'].tolist()
+        theme_autos = theme_autos_optimaux + [
+            c for c in tous_theme_autos 
+            if c not in theme_autos_optimaux
+        ]
+    else:
+        theme_autos = theme_autos_optimaux
 
     # Placement selon le nombre d'automatismes
     if nb_automatismes == 6:
-        # Mode 2x3 : positions 0 et 3
+        # Mode 2x3 : positions 0 et 3 - TOUJOURS remplir
         if len(theme_autos) >= 2:
-            auto1, auto2 = theme_autos[:2]
+            selection_finale[0] = theme_autos[0]
+            selection_finale[3] = theme_autos[1]
         elif len(theme_autos) == 1:
-            auto1 = auto2 = theme_autos[0]
+            # Répéter le même automatisme
+            selection_finale[0] = theme_autos[0]
+            selection_finale[3] = theme_autos[0]
         else:
-            auto1 = auto2 = None
-
-        if auto1:
-            selection_finale[0] = auto1
-        if auto2:
-            selection_finale[3] = auto2
+            # Cas extrême : pas d'automatisme du tout pour ce thème
+            # (ne devrait pas arriver si les données sont correctes)
+            pass
     else:
-        # Mode 3x3 : positions 0, 3, 6
+        # Mode 3x3 : positions 0, 3, 6 - TOUJOURS remplir
         if len(theme_autos) >= 3:
             selection_finale[0] = theme_autos[0]
             selection_finale[3] = theme_autos[1]
@@ -82,8 +93,13 @@ def selectionner_automatismes_theme(
         elif len(theme_autos) == 2:
             selection_finale[0] = theme_autos[0]
             selection_finale[3] = theme_autos[1]
+            # Répéter le premier pour la 3ème position
+            selection_finale[6] = theme_autos[0]
         elif len(theme_autos) == 1:
+            # Répéter le même automatisme 3 fois
             selection_finale[0] = theme_autos[0]
+            selection_finale[3] = theme_autos[0]
+            selection_finale[6] = theme_autos[0]
 
     return selection_finale
 
