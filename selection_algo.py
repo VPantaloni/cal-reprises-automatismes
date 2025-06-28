@@ -158,17 +158,40 @@ def selectionner_automatismes(
         elif complement[i]:
             selection_finale[i] = complement[i]
 
-    # Compléter les cases vides si besoin avec n'importe quel automatisme disponible
+    # Compléter les cases vides - PRIORITÉ : grille complète
     for i in range(nb_automatismes):
         if selection_finale[i] is None:
-            candidats = [
+            # 1. D'abord, chercher des automatismes sous-utilisés (non-rappels)
+            target_usage = 4 if nb_automatismes == 6 else 6
+            candidats_sous_utilises = [
                 c for c in data['Code']
-                if c not in selection_finale and
-                peut_etre_place(c, data, semaine, auto_weeks, used_codes, themes_passes,
-                              min_espacement_rappel, nb_automatismes)
+                if (c not in selection_finale and 
+                    not data[data['Code'] == c]['Rappel'].iloc[0] and  # Pas un rappel
+                    used_codes[c] < target_usage and  # Sous-utilisé
+                    respecte_espacement(auto_weeks.get(c, []), semaine, False, min_espacement_rappel))
             ]
-            if candidats:
-                choix = random.choice(candidats)
+            
+            # 2. Si pas assez de sous-utilisés, prendre tous les non-rappels disponibles
+            if not candidats_sous_utilises:
+                candidats_sous_utilises = [
+                    c for c in data['Code']
+                    if (c not in selection_finale and 
+                        not data[data['Code'] == c]['Rappel'].iloc[0] and  # Pas un rappel
+                        respecte_espacement(auto_weeks.get(c, []), semaine, False, min_espacement_rappel))
+                ]
+            
+            # 3. En dernier recours, prendre n'importe quel automatisme (même rappels)
+            if not candidats_sous_utilises:
+                candidats_sous_utilises = [
+                    c for c in data['Code']
+                    if (c not in selection_finale and
+                        respecte_espacement(auto_weeks.get(c, []), semaine, 
+                                          data[data['Code'] == c]['Rappel'].iloc[0], 
+                                          min_espacement_rappel))
+                ]
+            
+            if candidats_sous_utilises:
+                choix = random.choice(candidats_sous_utilises)
                 selection_finale[i] = choix
 
     return selection_finale
