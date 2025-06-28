@@ -93,35 +93,6 @@ st.set_page_config(layout="wide")
 st.title("📅 Reprises d'automatismes mathématiques en 6e")
 
 # ===== CHOIX DU MODE D'AFFICHAGE =====
-st.markdown("### 🎯 Mode d'affichage")
-col1, col2 = st.columns(2)
-
-with col1:
-    if st.button("📊 Mode 32 semaines (2×3 automatismes)", 
-                 type="primary" if st.session_state.mode_affichage == "32_semaines" else "secondary"):
-        if st.session_state.mode_affichage != "32_semaines":
-            st.session_state.mode_affichage = "32_semaines"
-            st.session_state.sequences = initialiser_sequences()
-            st.session_state.selection_by_week = initialiser_selection_by_week()
-            # Réinitialiser les états des pickers
-            for i in range(50):  # Sécurité pour tous les pickers possibles
-                if f"show_picker_{i}" in st.session_state:
-                    st.session_state[f"show_picker_{i}"] = False
-            st.rerun()
-
-with col2:
-    if st.button("📈 Mode 35 semaines (3×3 automatismes)", 
-                 type="primary" if st.session_state.mode_affichage == "35_semaines" else "secondary"):
-        if st.session_state.mode_affichage != "35_semaines":
-            st.session_state.mode_affichage = "35_semaines"
-            st.session_state.sequences = initialiser_sequences()
-            st.session_state.selection_by_week = initialiser_selection_by_week()
-            # Réinitialiser les états des pickers
-            for i in range(50):
-                if f"show_picker_{i}" in st.session_state:
-                    st.session_state[f"show_picker_{i}"] = False
-            st.rerun()
-
 # Affichage du mode actuel
 mode_text = "32 semaines (4×8) - 6 automatismes par semaine" if st.session_state.mode_affichage == "32_semaines" else "35 semaines (5×7) - 9 automatismes par semaine"
 st.info(f"Mode actuel : {mode_text}")
@@ -172,7 +143,31 @@ if st.session_state.dark_mode:
         """,
         unsafe_allow_html=True
     )
+###
+st.sidebar.markdown("### 🎯 Mode d'affichage")
+if st.sidebar.button("🗓 32 sem. (2×3)", 
+                 type="primary" if st.session_state.mode_affichage == "32_semaines" else "secondary"):
+        if st.session_state.mode_affichage != "32_semaines":
+            st.session_state.mode_affichage = "32_semaines"
+            st.session_state.sequences = initialiser_sequences()
+            st.session_state.selection_by_week = initialiser_selection_by_week()
+            # Réinitialiser les états des pickers
+            for i in range(50):  # Sécurité pour tous les pickers possibles
+                if f"show_picker_{i}" in st.session_state:
+                    st.session_state[f"show_picker_{i}"] = False
+            st.rerun()
 
+if st.sidebar.button("📆 35 sem. (3×3)", 
+             type="primary" if st.session_state.mode_affichage == "35_semaines" else "secondary"):
+    if st.session_state.mode_affichage != "35_semaines":
+        st.session_state.mode_affichage = "35_semaines"
+        st.session_state.sequences = initialiser_sequences()
+        st.session_state.selection_by_week = initialiser_selection_by_week()
+        # Réinitialiser les états des pickers
+        for i in range(50):
+            if f"show_picker_{i}" in st.session_state:
+                st.session_state[f"show_picker_{i}"] = False
+        st.rerun()
 st.sidebar.markdown("### Actions")
 
 # Progressions adaptées au mode
