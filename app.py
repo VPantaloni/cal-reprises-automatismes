@@ -235,10 +235,10 @@ st.sidebar.markdown(
 
 st.sidebar.markdown("### Paramètres d'espacement")
 min_espacement_rappel = st.sidebar.slider("Espacement min pour rappels", 1, 6, 1)
-#espacement_min2 = st.sidebar.slider("1ère → 2e apparition (min)", 1, 6, 2)
-#espacement_max2 = st.sidebar.slider("1ère → 2e apparition (max)", 2, 10, 6)
-#espacement_min3 = st.sidebar.slider("2e → 3e apparition (min)", 2, 10, 4)
-#espacement_max3 = st.sidebar.slider("2e → 3e apparition (max)", 2, 15, 10)
+espacement_min2 = st.sidebar.slider("1ère → 2e apparition (min)", 1, 6, 2)
+espacement_max2 = st.sidebar.slider("1ère → 2e apparition (max)", 2, 10, 6)
+espacement_min3 = st.sidebar.slider("2e → 3e apparition (min)", 2, 10, 4)
+espacement_max3 = st.sidebar.slider("2e → 3e apparition (max)", 2, 15, 10)
 
 # Chargement des données
 data = charger_donnees()
