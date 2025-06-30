@@ -48,10 +48,34 @@ def peut_etre_place(code, data, semaine, auto_weeks, used_codes, themes_passes,
     # Vérifier l'espacement
     return respecte_espacement(semaines_precedentes, semaine, est_rappel, min_espacement_rappel)
 
-def get_theme_semaine_plus_2(themes_progression, semaine_actuelle):
-    """Retourne le thème qui sera étudié dans 2 semaines"""
-    if semaine_actuelle + 2 <= len(themes_progression):
-        return themes_progression[semaine_actuelle + 1]  # Index 0-based
+def get_theme_diagnostic(themes_progression, semaine_actuelle, theme_courant):
+    """
+    Retourne le thème pour la ligne diagnostic avec souplesse :
+    1. Essaie semaine S+2
+    2. Si identique au thème courant, essaie S+3
+    3. Sinon essaie S+1
+    """
+    if not themes_progression or semaine_actuelle >= len(themes_progression):
+        return None
+    
+    # Essayer S+2 d'abord
+    if semaine_actuelle + 2 < len(themes_progression):
+        theme_s2 = themes_progression[semaine_actuelle + 1]  # Index 0-based
+        if theme_s2 != theme_courant:
+            return theme_s2
+    
+    # Si S+2 = thème courant ou inexistant, essayer S+3
+    if semaine_actuelle + 3 < len(themes_progression):
+        theme_s3 = themes_progression[semaine_actuelle + 2]  # Index 0-based
+        if theme_s3 != theme_courant:
+            return theme_s3
+    
+    # Sinon essayer S+1
+    if semaine_actuelle + 1 < len(themes_progression):
+        theme_s1 = themes_progression[semaine_actuelle]  # Index 0-based
+        if theme_s1 != theme_courant:
+            return theme_s1
+    
     return None
 
 def selectionner_automatismes_theme_courant(
@@ -96,23 +120,27 @@ def selectionner_automatismes_theme_courant(
 
     return selection_finale
 
-def selectionner_automatismes_theme_plus_2(
-    data, semaine, theme_plus_2, auto_weeks, used_codes, min_espacement_rappel, 
+def selectionner_automatismes_theme_diagnostic(
+    data, semaine, theme_diagnostic, auto_weeks, used_codes, min_espacement_rappel, 
     themes_passes, nb_automatismes=6
 ):
-    """Sélectionne les automatismes du thème semaine+2 (ligne 2) - diagnostic/réactivation"""
+    """
+    Sélectionne les automatismes du thème diagnostic (ligne 2) 
+    Permet les répétitions si premières apparitions
+    """
     selection_finale = [None] * nb_automatismes
     
-    if not theme_plus_2:
+    if not theme_diagnostic:
         return selection_finale
     
-    # Prendre TOUS les automatismes du thème +2 (même si pas encore vu)
-    # car c'est du diagnostic/réactivation
-    theme_plus_2_autos = data[data['Code'].str.startswith(theme_plus_2)]['Code'].tolist()
+    # Prendre TOUS les automatismes du thème diagnostic
+    theme_diagnostic_autos = data[data['Code'].str.startswith(theme_diagnostic)]['Code'].tolist()
     
-    # Filtrer seulement par usage et espacement, pas par thème vu
-    theme_plus_2_disponibles = []
-    for code in theme_plus_2_autos:
+    # Séparer selon les premières apparitions et les répétitions
+    premieres_apparitions = []
+    autres_disponibles = []
+    
+    for code in theme_diagnostic_autos:
         row = data[data['Code'] == code].iloc[0]
         est_rappel = row['Rappel']
         semaines_precedentes = auto_weeks.get(code, [])
@@ -122,36 +150,41 @@ def selectionner_automatismes_theme_plus_2(
                     3 if est_rappel and nb_automatismes == 9 else \
                     4 if nb_automatismes == 6 else 6
         
-        if (used_codes[code] < max_usage and 
-            respecte_espacement(semaines_precedentes, semaine, est_rappel, min_espacement_rappel)):
-            theme_plus_2_disponibles.append(code)
+        # Si première apparition, priorité absolue (même sans espacement)
+        if not semaines_precedentes and used_codes[code] < max_usage:
+            premieres_apparitions.append(code)
+        # Sinon, vérifier espacement classique
+        elif (used_codes[code] < max_usage and 
+              respecte_espacement(semaines_precedentes, semaine, est_rappel, min_espacement_rappel)):
+            autres_disponibles.append(code)
     
-    # Si pas assez d'automatismes disponibles, prendre tous ceux du thème +2
-    if len(theme_plus_2_disponibles) < (2 if nb_automatismes == 6 else 3):
-        theme_plus_2_disponibles = theme_plus_2_autos
+    # Combiner : priorité aux premières apparitions
+    candidats_diagnostic = premieres_apparitions + autres_disponibles
     
-    # Placement selon le nombre d'automatismes - LIGNE 2
+    # Si pas assez, prendre tous les automatismes du thème (souplesse maximale)
+    if len(candidats_diagnostic) < (2 if nb_automatismes == 6 else 3):
+        candidats_diagnostic = theme_diagnostic_autos
+    
+    # Définir les positions selon le mode
     if nb_automatismes == 6:
-        # Mode 2x3 : position 2 (reste de ligne 1) + positions 3, 4 (début ligne 2)
-        positions_theme_plus_2 = [2, 3, 4]
-        nb_positions = 2  # On n'utilise que 2 positions sur les 3
-        start_idx = 1  # Commencer par la position 3 (index 1 dans la liste)
+        # Mode 2x3 : positions 2, 3 
+        positions_diagnostic = [2, 3]
+        nb_positions = 2
     else:
         # Mode 3x3 : positions 3, 4, 5 (deuxième ligne complète)
-        positions_theme_plus_2 = [3, 4, 5]
+        positions_diagnostic = [3, 4, 5]
         nb_positions = 3
-        start_idx = 0
     
-    # Remplir les positions
-    if theme_plus_2_disponibles:
+    # Remplir les positions - PERMET LES RÉPÉTITIONS
+    if candidats_diagnostic:
         for i in range(nb_positions):
-            pos = positions_theme_plus_2[start_idx + i]
-            selection_finale[pos] = theme_plus_2_disponibles[i % len(theme_plus_2_disponibles)]
+            pos = positions_diagnostic[i]
+            selection_finale[pos] = candidats_diagnostic[i % len(candidats_diagnostic)]
 
     return selection_finale
 
 def selectionner_automatismes_autres_themes(
-    data, semaine, theme_courant, theme_plus_2, auto_weeks, used_codes, codes_selectionnes,
+    data, semaine, theme_courant, theme_diagnostic, auto_weeks, used_codes, codes_selectionnes,
     min_espacement_rappel, themes_passes, nb_automatismes=6
 ):
     """Sélectionne les automatismes des autres thèmes (ligne 3) selon les contraintes initiales"""
@@ -159,14 +192,14 @@ def selectionner_automatismes_autres_themes(
     
     # Définir les positions pour les autres thèmes - LIGNE 3
     if nb_automatismes == 6:
-        # Mode 2x3 : position 5 (reste de ligne 2)
-        positions_autres = [5]
+        # Mode 2x3 : positions 4, 5
+        positions_autres = [4, 5]
     else:
         # Mode 3x3 : positions 6, 7, 8 (troisième ligne complète)
         positions_autres = [6, 7, 8]
     
     # Créer une liste de tous les candidats valides (rappels ou thèmes déjà vus)
-    # Exclure le thème courant et le thème +2
+    # Exclure le thème courant et le thème diagnostic
     tous_candidats = []
     for code in data['Code']:
         if (code not in codes_selectionnes and 
@@ -177,8 +210,8 @@ def selectionner_automatismes_autres_themes(
             theme_code = row['Code'][0]
             est_rappel = row['Rappel']
             
-            # Exclure les automatismes du thème courant et du thème +2
-            if theme_code not in [theme_courant, theme_plus_2]:
+            # Exclure les automatismes du thème courant et du thème diagnostic
+            if theme_code not in [theme_courant, theme_diagnostic]:
                 # Accepter si c'est un rappel OU si le thème a déjà été vu
                 if est_rappel or theme_code in themes_passes:
                     tous_candidats.append(code)
@@ -199,14 +232,15 @@ def selectionner_automatismes(
     themes_passes, themes_progression, nb_automatismes=6
 ):
     """
-    Nouvelle logique à 3 lignes :
+    Nouvelle logique à 3 lignes avec souplesse :
     - Ligne 1 : Thème courant
-    - Ligne 2 : Thème semaine+2 (diagnostic/réactivation)  
+    - Ligne 2 : Thème diagnostic (S+2, S+3 ou S+1 selon disponibilité)
     - Ligne 3 : Autres thèmes (contraintes habituelles)
+    Permet les répétitions d'automatismes dans la même semaine
     """
     
-    # Obtenir le thème de la semaine +2
-    theme_plus_2 = get_theme_semaine_plus_2(themes_progression, semaine)
+    # Obtenir le thème diagnostic avec souplesse
+    theme_diagnostic = get_theme_diagnostic(themes_progression, semaine, theme)
     
     # Ligne 1 : Automatismes du thème courant
     selection_ligne_1 = selectionner_automatismes_theme_courant(
@@ -214,16 +248,16 @@ def selectionner_automatismes(
     )
     codes_selectionnes = set([c for c in selection_ligne_1 if c])
     
-    # Ligne 2 : Automatismes du thème semaine+2
-    selection_ligne_2 = selectionner_automatismes_theme_plus_2(
-        data, semaine, theme_plus_2, auto_weeks, used_codes, min_espacement_rappel, 
+    # Ligne 2 : Automatismes du thème diagnostic
+    selection_ligne_2 = selectionner_automatismes_theme_diagnostic(
+        data, semaine, theme_diagnostic, auto_weeks, used_codes, min_espacement_rappel, 
         themes_passes, nb_automatismes
     )
-    codes_selectionnes.update([c for c in selection_ligne_2 if c])
+    # Ne pas ajouter à codes_selectionnes pour permettre les répétitions
     
     # Ligne 3 : Autres thèmes avec contraintes habituelles
     selection_ligne_3 = selectionner_automatismes_autres_themes(
-        data, semaine, theme, theme_plus_2, auto_weeks, used_codes, codes_selectionnes,
+        data, semaine, theme, theme_diagnostic, auto_weeks, used_codes, codes_selectionnes,
         min_espacement_rappel, themes_passes, nb_automatismes
     )
     
@@ -243,10 +277,9 @@ def selectionner_automatismes(
             # Chercher n'importe quel automatisme disponible
             candidats_fallback = [
                 c for c in data['Code']
-                if (c not in selection_finale and
-                    respecte_espacement(auto_weeks.get(c, []), semaine, 
-                                      data[data['Code'] == c]['Rappel'].iloc[0], 
-                                      min_espacement_rappel))
+                if respecte_espacement(auto_weeks.get(c, []), semaine, 
+                                     data[data['Code'] == c]['Rappel'].iloc[0], 
+                                     min_espacement_rappel)
             ]
             
             if candidats_fallback:
