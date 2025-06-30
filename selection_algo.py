@@ -48,9 +48,16 @@ def peut_etre_place(code, data, semaine, auto_weeks, used_codes, themes_passes,
     # Vérifier l'espacement
     return respecte_espacement(semaines_precedentes, semaine, est_rappel, min_espacement_rappel)
 
-def selectionner_automatismes_theme(
+def get_theme_semaine_plus_2(themes_progression, semaine_actuelle):
+    """Retourne le thème qui sera étudié dans 2 semaines"""
+    if semaine_actuelle + 2 <= len(themes_progression):
+        return themes_progression[semaine_actuelle + 1]  # Index 0-based
+    return None
+
+def selectionner_automatismes_theme_courant(
     data, semaine, theme, auto_weeks, used_codes, min_espacement_rappel, themes_passes, nb_automatismes=6
 ):
+    """Sélectionne les automatismes du thème courant (ligne 1)"""
     selection_finale = [None] * nb_automatismes
 
     # D'abord, essayer avec les automatismes qui respectent l'espacement
@@ -70,31 +77,96 @@ def selectionner_automatismes_theme(
     else:
         theme_autos = theme_autos_optimaux
 
-    # Placement selon le nombre d'automatismes
+    # Placement selon le nombre d'automatismes - LIGNE 1
     if nb_automatismes == 6:
-        # Mode 2x3 : positions 0 et 3 - TOUJOURS remplir
-        positions_theme = [0, 3]
-        nb_positions = 2
+        # Mode 2x3 : positions 0, 1, 2 (première ligne)
+        positions_theme = [0, 1, 2]
+        nb_positions = 2  # On n'utilise que 2 positions sur les 3
     else:
-        # Mode 3x3 : positions 0, 3, 6 - TOUJOURS remplir
-        positions_theme = [0, 3, 6]
+        # Mode 3x3 : positions 0, 1, 2 (première ligne)
+        positions_theme = [0, 1, 2]
         nb_positions = 3
     
     # Remplir les positions en répétant cycliquement les automatismes disponibles
     if theme_autos:
-        for i, pos in enumerate(positions_theme):
+        for i in range(nb_positions):
+            pos = positions_theme[i]
             # Utiliser l'opérateur modulo pour répéter cycliquement
             selection_finale[pos] = theme_autos[i % len(theme_autos)]
 
     return selection_finale
-def selectionner_automatismes_autres_themes(
-    data, semaine, theme, auto_weeks, used_codes, codes_selectionnes,
-    min_espacement_rappel, themes_passes, positions, nb_automatismes=6
-):
-    """Version modifiée : sélectionne individuellement chaque automatisme parmi tous les candidats valides"""
-    selection = [None] * nb_automatismes
 
+def selectionner_automatismes_theme_plus_2(
+    data, semaine, theme_plus_2, auto_weeks, used_codes, min_espacement_rappel, 
+    themes_passes, nb_automatismes=6
+):
+    """Sélectionne les automatismes du thème semaine+2 (ligne 2) - diagnostic/réactivation"""
+    selection_finale = [None] * nb_automatismes
+    
+    if not theme_plus_2:
+        return selection_finale
+    
+    # Prendre TOUS les automatismes du thème +2 (même si pas encore vu)
+    # car c'est du diagnostic/réactivation
+    theme_plus_2_autos = data[data['Code'].str.startswith(theme_plus_2)]['Code'].tolist()
+    
+    # Filtrer seulement par usage et espacement, pas par thème vu
+    theme_plus_2_disponibles = []
+    for code in theme_plus_2_autos:
+        row = data[data['Code'] == code].iloc[0]
+        est_rappel = row['Rappel']
+        semaines_precedentes = auto_weeks.get(code, [])
+        
+        # Vérifier les limites d'usage
+        max_usage = 2 if est_rappel and nb_automatismes == 6 else \
+                    3 if est_rappel and nb_automatismes == 9 else \
+                    4 if nb_automatismes == 6 else 6
+        
+        if (used_codes[code] < max_usage and 
+            respecte_espacement(semaines_precedentes, semaine, est_rappel, min_espacement_rappel)):
+            theme_plus_2_disponibles.append(code)
+    
+    # Si pas assez d'automatismes disponibles, prendre tous ceux du thème +2
+    if len(theme_plus_2_disponibles) < (2 if nb_automatismes == 6 else 3):
+        theme_plus_2_disponibles = theme_plus_2_autos
+    
+    # Placement selon le nombre d'automatismes - LIGNE 2
+    if nb_automatismes == 6:
+        # Mode 2x3 : position 2 (reste de ligne 1) + positions 3, 4 (début ligne 2)
+        positions_theme_plus_2 = [2, 3, 4]
+        nb_positions = 2  # On n'utilise que 2 positions sur les 3
+        start_idx = 1  # Commencer par la position 3 (index 1 dans la liste)
+    else:
+        # Mode 3x3 : positions 3, 4, 5 (deuxième ligne complète)
+        positions_theme_plus_2 = [3, 4, 5]
+        nb_positions = 3
+        start_idx = 0
+    
+    # Remplir les positions
+    if theme_plus_2_disponibles:
+        for i in range(nb_positions):
+            pos = positions_theme_plus_2[start_idx + i]
+            selection_finale[pos] = theme_plus_2_disponibles[i % len(theme_plus_2_disponibles)]
+
+    return selection_finale
+
+def selectionner_automatismes_autres_themes(
+    data, semaine, theme_courant, theme_plus_2, auto_weeks, used_codes, codes_selectionnes,
+    min_espacement_rappel, themes_passes, nb_automatismes=6
+):
+    """Sélectionne les automatismes des autres thèmes (ligne 3) selon les contraintes initiales"""
+    selection_finale = [None] * nb_automatismes
+    
+    # Définir les positions pour les autres thèmes - LIGNE 3
+    if nb_automatismes == 6:
+        # Mode 2x3 : position 5 (reste de ligne 2)
+        positions_autres = [5]
+    else:
+        # Mode 3x3 : positions 6, 7, 8 (troisième ligne complète)
+        positions_autres = [6, 7, 8]
+    
     # Créer une liste de tous les candidats valides (rappels ou thèmes déjà vus)
+    # Exclure le thème courant et le thème +2
     tous_candidats = []
     for code in data['Code']:
         if (code not in codes_selectionnes and 
@@ -105,93 +177,80 @@ def selectionner_automatismes_autres_themes(
             theme_code = row['Code'][0]
             est_rappel = row['Rappel']
             
-            # Accepter si c'est un rappel OU si le thème a déjà été vu
-            if est_rappel or theme_code in themes_passes:
-                tous_candidats.append(code)
+            # Exclure les automatismes du thème courant et du thème +2
+            if theme_code not in [theme_courant, theme_plus_2]:
+                # Accepter si c'est un rappel OU si le thème a déjà été vu
+                if est_rappel or theme_code in themes_passes:
+                    tous_candidats.append(code)
     
     # Mélanger les candidats pour la diversité
     random.shuffle(tous_candidats)
     
     # Assigner aux positions disponibles
-    candidat_index = 0
-    for pos in positions:
-        if candidat_index < len(tous_candidats):
-            selection[pos] = tous_candidats[candidat_index]
-            codes_selectionnes.add(tous_candidats[candidat_index])
-            candidat_index += 1
+    for i, pos in enumerate(positions_autres):
+        if i < len(tous_candidats):
+            selection_finale[pos] = tous_candidats[i]
 
-    return selection
+    return selection_finale
 
 def selectionner_automatismes(
     data, semaine, theme, auto_weeks, used_codes, next_index_by_theme,
     min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
-    themes_passes, nb_automatismes=6
+    themes_passes, themes_progression, nb_automatismes=6
 ):
-    # Note: espacement_min2, max2, min3, max3 ne sont plus utilisés avec Fibonacci
-    # mais gardés pour compatibilité avec l'interface
+    """
+    Nouvelle logique à 3 lignes :
+    - Ligne 1 : Thème courant
+    - Ligne 2 : Thème semaine+2 (diagnostic/réactivation)  
+    - Ligne 3 : Autres thèmes (contraintes habituelles)
+    """
     
-    # Sélection des automatismes du thème principal
-    base = selectionner_automatismes_theme(
+    # Obtenir le thème de la semaine +2
+    theme_plus_2 = get_theme_semaine_plus_2(themes_progression, semaine)
+    
+    # Ligne 1 : Automatismes du thème courant
+    selection_ligne_1 = selectionner_automatismes_theme_courant(
         data, semaine, theme, auto_weeks, used_codes, min_espacement_rappel, themes_passes, nb_automatismes
     )
-    codes_selectionnes = set([c for c in base if c])
-
-    # Définir les positions pour les autres thèmes selon le mode
-    if nb_automatismes == 6:
-        # Mode 2x3 : positions restantes [1,2,4,5]
-        positions_autres = [1, 2, 4, 5]
-    else:
-        # Mode 3x3 : positions restantes [1,2,4,5,7,8]
-        positions_autres = [1, 2, 4, 5, 7, 8]
-
-    # Compléter avec d'autres automatismes (rappels ou thèmes déjà vus)
-    complement = selectionner_automatismes_autres_themes(
-        data, semaine, theme, auto_weeks, used_codes, codes_selectionnes,
-        min_espacement_rappel, themes_passes, positions_autres, nb_automatismes
+    codes_selectionnes = set([c for c in selection_ligne_1 if c])
+    
+    # Ligne 2 : Automatismes du thème semaine+2
+    selection_ligne_2 = selectionner_automatismes_theme_plus_2(
+        data, semaine, theme_plus_2, auto_weeks, used_codes, min_espacement_rappel, 
+        themes_passes, nb_automatismes
     )
-
-    # Fusion finale
+    codes_selectionnes.update([c for c in selection_ligne_2 if c])
+    
+    # Ligne 3 : Autres thèmes avec contraintes habituelles
+    selection_ligne_3 = selectionner_automatismes_autres_themes(
+        data, semaine, theme, theme_plus_2, auto_weeks, used_codes, codes_selectionnes,
+        min_espacement_rappel, themes_passes, nb_automatismes
+    )
+    
+    # Fusion des trois lignes
     selection_finale = [None] * nb_automatismes
     for i in range(nb_automatismes):
-        if base[i]:
-            selection_finale[i] = base[i]
-        elif complement[i]:
-            selection_finale[i] = complement[i]
-
-    # Compléter les cases vides - PRIORITÉ : grille complète
+        if selection_ligne_1[i]:
+            selection_finale[i] = selection_ligne_1[i]
+        elif selection_ligne_2[i]:
+            selection_finale[i] = selection_ligne_2[i]
+        elif selection_ligne_3[i]:
+            selection_finale[i] = selection_ligne_3[i]
+    
+    # Compléter les cases vides restantes si nécessaire
     for i in range(nb_automatismes):
         if selection_finale[i] is None:
-            # 1. D'abord, chercher des automatismes sous-utilisés (non-rappels)
-            target_usage = 4 if nb_automatismes == 6 else 6
-            candidats_sous_utilises = [
+            # Chercher n'importe quel automatisme disponible
+            candidats_fallback = [
                 c for c in data['Code']
-                if (c not in selection_finale and 
-                    not data[data['Code'] == c]['Rappel'].iloc[0] and  # Pas un rappel
-                    used_codes[c] < target_usage and  # Sous-utilisé
-                    respecte_espacement(auto_weeks.get(c, []), semaine, False, min_espacement_rappel))
+                if (c not in selection_finale and
+                    respecte_espacement(auto_weeks.get(c, []), semaine, 
+                                      data[data['Code'] == c]['Rappel'].iloc[0], 
+                                      min_espacement_rappel))
             ]
             
-            # 2. Si pas assez de sous-utilisés, prendre tous les non-rappels disponibles
-            if not candidats_sous_utilises:
-                candidats_sous_utilises = [
-                    c for c in data['Code']
-                    if (c not in selection_finale and 
-                        not data[data['Code'] == c]['Rappel'].iloc[0] and  # Pas un rappel
-                        respecte_espacement(auto_weeks.get(c, []), semaine, False, min_espacement_rappel))
-                ]
-            
-            # 3. En dernier recours, prendre n'importe quel automatisme (même rappels)
-            if not candidats_sous_utilises:
-                candidats_sous_utilises = [
-                    c for c in data['Code']
-                    if (c not in selection_finale and
-                        respecte_espacement(auto_weeks.get(c, []), semaine, 
-                                          data[data['Code'] == c]['Rappel'].iloc[0], 
-                                          min_espacement_rappel))
-                ]
-            
-            if candidats_sous_utilises:
-                choix = random.choice(candidats_sous_utilises)
+            if candidats_fallback:
+                choix = random.choice(candidats_fallback)
                 selection_finale[i] = choix
 
     return selection_finale
