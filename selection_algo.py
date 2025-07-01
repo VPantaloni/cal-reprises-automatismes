@@ -19,34 +19,23 @@ def peut_etre_place(code, data, semaine, auto_weeks, used_codes, themes_passes, 
     theme_code = row['Code'][0]
     est_rappel = row['Rappel']
     semaines_precedentes = auto_weeks.get(code, [])
-
-    max_usage = 99  # aucune limite stricte : on veut TOUT remplir !
-
-    if used_codes[code] >= max_usage:
-        return False
     if not est_rappel and theme_code not in themes_passes:
         return False
-
     return respecte_espacement(semaines_precedentes, semaine, est_rappel, min_espacement_rappel)
 
-def selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes, min_espacement_rappel, themes_passes, nb_automatismes):
-    selection_finale = [None] * nb_automatismes
-    theme_autos_optimaux = [
+def selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes, min_espacement_rappel, themes_passes, nb_automatismes, positions):
+    selection = [None] * nb_automatismes
+    theme_autos = [
         c for c in data[data['Code'].str.startswith(theme)]['Code']
         if peut_etre_place(c, data, semaine, auto_weeks, used_codes, themes_passes, min_espacement_rappel, nb_automatismes)
     ]
+    random.shuffle(theme_autos)
+    for i, pos in enumerate(positions):
+        if i < len(theme_autos):
+            selection[pos] = theme_autos[i]
+    return selection
 
-    tous_theme_autos = data[data['Code'].str.startswith(theme)]['Code'].tolist()
-    theme_autos = theme_autos_optimaux + [c for c in tous_theme_autos if c not in theme_autos_optimaux]
-
-    positions_theme = [0, 3] if nb_automatismes == 6 else [0, 3, 6]
-    if theme_autos:
-        for i, pos in enumerate(positions_theme):
-            selection_finale[pos] = theme_autos[i % len(theme_autos)]
-
-    return selection_finale
-
-def selectionner_automatismes_autres_themes(data, semaine, theme, auto_weeks, used_codes, codes_selectionnes, min_espacement_rappel, themes_passes, positions, nb_automatismes):
+def selectionner_automatismes_autres_themes(data, semaine, auto_weeks, used_codes, codes_selectionnes, min_espacement_rappel, themes_passes, positions, nb_automatismes):
     selection = [None] * nb_automatismes
     tous_candidats = []
     for code in data['Code']:
@@ -56,39 +45,56 @@ def selectionner_automatismes_autres_themes(data, semaine, theme, auto_weeks, us
             est_rappel = row['Rappel']
             if est_rappel or theme_code in themes_passes:
                 tous_candidats.append(code)
-
     random.shuffle(tous_candidats)
-    candidat_index = 0
     for pos in positions:
-        if candidat_index < len(tous_candidats):
-            selection[pos] = tous_candidats[candidat_index]
-            codes_selectionnes.add(tous_candidats[candidat_index])
-            candidat_index += 1
-
+        if tous_candidats:
+            choix = tous_candidats.pop()
+            selection[pos] = choix
+            codes_selectionnes.add(choix)
     return selection
 
 def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next_index_by_theme, min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3, themes_passes, sequences, nb_automatismes):
-    base = selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes, min_espacement_rappel, themes_passes, nb_automatismes)
-    codes_selectionnes = set([c for c in base if c])
-
-    positions_autres = [1, 2, 4, 5] if nb_automatismes == 6 else [1, 2, 4, 5, 7, 8]
-    complement = selectionner_automatismes_autres_themes(data, semaine, theme, auto_weeks, used_codes, codes_selectionnes, min_espacement_rappel, themes_passes, positions_autres, nb_automatismes)
-
     selection_finale = [None] * nb_automatismes
-    for i in range(nb_automatismes):
-        if base[i]:
-            selection_finale[i] = base[i]
-        elif complement[i]:
-            selection_finale[i] = complement[i]
+    codes_selectionnes = set()
 
+    # 1. Automatisme du thème de la semaine
+    pos_theme = [0, 3] if nb_automatismes == 6 else [0, 3, 6]
+    base_theme = selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes, min_espacement_rappel, themes_passes, nb_automatismes, pos_theme)
+    for i in pos_theme:
+        if base_theme[i] is not None:
+            selection_finale[i] = base_theme[i]
+            codes_selectionnes.add(base_theme[i])
+
+    # 2. Automatisme diagnostique du thème à venir
+    future_index = semaine + 2 if nb_automatismes == 6 else semaine + 3
+    if future_index < len(sequences):
+        future_theme = sequences[future_index]
+        pos_diag = [1, 4] if nb_automatismes == 6 else [1, 4, 7]
+        diag_theme = selectionner_automatismes_theme(data, semaine, future_theme, auto_weeks, used_codes, min_espacement_rappel, themes_passes, nb_automatismes, pos_diag)
+        for i in pos_diag:
+            if diag_theme[i] is not None:
+                selection_finale[i] = diag_theme[i]
+                codes_selectionnes.add(diag_theme[i])
+
+    # 3. Complément (rappels et thèmes déjà vus)
+    pos_autres = [i for i in range(nb_automatismes) if selection_finale[i] is None]
+    complement = selectionner_automatismes_autres_themes(data, semaine, auto_weeks, used_codes, codes_selectionnes, min_espacement_rappel, themes_passes, pos_autres, nb_automatismes)
+    for i in pos_autres:
+        if selection_finale[i] is None and complement[i] is not None:
+            selection_finale[i] = complement[i]
+            codes_selectionnes.add(complement[i])
+
+    # 4. Dernier recours : remplir les cases vides (même sans toutes les contraintes)
     for i in range(nb_automatismes):
         if selection_finale[i] is None:
             candidats = [
                 c for c in data['Code']
-                if c not in selection_finale and respecte_espacement(auto_weeks.get(c, []), semaine, data[data['Code'] == c]['Rappel'].iloc[0], min_espacement_rappel)
+                if respecte_espacement(auto_weeks.get(c, []), semaine, data[data['Code'] == c]['Rappel'].iloc[0], min_espacement_rappel)
             ]
-            if candidats:
-                choix = random.choice(candidats)
-                selection_finale[i] = choix
+            random.shuffle(candidats)
+            for c in candidats:
+                if c not in selection_finale:
+                    selection_finale[i] = c
+                    break
 
     return selection_finale
