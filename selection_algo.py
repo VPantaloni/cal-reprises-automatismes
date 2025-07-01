@@ -20,9 +20,7 @@ def peut_etre_place(code, data, semaine, auto_weeks, used_codes, themes_passes, 
     est_rappel = row['Rappel']
     semaines_precedentes = auto_weeks.get(code, [])
 
-    max_usage = 2 if est_rappel and nb_automatismes == 6 else \
-                3 if est_rappel and nb_automatismes == 9 else \
-                4 if nb_automatismes == 6 else 6
+    max_usage = 99  # aucune limite stricte : on veut TOUT remplir !
 
     if used_codes[code] >= max_usage:
         return False
@@ -38,11 +36,8 @@ def selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes
         if peut_etre_place(c, data, semaine, auto_weeks, used_codes, themes_passes, min_espacement_rappel, nb_automatismes)
     ]
 
-    if len(theme_autos_optimaux) < (2 if nb_automatismes == 6 else 3):
-        tous_theme_autos = data[data['Code'].str.startswith(theme)]['Code'].tolist()
-        theme_autos = theme_autos_optimaux + [c for c in tous_theme_autos if c not in theme_autos_optimaux]
-    else:
-        theme_autos = theme_autos_optimaux
+    tous_theme_autos = data[data['Code'].str.startswith(theme)]['Code'].tolist()
+    theme_autos = theme_autos_optimaux + [c for c in tous_theme_autos if c not in theme_autos_optimaux]
 
     positions_theme = [0, 3] if nb_automatismes == 6 else [0, 3, 6]
     if theme_autos:
@@ -88,23 +83,12 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
 
     for i in range(nb_automatismes):
         if selection_finale[i] is None:
-            target_usage = 4 if nb_automatismes == 6 else 6
-            candidats_sous_utilises = [
+            candidats = [
                 c for c in data['Code']
-                if c not in selection_finale and not data[data['Code'] == c]['Rappel'].iloc[0] and used_codes[c] < target_usage and respecte_espacement(auto_weeks.get(c, []), semaine, False, min_espacement_rappel)
+                if c not in selection_finale and respecte_espacement(auto_weeks.get(c, []), semaine, data[data['Code'] == c]['Rappel'].iloc[0], min_espacement_rappel)
             ]
-            if not candidats_sous_utilises:
-                candidats_sous_utilises = [
-                    c for c in data['Code']
-                    if c not in selection_finale and not data[data['Code'] == c]['Rappel'].iloc[0] and respecte_espacement(auto_weeks.get(c, []), semaine, False, min_espacement_rappel)
-                ]
-            if not candidats_sous_utilises:
-                candidats_sous_utilises = [
-                    c for c in data['Code']
-                    if c not in selection_finale and respecte_espacement(auto_weeks.get(c, []), semaine, data[data['Code'] == c]['Rappel'].iloc[0], min_espacement_rappel)
-                ]
-            if candidats_sous_utilises:
-                choix = random.choice(candidats_sous_utilises)
+            if candidats:
+                choix = random.choice(candidats)
                 selection_finale[i] = choix
 
     return selection_finale
