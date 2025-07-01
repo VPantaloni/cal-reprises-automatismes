@@ -27,7 +27,7 @@ def selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes
     selection = [None] * nb_automatismes
     theme_autos = [
         c for c in data[data['Code'].str.startswith(theme)]['Code']
-        if peut_etre_place(c, data, semaine, auto_weeks, used_codes, themes_passes, min_espacement_rappel, nb_automatismes)
+        if respecte_espacement(auto_weeks.get(c, []), semaine, data[data['Code'] == c]['Rappel'].iloc[0], min_espacement_rappel)
     ]
     random.shuffle(theme_autos)
     for i, pos in enumerate(positions):
@@ -70,7 +70,7 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
     if future_index < len(sequences):
         future_theme = sequences[future_index]
         pos_diag = [1, 4] if nb_automatismes == 6 else [1, 4, 7]
-        diag_theme = selectionner_automatismes_theme(data, semaine, future_theme, auto_weeks, used_codes, min_espacement_rappel, themes_passes, nb_automatismes, pos_diag)
+        diag_theme = selectionner_automatismes_theme(data, semaine, future_theme, auto_weeks, used_codes, min_espacement_rappel, themes_passes + [future_theme], nb_automatismes, pos_diag)
         for i in pos_diag:
             if diag_theme[i] is not None:
                 selection_finale[i] = diag_theme[i]
