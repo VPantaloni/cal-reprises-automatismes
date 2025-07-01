@@ -19,15 +19,25 @@ def peut_etre_place(code, data, semaine, auto_weeks, used_codes, themes_passes, 
     theme_code = row['Code'][0]
     est_rappel = row['Rappel']
     semaines_precedentes = auto_weeks.get(code, [])
+
+    # Limiter le nombre de révisions des rappels strictement
+    if est_rappel:
+        max_usages = 2 if nb_automatismes == 6 else 4
+        if used_codes[code] >= max_usages:
+            return False
+
+    # Les autres automatismes ne sont pas limités strictement
+
     if not est_rappel and theme_code not in themes_passes:
         return False
+
     return respecte_espacement(semaines_precedentes, semaine, est_rappel, min_espacement_rappel)
 
 def selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes, min_espacement_rappel, themes_passes, nb_automatismes, positions):
     selection = [None] * nb_automatismes
     theme_autos = [
         c for c in data[data['Code'].str.startswith(theme)]['Code']
-        if respecte_espacement(auto_weeks.get(c, []), semaine, data[data['Code'] == c]['Rappel'].iloc[0], min_espacement_rappel)
+        if peut_etre_place(c, data, semaine, auto_weeks, used_codes, themes_passes, min_espacement_rappel, nb_automatismes)
     ]
     random.shuffle(theme_autos)
     for i, pos in enumerate(positions):
@@ -65,7 +75,7 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
             selection_finale[i] = base_theme[i]
             codes_selectionnes.add(base_theme[i])
 
-    # 2. Automatisme diagnostique du thème à venir
+    # 2. Automatisme diagnostique du thème à venir (rappels ou non)
     future_index = semaine + 2 if nb_automatismes == 6 else semaine + 3
     if future_index < len(sequences):
         future_theme = sequences[future_index]
@@ -89,12 +99,11 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
         if selection_finale[i] is None:
             candidats = [
                 c for c in data['Code']
-                if respecte_espacement(auto_weeks.get(c, []), semaine, data[data['Code'] == c]['Rappel'].iloc[0], min_espacement_rappel)
+                if c not in selection_finale and respecte_espacement(auto_weeks.get(c, []), semaine, data[data['Code'] == c]['Rappel'].iloc[0], min_espacement_rappel)
             ]
             random.shuffle(candidats)
             for c in candidats:
-                if c not in selection_finale:
-                    selection_finale[i] = c
-                    break
+                selection_finale[i] = c
+                break
 
     return selection_finale
