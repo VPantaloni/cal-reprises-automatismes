@@ -107,7 +107,6 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
         if futur_block[i]:
             selection_finale[i] = futur_block[i]
 
-
     # Complément si case vide
     for i in range(6):
         if not selection_finale[i]:
