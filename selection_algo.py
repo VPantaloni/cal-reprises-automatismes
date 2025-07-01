@@ -71,7 +71,7 @@ def selectionner_automatismes_theme_futur(data, semaine, theme_futur, auto_weeks
 
 def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next_index_by_theme,
                                min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
-                               themes_passes, sequences):
+                               themes_passes, sequences, nb_automatismes):
 
     base = selectionner_automatismes_theme(
         data, semaine, theme, auto_weeks, used_codes,
