@@ -100,11 +100,13 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
     codes_selectionnes.update([c for c in futur_block if c])
 
     selection_finale = [None] * 6
-    for i in range(6):
-        for src in [base, futur_block]:
-            if src[i]:
-                selection_finale[i] = src[i]
-                break
+    for i in [0, 3, 5]:
+        if base[i]:
+            selection_finale[i] = base[i]
+    for i in [1, 2, 4]:
+        if futur_block[i]:
+            selection_finale[i] = futur_block[i]
+
 
     # Complément si case vide
     for i in range(6):
