@@ -343,7 +343,7 @@ if st.session_state.mode_affichage == "32_semaines":
                         selection_df.append({
                             "Position": pos,
                             "Code": row['Code'],
-                            "Automatisme": row['Objectif'],
+                            "Automatisme": row['Objectifs'],
                             "Couleur": row['Couleur']
                         })
                 selection_df = pd.DataFrame(selection_df)
@@ -387,7 +387,7 @@ else:
                         selection_df.append({
                             "Position": pos,
                             "Code": row['Code'],
-                            "Automatisme": row['Objectif'],
+                            "Automatisme": row['Objectifs'],
                             "Couleur": row['Couleur']
                         })
                 selection_df = pd.DataFrame(selection_df)
