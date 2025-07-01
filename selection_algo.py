@@ -71,7 +71,7 @@ def selectionner_automatismes_theme_futur(data, semaine, theme_futur, auto_weeks
 
 def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next_index_by_theme,
                                min_espacement_rappel, espacement_min2, espacement_max2, espacement_min3, espacement_max3,
-                               themes_passes):
+                               themes_passes, sequences):
 
     base = selectionner_automatismes_theme(
         data, semaine, theme, auto_weeks, used_codes,
@@ -82,8 +82,8 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
 
     theme_futur = None
     for decalage in [2, 3]:
-        if semaine + decalage < len(st.session_state.sequences):
-            futur = st.session_state.sequences[semaine + decalage]
+        if semaine + decalage < len(sequences):
+            futur = sequences[semaine + decalage]
             if futur:
                 theme_futur = futur
                 break
