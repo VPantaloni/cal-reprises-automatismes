@@ -303,8 +303,8 @@ def recalculer_toute_la_repartition():
                 espacement_min3=espacement_min3,
                 espacement_max3=espacement_max3,
                 themes_passes=themes_passes,
-                nb_automatismes=get_nb_automatismes()
-            )
+                sequences=st.session_state.sequences  # ← ICI
+                )
             st.session_state.selection_by_week[i] = codes
             for code in codes:
                 st.session_state.auto_weeks[code].append(i)
