@@ -348,7 +348,6 @@ if st.session_state.mode_affichage == "32_semaines":
                         })
                 selection_df = pd.DataFrame(selection_df)
                 afficher_pastilles_compacte(selection_df, nb_auto_par_ligne=2 if nb_automatismes == 6 else 3, total_cases=nb_automatismes)
-
                 st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
 else:
     # 5 lignes de 7 colonnes
@@ -381,7 +380,18 @@ else:
 
             if st.session_state.sequences[i] and st.session_state.selection_by_week[i]:
                 codes = st.session_state.selection_by_week[i]
-                afficher_pastilles_compacte(data[data['Code'].isin(codes)], nb_auto_par_ligne=3)
+                selection_df = []
+                for pos, code in enumerate(codes):
+                    if code:
+                        row = data[data['Code'] == code].iloc[0]
+                        selection_df.append({
+                            "Position": pos,
+                            "Code": row['Code'],
+                            "Automatisme": row['Objectif'],
+                            "Couleur": row['Couleur']
+                        })
+                selection_df = pd.DataFrame(selection_df)
+                afficher_pastilles_compacte(selection_df, nb_auto_par_ligne=2 if nb_automatismes == 6 else 3, total_cases=nb_automatismes)
                 st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
 
 # Import du volet 2
