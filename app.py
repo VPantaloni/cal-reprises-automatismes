@@ -54,28 +54,22 @@ def charger_donnees():
 
 def afficher_pastilles_compacte(selection_df, nb_auto_par_ligne=2, total_cases=6):
     if not selection_df.empty:
-        # Crée un dictionnaire : index → HTML pastille
         pastilles_dict = {
-            int(row['Position']): f"<div title=\"{row['Automatisme']}\" style='flex:1; padding:2px; border: 3px solid {row['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em; font-weight:bold; text-align:center; cursor:help;'> {row['Code']} </div>"
+            int(row['Position']): f"<div title=\"{row['Automatisme']}\" style='flex:1; padding:2px; border:3px solid {row['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em; font-weight:bold; text-align:center; cursor:help;'> {row['Code']} </div>"
             for _, row in selection_df.iterrows()
         }
+        nb_lignes = (total_cases + nb_auto_par_ligne - 1) // nb_auto_par_ligne
 
-        # Crée la liste ordonnée avec cases vides si besoin
-        pastilles = []
-        for i in range(total_cases):
-            if i in pastilles_dict:
-                pastilles.append(pastilles_dict[i])
-            else:
-                pastilles.append("<div style='flex:1; padding:2px; border: 1px dashed #ccc; border-radius:4px; height:1.5em;'></div>")
-
-        # Regrouper en lignes
-        lignes = [
-            "<div style='display:flex; gap:4px;'>" + "".join(pastilles[i:i+nb_auto_par_ligne]) + "</div>" 
-            for i in range(0, len(pastilles), nb_auto_par_ligne)
-        ]
-        for ligne in lignes:
-            st.markdown(ligne, unsafe_allow_html=True)
-
+        for ligne in range(nb_lignes):
+            ligne_html = "<div style='display:flex; gap:4px;'>"
+            for col in range(nb_auto_par_ligne):
+                pos = col * nb_lignes + ligne
+                if pos in pastilles_dict:
+                    ligne_html += pastilles_dict[pos]
+                else:
+                    ligne_html += "<div style='flex:1; padding:2px; border:1px dashed #ccc; border-radius:4px; height:1.5em;'></div>"
+            ligne_html += "</div>"
+            st.markdown(ligne_html, unsafe_allow_html=True)
 
 def melanger_sans_consecutifs(liste):
     for _ in range(1000):
