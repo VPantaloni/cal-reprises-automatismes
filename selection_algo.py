@@ -76,7 +76,10 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
             codes_selectionnes.add(base_theme[i])
 
     # 2. Automatisme diagnostique du thème à venir (rappels ou non)
-    future_index = semaine + 2 #if nb_automatismes == 6 else semaine + 3
+    future_index = semaine + 2
+    if future_index < len(sequences) and sequences[future_index] == theme:
+        if semaine + 3 < len(sequences):
+            future_index = semaine + 3
     if future_index < len(sequences):
         future_theme = sequences[future_index]
         pos_diag = [1, 4] if nb_automatismes == 6 else [1, 4, 7]
