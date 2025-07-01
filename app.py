@@ -290,26 +290,26 @@ def recalculer_toute_la_repartition():
     st.session_state.next_index_by_theme = defaultdict(lambda: 1)
     
     for i in range(nb_semaines):
-    if st.session_state.sequences[i]:
-        themes_passes = [t for t in st.session_state.sequences[:i] if t]
-        codes = selectionner_automatismes(
-            data, i, st.session_state.sequences[i],
-            st.session_state.auto_weeks,
-            st.session_state.used_codes,
-            st.session_state.next_index_by_theme,
-            min_espacement_rappel=min_espacement_rappel,
-            espacement_min2=espacement_min2,
-            espacement_max2=espacement_max2,
-            espacement_min3=espacement_min3,
-            espacement_max3=espacement_max3,
-            themes_passes=themes_passes,
-            sequences=st.session_state.sequences,
-            nb_automatismes=get_nb_automatismes()  # ← ici à garder !
-        )
-        st.session_state.selection_by_week[i] = codes
-        for code in codes:
-            st.session_state.auto_weeks[code].append(i)
-            st.session_state.used_codes[code] += 1
+        if st.session_state.sequences[i]:
+            themes_passes = [t for t in st.session_state.sequences[:i] if t]
+            codes = selectionner_automatismes(
+                data, i, st.session_state.sequences[i],
+                st.session_state.auto_weeks,
+                st.session_state.used_codes,
+                st.session_state.next_index_by_theme,
+                min_espacement_rappel=min_espacement_rappel,
+                espacement_min2=espacement_min2,
+                espacement_max2=espacement_max2,
+                espacement_min3=espacement_min3,
+                espacement_max3=espacement_max3,
+                themes_passes=themes_passes,
+                sequences=st.session_state.sequences,
+                nb_automatismes=get_nb_automatismes()  # ← ici à garder !
+            )
+            st.session_state.selection_by_week[i] = codes
+            for code in codes:
+                st.session_state.auto_weeks[code].append(i)
+                st.session_state.used_codes[code] += 1
 
 # Bouton recalcul
 if top_button_placeholder.button("🔄 (Re)calculer la distribution des automatismes"):
