@@ -227,34 +227,6 @@ if st.sidebar.button("📙 Progression n°2"):
 
 top_button_placeholder = st.sidebar.empty()
 
-# Bouton remplissage aléatoire adapté
-if st.sidebar.button("🎲 Compléter les ❓"):
-    nb_semaines = get_nb_semaines()
-    new_seq = st.session_state.sequences.copy()
-    start_idx = 8 if st.session_state.mode_affichage == "32_semaines" else 10
-    if len(new_seq) > start_idx - 1:
-        prev = new_seq[start_idx - 1]
-        for i in range(start_idx, nb_semaines):
-            options = [s for s in subtheme_emojis if s != prev]
-            choice = random.choice(options)
-            new_seq[i] = choice
-            prev = choice
-    st.session_state.sequences = new_seq
-    st.rerun()
-
-st.sidebar.markdown(
-    "<a href='https://codimd.apps.education.fr/s/xd2gxRA1m' target='_blank' style='text-decoration: none;'>"
-    "📚 Tuto </a>",
-    unsafe_allow_html=True
-)
-
-#st.sidebar.markdown("### Paramètres d'espacement")
-#min_espacement_rappel = st.sidebar.slider("Espacement min pour rappels", 1, 6, 1)
-#espacement_min2 = st.sidebar.slider("1ère → 2e apparition (min)", 1, 6, 2)
-#espacement_max2 = st.sidebar.slider("1ère → 2e apparition (max)", 2, 10, 6)
-#espacement_min3 = st.sidebar.slider("2e → 3e apparition (min)", 2, 10, 4)
-#espacement_max3 = st.sidebar.slider("2e → 3e apparition (max)", 2, 15, 10)
-
 #parametres obsolètes mais utiles pour la cohérence des appels.
 min_espacement_rappel = 1
 espacement_min2 = 1 #"1ère → 2e apparition (min)", 1, 6, 2)
@@ -364,7 +336,19 @@ if st.session_state.mode_affichage == "32_semaines":
 
             if st.session_state.sequences[i] and st.session_state.selection_by_week[i]:
                 codes = st.session_state.selection_by_week[i]
-                afficher_pastilles_compacte(data[data['Code'].isin(codes)], nb_auto_par_ligne=2)
+                selection_df = []
+                for pos, code in enumerate(codes):
+                    if code:
+                        row = data[data['Code'] == code].iloc[0]
+                        selection_df.append({
+                            "Position": pos,
+                            "Code": row['Code'],
+                            "Automatisme": row['Objectif'],
+                            "Couleur": row['Couleur']
+                        })
+                selection_df = pd.DataFrame(selection_df)
+                afficher_pastilles_compacte(selection_df, nb_auto_par_ligne=2 if nb_automatismes == 6 else 3, total_cases=nb_automatismes)
+
                 st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
 else:
     # 5 lignes de 7 colonnes
