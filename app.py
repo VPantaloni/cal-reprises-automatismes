@@ -237,18 +237,8 @@ for i in range(35):
     with rows[row][col]:
         emoji = st.session_state.sequences[i] if st.session_state.sequences[i] else "❓"
         label = emoji_numeros[i]
-        # Appliquer une bordure verticale si cette semaine précède des vacances
-        semaine_num = i + 1
-        border_style = "border-right: 6px solid gold; padding-right: 6px;" if semaine_num in vacances_A else ""
-        
-        # Afficher le bouton avec un conteneur HTML stylé
-        st.markdown(
-            f"<div style='{border_style}'>",
-            unsafe_allow_html=True
-        )
         if st.button(f"{label} {emoji}", key=f"pick_{i}"):
             st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
-        st.markdown("</div>", unsafe_allow_html=True)    
 
         if st.session_state.get(f"show_picker_{i}", False):
             picker_rows = [st.columns(3) for _ in range(4)]
@@ -266,6 +256,22 @@ for i in range(35):
                                 st.session_state.sequences[i] = icon
                                 st.session_state[f"show_picker_{i}"] = False
                                 st.rerun()
+
+        if st.session_state.sequences[i] and st.session_state.selection_by_week[i]:
+            codes = st.session_state.selection_by_week[i]
+            selection_df = []
+            for pos, code in enumerate(codes):
+                if code:
+                    row = data[data['Code'] == code].iloc[0]
+                    selection_df.append({
+                        "Position": pos,
+                        "Code": row['Code'],
+                        "Automatisme": row['Automatisme'],
+                        "Couleur": row['Couleur']
+                    })
+            selection_df = pd.DataFrame(selection_df)
+            afficher_pastilles_compacte(selection_df, nb_auto_par_ligne=3, total_cases=9)
+            st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
 
 # Import du volet 2
 
