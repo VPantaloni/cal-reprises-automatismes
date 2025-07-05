@@ -228,7 +228,30 @@ if st.sidebar.button("🧩 Compléter Q3 ❓"):
     )
     st.rerun()
 
+## Tout en un ?
+if st.sidebar.button("Placer des automatismes"):
+    auto_weeks = defaultdict(list)
+    used_codes = defaultdict(int)
+    for i in range(35):
+        if i < len(st.session_state.sequences):
+            theme = st.session_state.sequences[i]
+            if theme and theme != "❓":
+                st.session_state.selection_by_week[i] = selection_q1q2.selectionner_q1q2(
+                    data, i, theme, st.session_state.sequences, auto_weeks, used_codes
+                )
+    
+    from selection_q3 import selectionner_q3, reconstruire_auto_weeks
 
+    auto_weeks, used_codes = reconstruire_auto_weeks(st.session_state.selection_by_week)
+
+    st.session_state.selection_by_week = selectionner_q3(
+        data,
+        st.session_state.selection_by_week,
+        st.session_state.sequences,
+        auto_weeks,
+        used_codes
+    )
+    st.rerun()
 
 #st.sidebar.markdown("### Affichages")
 st.sidebar.markdown(
