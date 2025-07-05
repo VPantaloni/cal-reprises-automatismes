@@ -212,12 +212,9 @@ if st.sidebar.button("▶️ Sélection Q1/Q2 uniquement"):
     st.rerun()
 #---
 if st.sidebar.button("🧩 Compléter Q3"):
-    from selection_q3 import completer_q3
-    st.session_state.selection_by_week = completer_q3(
-        data,
-        st.session_state.selection_by_week,
-        st.session_state.auto_weeks
-    )
+    st.session_state.selection_by_week = selection_q3.selectionner_q3(data, st.session_state.selection_by_week)
+    auto_weeks = selection_q3.reconstruire_auto_weeks(st.session_state.selection_by_week)
+    st.session_state.auto_weeks = auto_weeks
     st.rerun()
 
 
