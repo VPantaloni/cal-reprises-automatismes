@@ -300,9 +300,9 @@ def afficher_lecture_et_export(data, subtheme_legend):
     
     # Attribution manuelle des tailles selon ta logique :
     # - col 0 : +1 (donc base + 1)
-    # - col 1 : base - 1
+    # - col 1 : base +0 
     # - col 2 : le reste
-    sizes = [base + 1, base - 1, nb - (base + 1 + base - 1)]
+    sizes = [base + 1, base + 0, nb - (base + 1 + base + 0)]
     
     start = 0
     for j in range(3):
