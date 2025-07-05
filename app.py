@@ -375,7 +375,7 @@ for i in range(35):
             st.markdown("<div style='margin-top:10px;'></div>", unsafe_allow_html=True)
 
 # Import du volet 2
-auto_weeks, used_codes = selection_q3.reconstruire_auto_weeks(st.session_state.selection_by_week)
+#auto_weeks, used_codes = selection_q3.reconstruire_auto_weeks(st.session_state.selection_by_week)
 st.session_state.auto_weeks = auto_weeks
 
 ##
@@ -398,19 +398,13 @@ def afficher_lecture_et_export(data, subtheme_legend):
             "Couleur": row['Couleur']
         })
 
+    # Répartition en 3 colonnes équilibrées
     cols = st.columns(3)
     nb = len(recap_data)
-    
-    # Répartition initiale
     base = nb // 3
     reste = nb % 3
-    
-    # Attribution manuelle des tailles selon ta logique :
-    # - col 0 : +1 (donc base + 1)
-    # - col 1 : base +0 
-    # - col 2 : le reste
-    sizes = [base + 1, base + 0, nb - (base + 1 + base + 0)]
-    
+    sizes = [base + 1, base, nb - (base + 1 + base)]
+
     start = 0
     for j in range(3):
         end = start + sizes[j]
@@ -424,26 +418,23 @@ def afficher_lecture_et_export(data, subtheme_legend):
                     unsafe_allow_html=True
                 )
         start = end
-            # Affichage compact des occurrences    # Reconstruire les auto_weeks une seule fois
-        auto_weeks, _ = selection_q3.reconstruire_auto_weeks(st.session_state.selection_by_week)
-    
-        occur_df = pd.DataFrame([
-            {
-                "Code": code,
-                "Occurrences": len(semaines),
-                "Semaines": ", ".join([f"S{s+1}" for s in semaines])
-            }
-            for code, semaines in auto_weeks.items()
-        ])
 
-        
-        occur_df = occur_df.sort_values(by="Occurrences", ascending=False)
-        st.markdown("### 📊 Répartition des automatismes")
-        st.dataframe(occur_df, use_container_width=True)
+    # ✅ Affichage unique du tableau global en dehors de la boucle
+    occur_df = pd.DataFrame([
+        {
+            "Code": code,
+            "Occurrences": len(semaines),
+            "Semaines": ", ".join([f"S{s+1}" for s in semaines])
+        }
+        for code, semaines in st.session_state.auto_weeks.items()
+    ])
+
+    occur_df = occur_df.sort_values(by="Occurrences", ascending=False)
+    st.markdown("### 📊 Répartition des automatismes")
+    st.dataframe(occur_df, use_container_width=True)
 
     return recap_data
-
- 
+#----------------------------- 
 if st.session_state.show_recap:
     recap_data = afficher_lecture_et_export(data, subtheme_legend)
 else:
