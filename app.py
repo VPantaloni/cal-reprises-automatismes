@@ -326,14 +326,24 @@ for i in range(35):
             codes = st.session_state.selection_by_week[i]
             selection_df = []
             for pos, code in enumerate(codes):
-                if code:
-                    row = data[data['Code'] == code].iloc[0]
+                if code and code != "❓":
+                    row = data[data['Code'] == code]
+                    if not row.empty:
+                        row = row.iloc[0]
+                        selection_df.append({
+                            "Position": pos,
+                            "Code": row['Code'],
+                            "Automatisme": row['Automatisme'],
+                            "Couleur": row['Couleur']
+                        })
+                elif code == "❓":
                     selection_df.append({
                         "Position": pos,
-                        "Code": row['Code'],
-                        "Automatisme": row['Automatisme'],
-                        "Couleur": row['Couleur']
+                        "Code": "❓",
+                        "Automatisme": "Automatisme à compléter",
+                        "Couleur": "#cccccc"
                     })
+
             selection_df = pd.DataFrame(selection_df)
             afficher_pastilles_compacte(selection_df, nb_auto_par_ligne=3, total_cases=9)
             st.markdown("<div style='margin-top:10px;'></div>", unsafe_allow_html=True)
