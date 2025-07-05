@@ -260,9 +260,9 @@ if st.sidebar.button("🛠️ Algo. distribuer les automatismes"):
 
 # ✅ Message de confirmation si bouton déjà utilisé
 if st.session_state.btn_done:
-    st.sidebar.success("✅ Distribution 🛠️")
+    #st.sidebar.success("✅ Distribution 🛠️")
     # 🔘 Affichage conditionnel de l’histogramme
-    show_histogram = st.sidebar.checkbox("📊 Afficher l’histogramme cumulé", value=True)
+    show_histogram = st.sidebar.checkbox("📊 Histogramme cumulé", value=True)
 
 ## Histo
 
