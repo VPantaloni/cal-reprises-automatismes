@@ -100,7 +100,7 @@ with st.expander("📘 Légende des thèmes ⤵" + " " + " " + " " + "\u00A0"* 1
 
 st.sidebar.markdown("### 🎯 Affichage")
 # Choix de la zone de vacances
-zone = st.sidebar.radio("Choix vacances 🡆|", ["Zone A", "Zone B", "Zone C"], index=0)
+zone = st.sidebar.radio("Choix vacances 🡆|", ["Zone A", "Zone B", "Zone C"], index=1) #index 1: par défaut Zone B
 # Définition des durées de vacances (en nombre de semaines) à chaque période
 vacances_A = [7, 7, 5, 6]
 vacances_B = [7, 7, 6, 6]
