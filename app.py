@@ -334,7 +334,7 @@ def afficher_lecture_et_export(data, subtheme_legend):
 afficher_lecture_et_export(data, subtheme_legend)
 # Nom du fichier
 filename = "planning_reprises_35sem.xlsx"
-
+buffer.seek(0)
 st.sidebar.download_button(
         label="📅 Télécharger le planning Excel",
         data=buffer.getvalue(),
