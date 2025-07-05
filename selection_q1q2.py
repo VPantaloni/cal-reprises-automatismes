@@ -4,20 +4,31 @@ from collections import defaultdict
 
 def selectionner_automatismes_theme_q1q2(data, semaine, theme, auto_weeks, used_codes, themes_passes, positions):
     selection = [None] * 9
-    theme_autos_df = data[data['Code'].str.startswith(theme)]
-    if theme_autos_df.empty:
-        return selection  # Aucun automatisme trouvé pour ce thème
+    # Récupérer tous les automatismes du thème
+    theme_autos = list(data[data['Code'].str.startswith(theme)]['Code'])
 
-    theme_autos = list(theme_autos_df['Code'])
+    if not theme_autos:
+        return selection  # Aucun automatisme, rien à faire
 
-    # Respect de l'ordre d'apparition dans le fichier CSV
-    for i, pos in enumerate(positions):
-        if len(theme_autos) == 1:
+    # Si 1 ou 2 automatismes → répétitions intelligentes
+    if len(theme_autos) == 1:
+        for pos in positions:
             selection[pos] = theme_autos[0]
-        elif len(theme_autos) == 2:
-            selection[pos] = theme_autos[i % 2]
-        elif i < len(theme_autos):
-            selection[pos] = theme_autos[i]
+        return selection
+    elif len(theme_autos) == 2:
+        alternance = [theme_autos[0], theme_autos[1], theme_autos[0]]
+        for pos, code in zip(positions, alternance):
+            selection[pos] = code
+        return selection
+
+    # Sinon, équilibrer selon les occurrences (used_codes)
+    # Trier par nombre d'utilisations croissant, puis ordre dans CSV
+    auto_scores = [(code, used_codes.get(code, 0)) for code in theme_autos]
+    auto_scores.sort(key=lambda x: (x[1], theme_autos.index(x[0])))  # tri par usage puis position
+
+    # Remplir les positions avec les moins utilisés
+    for pos, (code, _) in zip(positions, auto_scores):
+        selection[pos] = code
 
     return selection
 
