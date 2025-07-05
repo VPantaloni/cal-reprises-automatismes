@@ -203,7 +203,7 @@ if st.sidebar.button("📙 Progression n°2"):
 # Vérifier si tous les thèmes sont définis (au moins en grande partie)
 nb_vides = sum(1 for t in st.session_state.get("sequences", []) if not t or t == "❓")
 
-if nb_vides > 10:
+if nb_vides > 0:
     st.sidebar.warning(
         "👆 Avant de distribuer les automatismes :\n\n"
         "🟦 Cliquez sur chaque bouton de semaine (S1 à S35)\n"
@@ -211,7 +211,7 @@ if nb_vides > 10:
         "📘 Chargez une progression déjà prête ('Progression 1' ou 'Progression 2')."
     )
 else:
-    st.sidebar.info("👍 Thèmes détectés pour la majorité des semaines. Vous pouvez lancer la distribution des automatismes.")
+    st.sidebar.info("👍 Thèmes détectés. Vous pouvez lancer la distribution des automatismes.")
 ## Bouton tout en un
 if st.sidebar.button("⚙ Algo. distribuer les automatismes"):
     auto_weeks = defaultdict(list)
