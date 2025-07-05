@@ -128,17 +128,29 @@ if nb_vides > 1:
         "- ou 📘 chargez une progression prête ('Progression 1' ou 'Progression 2') via la barre latérale."
     )
 
-## LEGENDES
-with st.expander("📘 Légende des thèmes ⤵" + " " + " " + " " + "\u00A0"* 15 + ">> Ouvrir le menu latéral pour plus d'actions !"):
+# AFFICHAGE LÉGENDE SI ACTIVÉ
+if st.session_state.show_legend:
+    st.markdown("### 📘 Légende des thèmes")
     cols = st.columns(5)
     for idx, (emoji, label) in enumerate(subtheme_legend.items()):
         with cols[idx % 5]:
-            st.markdown(f"""<div style='background:{subtheme_colors[emoji]}; padding:4px; border-radius:6px; color:white; font-size:0.85em;'>
-                <b>{emoji}</b> {label}</div>""", unsafe_allow_html=True)
+            st.markdown(f"""
+                <div style='background:{subtheme_colors[emoji]}; padding:4px; border-radius:6px;
+                            color:white; font-size:0.85em; text-align:left'>
+                    <b>{emoji}</b> {label}
+                </div>
+            """, unsafe_allow_html=True)
+
 
 # ===== SIDEBAR =====
 
 st.sidebar.markdown("### 🎯 Affichage")
+# Affichage légende
+if "show_legend" not in st.session_state:
+    st.session_state.show_legend = True
+
+st.sidebar.checkbox("📘 Afficher la légende", key="show_legend")
+
 # Choix de la zone de vacances
 # Définitions des durées vacances (en nombre de semaines)
 vacances_A = [7, 7, 5, 6]
@@ -172,6 +184,69 @@ for v in vacances:
 
 #--------
 st.sidebar.checkbox("🔍 Afficher vue par automatisme", key="show_recap")
+
+st.sidebar.markdown("### Compléter grille")
+
+# Progressions pour 35 semaines
+progression_1 = [
+    "🔢", "📐", "➗", "📏", "📐", "🔢", "📏", "🔷", "➗", "⌚", "🧊",
+    "🔢", "📐", "➗", "🎲", "📐", "∝", "📐", "🎲", "🔢", "🧊",
+    "➗", "🔢", "⌚", "🔷", "🧊", "🔢", "📐", "➗", "📐", "📏",
+    "📐", "∝", "📊", "🔢"
+]
+progression_2 = [
+    "🔢", "📐", "➗", "🔢", "📐", "∝", "🎲", "📐", "🔢", "⌚", "📐",
+    "➗", "🔢", "📊", "📏", "📐", "➗", "∝", "🎲", "📐", "🔢",
+    "🧊", "⌚", "➗", "🔢", "📏", "📐", "➗", "🔷", "🧊", "📊",
+    "📐", "🔷", "🔢", "📐"
+]
+
+if st.sidebar.button("📘 Progression n°1"):
+    st.session_state.sequences = progression_1.copy()
+    st.rerun()
+
+if st.sidebar.button("📙 Progression n°2"):
+    st.session_state.sequences = progression_2.copy()
+    st.rerun()
+
+## Message avant distrib :
+# Vérifier si tous les thèmes sont définis (au moins en grande partie)
+nb_vides = sum(1 for t in st.session_state.get("sequences", []) if not t or t == "❓")
+
+if nb_vides == 0:
+    st.sidebar.info("👍 Thèmes détectés. Vous pouvez lancer la distribution des automatismes.👇")
+## Bouton tout en un
+if st.sidebar.button("⚙ Algo. distribuer les automatismes"):
+    auto_weeks = defaultdict(list)
+    used_codes = defaultdict(int)
+    for i in range(35):
+        if i < len(st.session_state.sequences):
+            theme = st.session_state.sequences[i]
+            if theme and theme != "❓":
+                st.session_state.selection_by_week[i] = selection_q1q2.selectionner_q1q2(
+                    data, i, theme, st.session_state.sequences, auto_weeks, used_codes
+                )
+    
+    from selection_q3 import selectionner_q3, reconstruire_auto_weeks
+
+    auto_weeks, used_codes = reconstruire_auto_weeks(st.session_state.selection_by_week)
+
+    st.session_state.selection_by_week = selectionner_q3(
+        data,
+        st.session_state.selection_by_week,
+        st.session_state.sequences,
+        auto_weeks,
+        used_codes
+    )
+    st.rerun()
+
+#st.sidebar.markdown("### Affichages")
+st.sidebar.markdown(
+    "<a href='https://codimd.apps.education.fr/s/xd2gxRA1m' target='_blank' style='text-decoration: none;'>"
+    "📚 Lien vers tutoriel </a>",
+    unsafe_allow_html=True
+)
+
 # === MODE NUIT ===
 if "dark_mode" not in st.session_state:
     st.session_state.dark_mode = False
@@ -209,78 +284,6 @@ if st.session_state.dark_mode:
         """,
         unsafe_allow_html=True
     )
-
-st.sidebar.markdown("### Compléter grille")
-
-# Progressions pour 35 semaines
-progression_1 = [
-    "🔢", "📐", "➗", "📏", "📐", "🔢", "📏", "🔷", "➗", "⌚", "🧊",
-    "🔢", "📐", "➗", "🎲", "📐", "∝", "📐", "🎲", "🔢", "🧊",
-    "➗", "🔢", "⌚", "🔷", "🧊", "🔢", "📐", "➗", "📐", "📏",
-    "📐", "∝", "📊", "🔢"
-]
-progression_2 = [
-    "🔢", "📐", "➗", "🔢", "📐", "∝", "🎲", "📐", "🔢", "⌚", "📐",
-    "➗", "🔢", "📊", "📏", "📐", "➗", "∝", "🎲", "📐", "🔢",
-    "🧊", "⌚", "➗", "🔢", "📏", "📐", "➗", "🔷", "🧊", "📊",
-    "📐", "🔷", "🔢", "📐"
-]
-
-if st.sidebar.button("📘 Progression n°1"):
-    st.session_state.sequences = progression_1.copy()
-    st.rerun()
-
-if st.sidebar.button("📙 Progression n°2"):
-    st.session_state.sequences = progression_2.copy()
-    st.rerun()
-
-## Message avant distrib :
-# Vérifier si tous les thèmes sont définis (au moins en grande partie)
-nb_vides = sum(1 for t in st.session_state.get("sequences", []) if not t or t == "❓")
-
-if nb_vides > 0:
-    st.sidebar.warning(
-        "👆 Avant de distribuer les automatismes :\n\n"
-        "🟦 Cliquez sur chaque bouton de semaine (S1 à S35)\n"
-        "ou\n"
-        "📘 Chargez une progression déjà prête ('Progression 1' ou 'Progression 2')."
-    )
-else:
-    st.sidebar.info("👍 Thèmes détectés. Vous pouvez lancer la distribution des automatismes.")
-## Bouton tout en un
-if st.sidebar.button("⚙ Algo. distribuer les automatismes"):
-    auto_weeks = defaultdict(list)
-    used_codes = defaultdict(int)
-    for i in range(35):
-        if i < len(st.session_state.sequences):
-            theme = st.session_state.sequences[i]
-            if theme and theme != "❓":
-                st.session_state.selection_by_week[i] = selection_q1q2.selectionner_q1q2(
-                    data, i, theme, st.session_state.sequences, auto_weeks, used_codes
-                )
-    
-    from selection_q3 import selectionner_q3, reconstruire_auto_weeks
-
-    auto_weeks, used_codes = reconstruire_auto_weeks(st.session_state.selection_by_week)
-
-    st.session_state.selection_by_week = selectionner_q3(
-        data,
-        st.session_state.selection_by_week,
-        st.session_state.sequences,
-        auto_weeks,
-        used_codes
-    )
-    st.rerun()
-
-#st.sidebar.markdown("### Affichages")
-st.sidebar.markdown(
-    "<a href='https://codimd.apps.education.fr/s/xd2gxRA1m' target='_blank' style='text-decoration: none;'>"
-    "📚 Lien vers tutoriel </a>",
-    unsafe_allow_html=True
-)
-
-# Import de l'algorithme de sélection
-# from selection_algo import selectionner_automatismes
 
 # ===================== AFFICHAGE PLANNING =====================
 
