@@ -263,7 +263,8 @@ if st.session_state.btn_done:
     #st.sidebar.success("✅ Distribution 🛠️")
     # 🔘 Affichage conditionnel de l’histogramme
     show_histogram = st.sidebar.checkbox("📊 Histogramme cumulé", value=True)
-
+    # 🎛️ Sélecteur de thème(s)
+    selected_themes = st.sidebar.multiselect("🎨 Filtrer par thème", theme_emojis, default=theme_emojis)
 ## Histo
 
 #st.sidebar.markdown("### Affichages")
@@ -524,7 +525,9 @@ if show_histogram:
     semaine_order = [f"S{i}" for i in range(1, 36)]
     df_viz["Semaine"] = pd.Categorical(df_viz["Semaine"], categories=semaine_order, ordered=True)
     df_viz = df_viz.sort_values("Semaine")
-    
+    # 🎯 Ne garder que les automatismes dont le code commence par un emoji sélectionné
+    df_viz = df_viz[df_viz["Code"].str[0].isin(selected_themes)]
+
     # 📈 Affichage interactif Plotly
     fig = px.bar(
         df_viz,
