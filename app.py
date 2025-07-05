@@ -250,15 +250,13 @@ for i in range(35):
         )
         
         # Conteneur avec le style
-        st.markdown(f"<div style='padding:4px; border-radius:6px; {background_style}'>", unsafe_allow_html=True)
-        
+        st.markdown(f"<div style='padding:1px; border-radius:4px; {background_style}'>", unsafe_allow_html=True)
         # Bouton semaine (emoji + numéro)
         if st.button(f"{label} {emoji}", key=f"pick_{i}"):
             st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
         
         st.markdown("</div>", unsafe_allow_html=True)
-  
-
+        
         if st.session_state.get(f"show_picker_{i}", False):
             picker_rows = [st.columns(3) for _ in range(4)]
             layout = [
