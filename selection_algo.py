@@ -32,14 +32,19 @@ def peut_etre_place(code, data, semaine, auto_weeks, used_codes, themes_passes, 
 
 def selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes, themes_passes, positions):
     selection = [None] * 9
-    theme_autos = [
-        c for c in data[data['Code'].str.startswith(theme)]['Code']
-        if peut_etre_place(c, data, semaine, auto_weeks, used_codes, themes_passes, theme)
+
+    df_theme = data[data['Code'].str.startswith(theme)].copy()
+    df_theme = df_theme.sort_values(by="__ordre__")  # 👈 respect strict de l’ordre CSV
+
+    codes_eligibles = [
+        row['Code'] for _, row in df_theme.iterrows()
+        if peut_etre_place(row['Code'], data, semaine, auto_weeks, used_codes, themes_passes, theme)
     ]
-    # ❌ Plus de random.shuffle → respect de l'ordre CSV
+
     for i, pos in enumerate(positions):
-        if i < len(theme_autos):
-            selection[pos] = theme_autos[i]
+        if i < len(codes_eligibles):
+            selection[pos] = codes_eligibles[i]
+
     return selection
 
 def selectionner_automatismes_autres_themes(data, semaine, auto_weeks, used_codes, codes_selectionnes, themes_passes, positions, theme):
