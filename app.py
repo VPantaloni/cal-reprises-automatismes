@@ -277,7 +277,7 @@ for i in range(35):
 def afficher_lecture_et_export(data, subtheme_legend):
     st.markdown("---")
     st.markdown("## 🔍 Lecture par automatisme")
-    
+
     recap_data = []
     for _, row in data.iterrows():
         code = row['Code']
@@ -288,14 +288,13 @@ def afficher_lecture_et_export(data, subtheme_legend):
             "Semaines": ", ".join(semaines),
             "Couleur": row['Couleur']
         })
-    
-    # Affichage en 3 colonnes avec surplus dans la dernière
+
     cols = st.columns(3)
     nb = len(recap_data)
     chunk_size = nb // 3
     for j in range(3):
         start = j * chunk_size
-        end = (j + 1) * chunk_size if j < 2 else nb  # Dernière colonne prend le reste
+        end = (j + 1) * chunk_size if j < 2 else nb
         for r in recap_data[start:end]:
             with cols[j]:
                 st.markdown(
@@ -305,9 +304,10 @@ def afficher_lecture_et_export(data, subtheme_legend):
                     f"<small><i>Semaine(s)</i> : {r['Semaines']}</small></div>",
                     unsafe_allow_html=True
                 )
-    
 
-afficher_lecture_et_export(data, subtheme_legend)
+    return recap_data  # ← Ajouté ici
+    
+recap_data = afficher_lecture_et_export(data, subtheme_legend)
 
 #-----------------------
 # Génération export Excel
