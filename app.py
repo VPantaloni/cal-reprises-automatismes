@@ -243,16 +243,25 @@ for i in range(35):
     row = i // 7
     col = i % 7
     with rows[row][col]:
+                # Préparation du label du bouton
         emoji = st.session_state.sequences[i] if st.session_state.sequences[i] else "❓"
-
-        # Ajout d’un repère visuel pour les vacances
         label = emoji_numeros[i]
-        if i + 1 in vacances_A:
-            label += " 🟡"  # ou " V" selon préférence
+        semaine_num = i + 1
+        est_vacances = semaine_num in vacances_A
 
-        # Bouton semaine
+        # Conteneur HTML pour placer le bouton et l’emoji 🟡 à côté
+        st.markdown("<div style='display:flex; align-items:center; gap:6px;'>", unsafe_allow_html=True)
+
+        # Affichage du bouton
         if st.button(f"{label} {emoji}", key=f"pick_{i}"):
             st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
+
+        # Ajout éventuel de l’emoji vacances à droite du bouton
+        if est_vacances:
+            st.markdown("<span style='font-size:1.2em;'>🟡</span>", unsafe_allow_html=True)
+
+        # Fermeture du conteneur
+        st.markdown("</div>", unsafe_allow_html=True)
 
         # Picker pour choisir un emoji
         if st.session_state.get(f"show_picker_{i}", False):
