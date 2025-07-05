@@ -366,6 +366,8 @@ for i in range(35):
             st.markdown("<div style='margin-top:10px;'></div>", unsafe_allow_html=True)
 
 # Import du volet 2
+auto_weeks = reconstruire_auto_weeks(st.session_state.selection_by_week)
+st.session_state.auto_weeks = auto_weeks
 
 def afficher_lecture_et_export(data, subtheme_legend):
     st.markdown("---")
