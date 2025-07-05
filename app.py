@@ -140,8 +140,8 @@ if st.session_state.show_legend:
                 <div style='background:{subtheme_colors[emoji]}; padding:4px; border-radius:6px;
                             color:white; font-size:0.85em; text-align:left'>
                     <b>{emoji}</b> {label}
-                </div><br>
-            """, unsafe_allow_html=True)
+                </div>
+            """, unsafe_allow_html=True)<br>
 
 
 # ===== SIDEBAR =====
@@ -218,7 +218,7 @@ nb_vides = sum(1 for t in st.session_state.get("sequences", []) if not t or t ==
 if nb_vides == 0:
     st.sidebar.info("👍 Thèmes détectés. Vous pouvez lancer la distribution des automatismes.👇")
 ## Bouton tout en un
-if st.sidebar.button("⚙ Algo. distribuer les automatismes"):
+if st.sidebar.button("🛠️ Algo. distribuer les automatismes"):
     auto_weeks = defaultdict(list)
     used_codes = defaultdict(int)
     for i in range(35):
