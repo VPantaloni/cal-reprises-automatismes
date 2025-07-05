@@ -100,7 +100,16 @@ with st.expander("📘 Légende des thèmes ⤵" + " " + " " + " " + "\u00A0"* 1
 
 st.sidebar.markdown("### 🎯 Affichage")
 # Choix de la zone de vacances
-# Définir la valeur par défaut si elle n'existe pas déjà dans session_state
+# Définitions des durées vacances (en nombre de semaines)
+vacances_A = [7, 7, 5, 6]
+vacances_B = [7, 7, 6, 6]
+vacances_C = [7, 7, 7, 6]
+
+vacances_map = {
+    "Zone A": vacances_A,
+    "Zone B": vacances_B,
+    "Zone C": vacances_C
+}
 # Initialiser la valeur par défaut dans session_state si absente
 if "zone_vacances" not in st.session_state:
     st.session_state.zone_vacances = "Zone B"
