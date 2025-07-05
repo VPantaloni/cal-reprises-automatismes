@@ -238,8 +238,9 @@ vacances_A = [6, 12, 18, 26]
 emoji_numeros = [f"S{i+1}" for i in range(35)]
 
 # Affichage en 5 lignes de 7 colonnes
+# Affichage en 5 lignes de 7 colonnes
 rows = [st.columns(7) for _ in range(5)]
-vacances_A = [6, 12, 18, 26]  # ← à adapter selon la zone
+vacances_A = [6, 12, 18, 26]  # Numéros de semaine juste avant vacances
 
 for i in range(35):
     row = i // 7
@@ -250,32 +251,16 @@ for i in range(35):
     vacances_txt = "ⓥ🌞|" if semaine_num in vacances_A else ""
 
     with rows[row][col]:
-        # Bouton semaine avec info vacances à droite (compact)
-        st.markdown(
-            f"""
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <form action="" method="post">
-                    <button name="pick_{i}" type="submit" style="
-                        all: unset;
-                        cursor: pointer;
-                        font-size: 1em;
-                        font-weight: bold;
-                        background-color: transparent;
-                        border: none;
-                        padding: 0;
-                        margin: 0;
-                    ">{label} {emoji}</button>
-                </form>
-                <span style="font-size: 0.85em;">{vacances_txt}</span>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        # Ligne contenant bouton semaine + repère vacances à droite
+        col_btn, col_vac = st.columns([5, 1])
+        with col_btn:
+            if st.button(f"{label} {emoji}", key=f"pick_{i}"):
+                st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
+                st.rerun()
+        with col_vac:
+            st.markdown(f"<div style='font-size: 0.75em; text-align:right;'>{vacances_txt}</div>", unsafe_allow_html=True)
 
-        if st.session_state.get(f"pick_{i}"):
-            st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
-            st.rerun()
-
+        # Picker d'emoji (sélecteur de thème)
         if st.session_state.get(f"show_picker_{i}", False):
             picker_rows = [st.columns(3) for _ in range(4)]
             layout = [
@@ -308,7 +293,7 @@ for i in range(35):
                     })
             selection_df = pd.DataFrame(selection_df)
             afficher_pastilles_compacte(selection_df, nb_auto_par_ligne=3, total_cases=9)
-            st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-top:10px;'></div>", unsafe_allow_html=True)
 
 # Import du volet 2
 
