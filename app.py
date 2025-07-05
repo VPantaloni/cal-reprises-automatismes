@@ -223,8 +223,11 @@ if st.sidebar.button("🧩 Compléter Q3 ❓"):
     st.session_state.selection_by_week = selectionner_q3(
         data,
         st.session_state.selection_by_week,
-        st.session_state.sequences
+        st.session_state.sequences,
+        auto_weeks,
+        used_codes
     )
+
     st.rerun()
 
 
