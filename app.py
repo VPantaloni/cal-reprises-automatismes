@@ -133,6 +133,7 @@ if st.session_state.show_legend:
                     <b>{emoji}</b> {label}
                 </div>
             """, unsafe_allow_html=True)
+    st.markdown("---")
 
 ## Bulles tuto warning
 nb_vides = sum(1 for t in st.session_state.sequences if not t or t == "❓")
