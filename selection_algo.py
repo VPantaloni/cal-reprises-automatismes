@@ -34,16 +34,31 @@ def selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes
     selection = [None] * 9
 
     df_theme = data[data['Code'].str.startswith(theme)].copy()
-    df_theme = df_theme.sort_values(by="__ordre__")  # 👈 respect strict de l’ordre CSV
+    df_theme = df_theme.sort_values(by="__ordre__")
 
     codes_eligibles = [
         row['Code'] for _, row in df_theme.iterrows()
         if peut_etre_place(row['Code'], data, semaine, auto_weeks, used_codes, themes_passes, theme)
     ]
 
-    for i, pos in enumerate(positions):
-        if i < len(codes_eligibles):
-            selection[pos] = codes_eligibles[i]
+    # Cas spéciaux pour thème avec peu d'automatismes
+    if len(codes_eligibles) == 1:
+        a = codes_eligibles[0]
+        for pos in positions:
+            selection[pos] = a
+    elif len(codes_eligibles) == 2:
+        a, b = codes_eligibles
+        # Petite variation aléatoire sur l'ordre : [a,b,a] ou [a,b,b]
+        choix = random.choice([
+            [a, b, a],
+            [a, b, b]
+        ])
+        for pos, code in zip(positions, choix):
+            selection[pos] = code
+    else:
+        for i, pos in enumerate(positions):
+            if i < len(codes_eligibles):
+                selection[pos] = codes_eligibles[i]
 
     return selection
 
