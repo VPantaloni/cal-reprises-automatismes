@@ -132,7 +132,7 @@ if st.session_state.show_legend:
                             color:white; font-size:0.85em; text-align:left'>
                     <b>{emoji}</b> {label}
                 </div>
-            """, unsafe_allow_html=True)<br>
+            """, unsafe_allow_html=True)
 
 ## Bulles tuto warning
 nb_vides = sum(1 for t in st.session_state.sequences if not t or t == "❓")
