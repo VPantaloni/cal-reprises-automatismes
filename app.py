@@ -100,18 +100,16 @@ with st.expander("📘 Légende des thèmes ⤵" + " " + " " + " " + "\u00A0"* 1
 
 st.sidebar.markdown("### 🎯 Affichage")
 # Choix de la zone de vacances
-zone = st.sidebar.radio("Choix vacances 🡆|", ["Zone A", "Zone B", "Zone C"], index=1) #index 1: par défaut Zone B
-# Définition des durées de vacances (en nombre de semaines) à chaque période
-vacances_A = [7, 7, 5, 6]
-vacances_B = [7, 7, 6, 6]
-vacances_C = [7, 7, 7, 6]
+# Définir la valeur par défaut si elle n'existe pas déjà dans session_state
+if "zone_vacances" not in st.session_state:
+    st.session_state.zone_vacances = "Zone B"
 
-vacances_map = {
-    "Zone A": vacances_A,
-    "Zone B": vacances_B,
-    "Zone C": vacances_C
-}
-
+zone = st.sidebar.radio(
+    "Choix vacances 🡆|",
+    ["Zone A", "Zone B", "Zone C"],
+    index=["Zone A", "Zone B", "Zone C"].index(st.session_state.zone_vacances),
+    key="zone_vacances"
+)
 # Convertir en numéros de semaine où afficher la séparation
 vacances = vacances_map[zone]
 vacances_semaines = []
