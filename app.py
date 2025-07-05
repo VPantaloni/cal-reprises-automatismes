@@ -261,8 +261,11 @@ if st.sidebar.button("🛠️ Algo. distribuer les automatismes"):
 # ✅ Message de confirmation si bouton déjà utilisé
 if st.session_state.btn_done:
     st.sidebar.success("✅ Distribution 🛠️")
+    # 🔘 Affichage conditionnel de l’histogramme
+    show_histogram = st.sidebar.checkbox("📊 Afficher l’histogramme cumulé", value=True)
 
-    
+## Histo
+
 #st.sidebar.markdown("### Affichages")
 
 # === MODE NUIT ===
@@ -488,49 +491,50 @@ st.sidebar.download_button(
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
 ##
-import plotly.express as px
-import pandas as pd
-
-# 🔧 Préparation des données pour le graphique
-rows = []
-cumul_counts = defaultdict(int)
-
-for semaine_index in range(35):
-    semaine_label = f"S{semaine_index + 1}"
-    codes = st.session_state.selection_by_week[semaine_index] if semaine_index < len(st.session_state.selection_by_week) else []
+if show_histogram:
+    import plotly.express as px
+    import pandas as pd
     
-    for code in codes:
-        if code != "❓":
-            cumul_counts[code] += 1
-            # Récupération des infos associées à ce code
-            row = data[data['Code'] == code]
-            if not row.empty:
-                couleur = row.iloc[0]['Couleur']
-                rows.append({
-                    "Semaine": semaine_label,
-                    "Code": code,
-                    "Occurrences cumulées": cumul_counts[code],
-                    "Couleur": couleur
-                })
-
-# 📊 Création du DataFrame
-df_viz = pd.DataFrame(rows)
-
-# 🧮 Tri explicite des semaines
-semaine_order = [f"S{i}" for i in range(1, 36)]
-df_viz["Semaine"] = pd.Categorical(df_viz["Semaine"], categories=semaine_order, ordered=True)
-df_viz = df_viz.sort_values("Semaine")
-
-# 📈 Affichage interactif Plotly
-fig = px.bar(
-    df_viz,
-    x="Semaine",
-    y="Occurrences cumulées",
-    color="Couleur",
-    hover_name="Code",
-    title="📊 Histogramme cumulé par automatisme et semaine",
-    color_discrete_map="identity",
-    category_orders={"Semaine": semaine_order}
-)
-
-st.plotly_chart(fig, use_container_width=True)
+    # 🔧 Préparation des données pour le graphique
+    rows = []
+    cumul_counts = defaultdict(int)
+    
+    for semaine_index in range(35):
+        semaine_label = f"S{semaine_index + 1}"
+        codes = st.session_state.selection_by_week[semaine_index] if semaine_index < len(st.session_state.selection_by_week) else []
+        
+        for code in codes:
+            if code != "❓":
+                cumul_counts[code] += 1
+                # Récupération des infos associées à ce code
+                row = data[data['Code'] == code]
+                if not row.empty:
+                    couleur = row.iloc[0]['Couleur']
+                    rows.append({
+                        "Semaine": semaine_label,
+                        "Code": code,
+                        "Occurrences cumulées": cumul_counts[code],
+                        "Couleur": couleur
+                    })
+    
+    # 📊 Création du DataFrame
+    df_viz = pd.DataFrame(rows)
+    
+    # 🧮 Tri explicite des semaines
+    semaine_order = [f"S{i}" for i in range(1, 36)]
+    df_viz["Semaine"] = pd.Categorical(df_viz["Semaine"], categories=semaine_order, ordered=True)
+    df_viz = df_viz.sort_values("Semaine")
+    
+    # 📈 Affichage interactif Plotly
+    fig = px.bar(
+        df_viz,
+        x="Semaine",
+        y="Occurrences cumulées",
+        color="Couleur",
+        hover_name="Code",
+        title="📊 Histogramme cumulé par automatisme et semaine",
+        color_discrete_map="identity",
+        category_orders={"Semaine": semaine_order}
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
