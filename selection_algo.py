@@ -23,11 +23,11 @@ def peut_etre_place(code, data, semaine, auto_weeks, used_codes, themes_passes):
 
     # Limiter le nombre de révisions des rappels
     if est_rappel:
-        if used_codes[code] >= 4:  # Maximum 4 usages pour les rappels
+        if used_codes[code] >= 5:  # Autoriser jusqu'à 5 rappels
             return False
-
-    # Les automatismes non-rappels doivent appartenir aux thèmes déjà passés
-    if not est_rappel and theme_code not in themes_passes:
+    
+    # Pour les non-rappels, autoriser si le thème est passé OU est le thème en cours
+    if not est_rappel and theme_code not in themes_passes + [theme]:
         return False
 
     return respecte_espacement(semaines_precedentes, semaine, est_rappel)
