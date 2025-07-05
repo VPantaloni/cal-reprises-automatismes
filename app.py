@@ -306,38 +306,38 @@ def afficher_lecture_et_export(data, subtheme_legend):
                     unsafe_allow_html=True
                 )
     
-    # Génération export Excel
-    buffer = BytesIO()
-    grille_data = []
-    
-    # Format fixe : 35 semaines, 9 automatismes
-    for i in range(35):
-        semaine = f"S{i+1}"
-        theme_emoji = st.session_state.sequences[i] if i < len(st.session_state.sequences) and st.session_state.sequences[i] else ""
-        theme_label = subtheme_legend.get(theme_emoji, "")
-        auto_codes = st.session_state.selection_by_week[i] if i < len(st.session_state.selection_by_week) else []
-        
-        # Compléter ou tronquer la liste pour avoir exactement 9 éléments
-        auto_codes = auto_codes[:9] + [""] * (9 - len(auto_codes))
-        
-        grille_data.append([semaine, f"{theme_emoji} {theme_label}"] + auto_codes)
-    
-    # Créer les colonnes
-    colonnes = ["Semaine", "Thème semaine"] + [f"Auto{i+1}" for i in range(9)]
-    df_grille = pd.DataFrame(grille_data, columns=colonnes)
-    df_recap = pd.DataFrame(recap_data)
-# Export Excel
-    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-        df_grille.to_excel(writer, index=False, sheet_name='Grille')
-        df_recap.to_excel(writer, index=False, sheet_name='Lecture_par_automatisme')
 
 afficher_lecture_et_export(data, subtheme_legend)
-# Nom du fichier
-filename = "planning_reprises_35sem.xlsx"
-buffer.seek(0)
+
+#-----------------------
+# Génération export Excel
+buffer = BytesIO()
+grille_data = []
+
+for i in range(35):
+    semaine = f"S{i+1}"
+    theme_emoji = st.session_state.sequences[i] if i < len(st.session_state.sequences) and st.session_state.sequences[i] else ""
+    theme_label = subtheme_legend.get(theme_emoji, "")
+    auto_codes = st.session_state.selection_by_week[i] if i < len(st.session_state.selection_by_week) else []
+    auto_codes = auto_codes[:9] + [""] * (9 - len(auto_codes))
+    grille_data.append([semaine, f"{theme_emoji} {theme_label}"] + auto_codes)
+
+colonnes = ["Semaine", "Thème semaine"] + [f"Auto{i+1}" for i in range(9)]
+df_grille = pd.DataFrame(grille_data, columns=colonnes)
+
+# Recap par automatisme (tu dois avoir `recap_data` défini ailleurs)
+df_recap = pd.DataFrame(recap_data)
+
+with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+    df_grille.to_excel(writer, index=False, sheet_name='Grille')
+    df_recap.to_excel(writer, index=False, sheet_name='Lecture_par_automatisme')
+
+buffer.seek(0)  # ← très important !
+
+# Bouton dans la sidebar
 st.sidebar.download_button(
-        label="📅 Télécharger le planning Excel",
-        data=buffer.getvalue(),
-        file_name=filename,
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+    label="📅 Télécharger le planning Excel",
+    data=buffer.getvalue(),
+    file_name="planning_reprises_35sem.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
