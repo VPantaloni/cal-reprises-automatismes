@@ -39,23 +39,20 @@ def afficher_lecture_et_export(data, subtheme_legend):
     buffer = BytesIO()
     grille_data = []
     
-    # Déterminer le nombre de semaines et d'automatismes selon le mode
-    nb_semaines = 32 if st.session_state.mode_affichage == "32_semaines" else 35
-    nb_automatismes = 6 if st.session_state.mode_affichage == "32_semaines" else 9
-    
-    for i in range(nb_semaines):
+    # Format fixe : 35 semaines, 9 automatismes
+    for i in range(35):
         semaine = f"S{i+1}"
         theme_emoji = st.session_state.sequences[i] if i < len(st.session_state.sequences) and st.session_state.sequences[i] else ""
         theme_label = subtheme_legend.get(theme_emoji, "")
         auto_codes = st.session_state.selection_by_week[i] if i < len(st.session_state.selection_by_week) else []
         
-        # Compléter ou tronquer la liste pour avoir exactement nb_automatismes éléments
-        auto_codes = auto_codes[:nb_automatismes] + [""] * (nb_automatismes - len(auto_codes))
+        # Compléter ou tronquer la liste pour avoir exactement 9 éléments
+        auto_codes = auto_codes[:9] + [""] * (9 - len(auto_codes))
         
         grille_data.append([semaine, f"{theme_emoji} {theme_label}"] + auto_codes)
     
-    # Créer les colonnes selon le mode
-    colonnes = ["Semaine", "Thème semaine"] + [f"Auto{i+1}" for i in range(nb_automatismes)]
+    # Créer les colonnes
+    colonnes = ["Semaine", "Thème semaine"] + [f"Auto{i+1}" for i in range(9)]
     df_grille = pd.DataFrame(grille_data, columns=colonnes)
     df_recap = pd.DataFrame(recap_data)
     
@@ -64,12 +61,11 @@ def afficher_lecture_et_export(data, subtheme_legend):
         df_grille.to_excel(writer, index=False, sheet_name='Grille')
         df_recap.to_excel(writer, index=False, sheet_name='Lecture_par_automatisme')
     
-    # Nom du fichier selon le mode
-    mode_text = "32sem_6auto" if st.session_state.mode_affichage == "32_semaines" else "35sem_9auto"
-    filename = f"planning_reprises_{mode_text}.xlsx"
+    # Nom du fichier
+    filename = "planning_reprises_35sem_9auto.xlsx"
     
     st.download_button(
-        label=f"📅 Télécharger le planning Excel ({mode_text})",
+        label="📅 Télécharger le planning Excel (35 semaines - 9 automatismes)",
         data=buffer.getvalue(),
         file_name=filename,
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
