@@ -300,10 +300,11 @@ def afficher_lecture_et_export(data, subtheme_legend):
 
     cols = st.columns(3)
     nb = len(recap_data)
-    chunk_size = nb // 3
+    chunk_size = (nb + 2) // 3  # arrondi vers le haut pour bien répartir
+    
     for j in range(3):
         start = j * chunk_size
-        end = (j + 1) * chunk_size + 2 if j < 2 else nb
+        end = min(start + chunk_size, nb)
         for r in recap_data[start:end]:
             with cols[j]:
                 st.markdown(
@@ -313,8 +314,9 @@ def afficher_lecture_et_export(data, subtheme_legend):
                     f"<small><i>Semaine(s)</i> : {r['Semaines']}</small></div>",
                     unsafe_allow_html=True
                 )
+    
+    return recap_data
 
-    return recap_data  # ← Ajouté ici
     
 if st.session_state.show_recap:
     recap_data = afficher_lecture_et_export(data, subtheme_legend)
