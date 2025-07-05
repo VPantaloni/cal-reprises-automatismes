@@ -230,68 +230,97 @@ if top_button_placeholder.button("🔄 (Re)calculer la distribution des automati
     st.rerun()
 
 # Affichage de la grille
-emoji_numeros = [f"Semaine {i+1}:" for i in range(35)]
+emoji_numeros = [f"Semaine {i+1}:" for i in range(nb_semaines)]
 
-# Affichage en 5 lignes de 7 colonnes
-rows = [st.columns(7) for _ in range(5)]
-for i in range(35):
-    row = i // 7
-    col = i % 7
-    with rows[row][col]:
-        emoji = st.session_state.sequences[i] if st.session_state.sequences[i] else "❓"
-        label = emoji_numeros[i]
-        # Appliquer une bordure verticale si cette semaine précède des vacances
-        semaine_num = i + 1
-        emoji = st.session_state.sequences[i] if st.session_state.sequences[i] else "❓"
-        label = emoji_numeros[i]
-        
-        # Bordure verticale à droite si la semaine précède des vacances
-        border_style = (
-            "border-right: 5px solid gold; padding-right: 4px; margin-bottom:0px;"
-            if semaine_num in vacances_A else "margin-bottom:0px;"
-        )
-        
-        # Bloc avec bordure droite — le bouton est inclus dedans
-        with st.container():
-            st.markdown(f"<div style='display:inline-block; {border_style}'>", unsafe_allow_html=True)
-            if st.button(f"{label} {emoji}", key=f"pick_{i}", use_container_width=True):
+# Affichage adapté selon le mode
+if st.session_state.mode_affichage == "32_semaines":
+    # 4 lignes de 8 colonnes
+    rows = [st.columns(8) for _ in range(4)]
+    for i in range(nb_semaines):
+        row = i // 8
+        col = i % 8
+        with rows[row][col]:
+            emoji = st.session_state.sequences[i] if st.session_state.sequences[i] else "❓"
+            label = emoji_numeros[i]
+            if st.button(f"{label} {emoji}", key=f"pick_{i}"):
                 st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
-            st.markdown("</div>", unsafe_allow_html=True)
-        
-        # Affiche le picker si besoin
-        if st.session_state.get(f"show_picker_{i}", False):
-            picker_rows = [st.columns(3) for _ in range(4)]
-            layout = [
-                ["❓", "🔢", "➗"],
-                ["📏", "🔷", "⌚"],
-                ["📐", "🧊", ""],
-                ["📊", "🎲", "∝"]
-            ]
-            for picker_row, icons in zip(picker_rows, layout):
-                for picker_col, icon in zip(picker_row, icons):
-                    with picker_col:
-                        if icon:
-                            if st.button(f"{icon}", key=f"choose_{i}_{icon}", use_container_width=True):
-                                st.session_state.sequences[i] = icon
-                                st.session_state[f"show_picker_{i}"] = False
-                                st.rerun()
 
+            if st.session_state.get(f"show_picker_{i}", False):
+                picker_rows = [st.columns(3) for _ in range(4)]
+                layout = [
+                    ["❓", "🔢", "➗"],
+                    ["📏", "🔷", "⌚"],
+                    ["📐", "🧊", ""],
+                    ["📊", "🎲", "∝"]
+                ]
+                for picker_row, icons in zip(picker_rows, layout):
+                    for picker_col, icon in zip(picker_row, icons):
+                        with picker_col:
+                            if icon:
+                                if st.button(f"{icon}", key=f"choose_{i}_{icon}", use_container_width=True):
+                                    st.session_state.sequences[i] = icon
+                                    st.session_state[f"show_picker_{i}"] = False
+                                    st.rerun()
 
-        if st.session_state.sequences[i] and st.session_state.selection_by_week[i]:
-            codes = st.session_state.selection_by_week[i]
-            selection_df = []
-            for pos, code in enumerate(codes):
-                if code:
-                    row = data[data['Code'] == code].iloc[0]
-                    selection_df.append({
-                        "Position": pos,
-                        "Code": row['Code'],
-                        "Automatisme": row['Automatisme'],
-                        "Couleur": row['Couleur']
-                    })
-            selection_df = pd.DataFrame(selection_df)
-            afficher_pastilles_compacte(selection_df, nb_auto_par_ligne=3, total_cases=9)
-            st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
+            if st.session_state.sequences[i] and st.session_state.selection_by_week[i]:
+                codes = st.session_state.selection_by_week[i]
+                selection_df = []
+                for pos, code in enumerate(codes):
+                    if code:
+                        row = data[data['Code'] == code].iloc[0]
+                        selection_df.append({
+                            "Position": pos,
+                            "Code": row['Code'],
+                            "Automatisme": row['Automatisme'],
+                            "Couleur": row['Couleur']
+                        })
+                selection_df = pd.DataFrame(selection_df)
+                afficher_pastilles_compacte(selection_df, nb_auto_par_ligne=2 if nb_automatismes == 6 else 3, total_cases=nb_automatismes)
+                st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
+else:
+    # 5 lignes de 7 colonnes
+    rows = [st.columns(7) for _ in range(5)]
+    for i in range(nb_semaines):
+        row = i // 7
+        col = i % 7
+        with rows[row][col]:
+            emoji = st.session_state.sequences[i] if st.session_state.sequences[i] else "❓"
+            label = emoji_numeros[i]
+            if st.button(f"{label} {emoji}", key=f"pick_{i}"):
+                st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
+
+            if st.session_state.get(f"show_picker_{i}", False):
+                picker_rows = [st.columns(3) for _ in range(4)]
+                layout = [
+                    ["❓", "🔢", "➗"],
+                    ["📏", "🔷", "⌚"],
+                    ["📐", "🧊", ""],
+                    ["📊", "🎲", "∝"]
+                ]
+                for picker_row, icons in zip(picker_rows, layout):
+                    for picker_col, icon in zip(picker_row, icons):
+                        with picker_col:
+                            if icon:
+                                if st.button(f"{icon}", key=f"choose_{i}_{icon}", use_container_width=True):
+                                    st.session_state.sequences[i] = icon
+                                    st.session_state[f"show_picker_{i}"] = False
+                                    st.rerun()
+
+            if st.session_state.sequences[i] and st.session_state.selection_by_week[i]:
+                codes = st.session_state.selection_by_week[i]
+                selection_df = []
+                for pos, code in enumerate(codes):
+                    if code:
+                        row = data[data['Code'] == code].iloc[0]
+                        selection_df.append({
+                            "Position": pos,
+                            "Code": row['Code'],
+                            "Automatisme": row['Automatisme'],
+                            "Couleur": row['Couleur']
+                        })
+                selection_df = pd.DataFrame(selection_df)
+                afficher_pastilles_compacte(selection_df, nb_auto_par_ligne=2 if nb_automatismes == 6 else 3, total_cases=nb_automatismes)
+                st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
 
 # Import du volet 2
 
