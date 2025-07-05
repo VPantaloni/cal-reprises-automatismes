@@ -100,20 +100,20 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
         if base_theme[i] is not None:
             selection_finale[i] = base_theme[i]
             codes_selectionnes.add(base_theme[i])
-    # Fallback : si aucune pastille du thème n'a été placée
-    if all(selection_finale[i] is None for i in pos_theme):
-        # Récupère tous les automatismes du thème, dans l'ordre du CSV
-        fallback_autos = list(data[data['Code'].str.startswith(theme)]['Code'])
-    
-        # Cas : 1 automatisme → a, a, a | 2 automatismes → a, b, a (ou autre)
-        if len(fallback_autos) == 1:
-            fallback_autos = fallback_autos * 3
-        elif len(fallback_autos) == 2:
-            fallback_autos = [fallback_autos[0], fallback_autos[1], fallback_autos[0]]
-    
-        for i, pos in enumerate(pos_theme):
-            selection_finale[pos] = fallback_autos[i]
-            codes_selectionnes.add(fallback_autos[i])
+            # Fallback : si aucune pastille du thème n'a été placée
+            if all(selection_finale[i] is None for i in pos_theme):
+                # Récupère tous les automatismes du thème, dans l'ordre du CSV
+                fallback_autos = list(data[data['Code'].str.startswith(theme)]['Code'])
+            
+                # Cas : 1 automatisme → a, a, a | 2 automatismes → a, b, a (ou autre)
+                if len(fallback_autos) == 1:
+                    fallback_autos = fallback_autos * 3
+                elif len(fallback_autos) == 2:
+                    fallback_autos = [fallback_autos[0], fallback_autos[1], fallback_autos[0]]
+            
+                for i, pos in enumerate(pos_theme):
+                    selection_finale[pos] = fallback_autos[i]
+                    codes_selectionnes.add(fallback_autos[i])
 
     # 2. Thème futur (diagnostique)
     future_index = semaine + 2
