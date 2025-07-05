@@ -15,7 +15,7 @@ def respecte_espacement(semaines_precedentes, semaine_actuelle, est_rappel):
     occurrence = len(semaines_precedentes) + 1
     return ecart >= get_espacement_fibonacci(occurrence)
 
-def peut_etre_place(code, data, semaine, auto_weeks, used_codes, themes_passes):
+def peut_etre_place(code, data, semaine, auto_weeks, used_codes, themes_passes, theme):
     row = data[data['Code'] == code].iloc[0]
     theme_code = row['Code'][0]
     est_rappel = row['Rappel']
@@ -36,7 +36,7 @@ def selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes
     selection = [None] * 9
     theme_autos = [
         c for c in data[data['Code'].str.startswith(theme)]['Code']
-        if peut_etre_place(c, data, semaine, auto_weeks, used_codes, themes_passes)
+        if peut_etre_place(c, data, semaine, auto_weeks, used_codes, themes_passes, theme)
     ]
     random.shuffle(theme_autos)
     for i, pos in enumerate(positions):
@@ -48,7 +48,7 @@ def selectionner_automatismes_autres_themes(data, semaine, auto_weeks, used_code
     selection = [None] * 9
     tous_candidats = []
     for code in data['Code']:
-        if code not in codes_selectionnes and peut_etre_place(code, data, semaine, auto_weeks, used_codes, themes_passes):
+        if code not in codes_selectionnes and peut_etre_place(code, data, semaine, auto_weeks, used_codes, themes_passes, theme):
             row = data[data['Code'] == code].iloc[0]
             theme_code = row['Code'][0]
             est_rappel = row['Rappel']
