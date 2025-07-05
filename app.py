@@ -97,6 +97,8 @@ with st.expander("📘 Légende des thèmes ⤵" + " " + " " + " " + "\u00A0"* 1
                 <b>{emoji}</b> {label}</div>""", unsafe_allow_html=True)
 
 # ===== SIDEBAR =====
+vacances_A = [6, 12, 18, 26]  # Semaines juste avant les vacances
+
 st.sidebar.markdown("### 🎯 Affichage")
 st.sidebar.checkbox("🔍 Afficher vue par automatisme", key="show_recap")
 # === MODE NUIT ===
@@ -238,8 +240,18 @@ for i in range(35):
     with rows[row][col]:
         emoji = st.session_state.sequences[i] if st.session_state.sequences[i] else "❓"
         label = emoji_numeros[i]
+        # Appliquer une bordure verticale si cette semaine précède des vacances
+        semaine_num = i + 1
+        border_style = "border-right: 6px solid gold; padding-right: 6px;" if semaine_num in vacances_A else ""
+        
+        # Afficher le bouton avec un conteneur HTML stylé
+        st.markdown(
+            f"<div style='{border_style}'>",
+            unsafe_allow_html=True
+        )
         if st.button(f"{label} {emoji}", key=f"pick_{i}"):
             st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
+        st.markdown("</div>", unsafe_allow_html=True)    
 
         if st.session_state.get(f"show_picker_{i}", False):
             picker_rows = [st.columns(3) for _ in range(4)]
