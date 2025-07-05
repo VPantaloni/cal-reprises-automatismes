@@ -242,16 +242,22 @@ for i in range(35):
         label = emoji_numeros[i]
         # Appliquer une bordure verticale si cette semaine précède des vacances
         semaine_num = i + 1
-        border_style = "border-right: 6px solid gold; padding-right: 6px;" if semaine_num in vacances_A else ""
-        
-        # Afficher le bouton avec un conteneur HTML stylé
-        st.markdown(
-            f"<div style='{border_style}'>",
-            unsafe_allow_html=True
+
+        # Style de fond avec "bande dorée" à droite si la semaine précède des vacances
+        background_style = (
+            "background: linear-gradient(to right, white 85%, gold 85%);" 
+            if semaine_num in vacances_A else ""
         )
+        
+        # Conteneur avec le style
+        st.markdown(f"<div style='padding:4px; border-radius:6px; {background_style}'>", unsafe_allow_html=True)
+        
+        # Bouton semaine (emoji + numéro)
         if st.button(f"{label} {emoji}", key=f"pick_{i}"):
             st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
-        st.markdown("</div>", unsafe_allow_html=True)    
+        
+        st.markdown("</div>", unsafe_allow_html=True)
+  
 
         if st.session_state.get(f"show_picker_{i}", False):
             picker_rows = [st.columns(3) for _ in range(4)]
