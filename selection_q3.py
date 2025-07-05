@@ -21,44 +21,39 @@ def reconstruire_auto_weeks(selection_by_week):
     return auto_weeks, used_codes
 
 def est_valide(code, semaine, auto_weeks, espacement=3):
-    if code not in auto_weeks:
-        return True
-    for s in auto_weeks[code]:
-        if abs(s - semaine) < espacement:
-            return False
-    return True
+    return all(abs(s - semaine) >= espacement for s in auto_weeks.get(code, []))
 
 def selectionner_q3(data, selection_by_week, sequences, auto_weeks, used_codes):
+    all_codes = list(data['Code'].unique())
     nb_semaines = len(sequences)
     positions_q3 = [2, 5, 8]
-    all_codes = list(data['Code'].unique())
 
     for semaine in range(nb_semaines):
         if semaine not in selection_by_week:
-            continue  # Ne rien faire si la semaine n'existe pas
+            continue
 
         ligne = selection_by_week[semaine]
 
+        # S'assurer que la ligne fait bien 9 éléments
         if len(ligne) < 9:
-            # On complète uniquement avec des ❓ à la fin (sans toucher Q1/Q2 déjà là)
             ligne += ["❓"] * (9 - len(ligne))
-            selection_by_week[semaine] = ligne
 
         for pos in positions_q3:
             if ligne[pos] == "❓":
-                random.shuffle(all_codes)
-                for code in all_codes:
+                # Trier par occurrences croissantes
+                candidates = sorted(all_codes, key=lambda c: used_codes.get(c, 0))
+                for code in candidates:
                     if est_valide(code, semaine, auto_weeks):
                         ligne[pos] = code
                         auto_weeks[code].append(semaine)
                         used_codes[code] += 1
                         break
                 else:
-                    # Aucun code valide, on met quand même le premier
-                    code = all_codes[0]
-                    ligne[pos] = code
-                    auto_weeks[code].append(semaine)
-                    used_codes[code] += 1
+                    # Aucun code ne respecte l'espacement : on prend celui avec le moins d'occurrences
+                    fallback = candidates[0]
+                    ligne[pos] = fallback
+                    auto_weeks[fallback].append(semaine)
+                    used_codes[fallback] += 1
 
         selection_by_week[semaine] = ligne
 
