@@ -13,7 +13,7 @@ subthemes = [
     ("⌚", "#dd9d68"), ("📐", "#16a34a"), ("🧊", "#44b56e"), ("📊", "#1975d1"),
     ("🎲", "#3384d6"), ("∝", "#8a38d2")
 ]
-
+theme_emojis = [emoji for emoji, _ in subthemes]
 subtheme_emojis = [s[0] for s in subthemes]
 subtheme_colors = dict(subthemes)
 
