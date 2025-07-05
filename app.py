@@ -221,9 +221,13 @@ if st.sidebar.button("📙 Progression n°2"):
 # Vérifier si tous les thèmes sont définis (au moins en grande partie)
 nb_vides = sum(1 for t in st.session_state.get("sequences", []) if not t or t == "❓")
 
-if nb_vides == 0:
-    st.sidebar.info("👍 Go go Algo!👇")
+
 ## Bouton tout en un
+if 'btn_done' not in st.session_state:
+    st.session_state.btn_done = False
+if nb_vides == 0 and not st.session_state.btn_done :
+    st.sidebar.info("👍 Go go Algo!👇")
+#---
 if st.sidebar.button("🛠️ Algo. distribuer les automatismes"):
     auto_weeks = defaultdict(list)
     used_codes = defaultdict(int)
@@ -247,7 +251,10 @@ if st.sidebar.button("🛠️ Algo. distribuer les automatismes"):
         used_codes
     )
     st.rerun()
-
+#-- validation de click
+if st.session_state.btn_done:
+    st.sidebar.markdown("✅ Distribution prête !", unsafe_allow_html=True)
+    
 #st.sidebar.markdown("### Affichages")
 
 # === MODE NUIT ===
