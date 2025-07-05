@@ -1,8 +1,6 @@
 from collections import defaultdict
 import random
 
-from collections import defaultdict
-
 def reconstruire_auto_weeks(selection_by_week):
     auto_weeks = defaultdict(list)
     used_codes = defaultdict(int)
@@ -32,34 +30,35 @@ def est_valide(code, semaine, auto_weeks, espacement=3):
             return False
     return True
 
-def selectionner_q3(data, sequences, selection_by_week, auto_weeks, used_codes):
+def selectionner_q3(data, selection_by_week, sequences, auto_weeks, used_codes):
     nb_semaines = len(sequences)
-    positions_q3 = [2, 5, 8]  # Positions réservées à Q3
+    positions_q3 = [2, 5, 8]  # Positions réservées à Q3 uniquement
 
     all_codes = list(data['Code'].unique())
 
-    # Assurer que selection_by_week est complet et bien formé
     for semaine in range(nb_semaines):
+        # S'assurer que la semaine a bien une liste de 9 éléments
         if semaine not in selection_by_week:
             selection_by_week[semaine] = ["❓"] * 9
-        else:
-            while len(selection_by_week[semaine]) < 9:
-                selection_by_week[semaine].append("❓")
+        elif len(selection_by_week[semaine]) < 9:
+            selection_by_week[semaine] += ["❓"] * (9 - len(selection_by_week[semaine]))
 
-    for semaine in range(nb_semaines):
         for pos in positions_q3:
+            # Ne compléter que si Q3 est encore un placeholder
             if selection_by_week[semaine][pos] == "❓":
                 random.shuffle(all_codes)
                 for code in all_codes:
+                    # Ne pas prendre un code déjà utilisé trop souvent ou trop rapproché
                     if est_valide(code, semaine, auto_weeks):
                         selection_by_week[semaine][pos] = code
                         auto_weeks[code].append(semaine)
                         used_codes[code] += 1
                         break
                 else:
+                    # En dernier recours, mettre un code quelconque
                     code = all_codes[0]
                     selection_by_week[semaine][pos] = code
                     auto_weeks[code].append(semaine)
                     used_codes[code] += 1
-    return selection_by_week
 
+    return selection_by_week
