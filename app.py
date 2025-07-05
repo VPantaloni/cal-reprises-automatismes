@@ -375,7 +375,7 @@ for i in range(35):
             st.markdown("<div style='margin-top:10px;'></div>", unsafe_allow_html=True)
 
 # Import du volet 2
-#auto_weeks, used_codes = selection_q3.reconstruire_auto_weeks(st.session_state.selection_by_week)
+auto_weeks, used_codes = selection_q3.reconstruire_auto_weeks(st.session_state.selection_by_week)
 st.session_state.auto_weeks = auto_weeks
 
 ##
