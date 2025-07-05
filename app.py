@@ -512,8 +512,8 @@ viz_df = pd.DataFrame(viz_rows)
 if not viz_df.empty:
     # Convertir 'Semaine' en catégorie ordonnée
     semaine_order = [f"S{i}" for i in range(1, 36)]
-    df_viz["Semaine"] = pd.Categorical(df_viz["Semaine"], categories=semaine_order, ordered=True)
-    df_viz = df_viz.sort_values("Semaine")
+    viz_df["Semaine"] = pd.Categorical(df_viz["Semaine"], categories=semaine_order, ordered=True)
+    viz_df = viz_df.sort_values("Semaine")
     fig = px.bar(
         viz_df,
         x="Semaine",
