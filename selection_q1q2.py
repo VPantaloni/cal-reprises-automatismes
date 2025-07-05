@@ -4,17 +4,23 @@ from collections import defaultdict
 
 def selectionner_automatismes_theme_q1q2(data, semaine, theme, auto_weeks, used_codes, themes_passes, positions):
     selection = [None] * 9
-    theme_autos = list(data[data['Code'].str.startswith(theme)]['Code'])
+    theme_autos_df = data[data['Code'].str.startswith(theme)]
+    if theme_autos_df.empty:
+        return selection  # Aucun automatisme trouvé pour ce thème
+
+    theme_autos = list(theme_autos_df['Code'])
 
     # Respect de l'ordre d'apparition dans le fichier CSV
     for i, pos in enumerate(positions):
-        if i < len(theme_autos):
-            selection[pos] = theme_autos[i]
-        elif len(theme_autos) == 1:
+        if len(theme_autos) == 1:
             selection[pos] = theme_autos[0]
         elif len(theme_autos) == 2:
             selection[pos] = theme_autos[i % 2]
+        elif i < len(theme_autos):
+            selection[pos] = theme_autos[i]
+
     return selection
+
 
 def selectionner_q1q2(data, semaine, theme, sequences):
     selection_finale = [None] * 9
