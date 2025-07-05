@@ -204,7 +204,7 @@ top_button_placeholder = st.sidebar.empty()
 if st.sidebar.button("▶️ Sélection Q1/Q2 uniquement"):
     auto_weeks = defaultdict(list)
     used_codes = defaultdict(int)
-    
+
     for i in range(35):
         if i < len(st.session_state.sequences):
             theme = st.session_state.sequences[i]
@@ -212,11 +212,6 @@ if st.sidebar.button("▶️ Sélection Q1/Q2 uniquement"):
                 st.session_state.selection_by_week[i] = selection_q1q2.selectionner_q1q2(
                     data, i, theme, st.session_state.sequences, auto_weeks, used_codes
                 )
-                # Met à jour auto_weeks et used_codes avec les Q1/Q2 sélectionnés
-                for code in st.session_state.selection_by_week[i]:
-                    if code and code != "❓":
-                        auto_weeks[code].append(i)
-                        used_codes[code] += 1
     st.rerun()
 
 #---
