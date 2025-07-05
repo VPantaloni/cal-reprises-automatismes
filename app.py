@@ -363,7 +363,7 @@ for i in range(35):
             st.markdown("<div style='margin-top:10px;'></div>", unsafe_allow_html=True)
 
 # Import du volet 2
-auto_weeks = reconstruire_auto_weeks(st.session_state.selection_by_week)
+auto_weeks = selection_q3.reconstruire_auto_weeks(st.session_state.selection_by_week)
 st.session_state.auto_weeks = auto_weeks
 
 def afficher_lecture_et_export(data, subtheme_legend):
@@ -407,7 +407,21 @@ def afficher_lecture_et_export(data, subtheme_legend):
                     unsafe_allow_html=True
                 )
         start = end
-    
+            # Affichage compact des occurrences
+        auto_weeks = selection_q3.reconstruire_auto_weeks(st.session_state.selection_by_week)
+        occur_df = pd.DataFrame([
+            {
+                "Code": code,
+                "Occurrences": len(semaines),
+                "Semaines": ", ".join([f"S{s+1}" for s in semaines])
+            }
+            for code, semaines in auto_weeks.items()
+        ])
+        
+        occur_df = occur_df.sort_values(by="Occurrences", ascending=False)
+        st.markdown("### 📊 Répartition des automatismes")
+        st.dataframe(occur_df, use_container_width=True)
+
     return recap_data
 
 
