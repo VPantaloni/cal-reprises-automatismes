@@ -97,9 +97,29 @@ with st.expander("📘 Légende des thèmes ⤵" + " " + " " + " " + "\u00A0"* 1
                 <b>{emoji}</b> {label}</div>""", unsafe_allow_html=True)
 
 # ===== SIDEBAR =====
-vacances_A = [6, 12, 18, 26]  # Semaines juste avant les vacances
 
 st.sidebar.markdown("### 🎯 Affichage")
+# Choix de la zone de vacances
+zone = st.sidebar.radio("Zone de vacances :", ["A", "B", "C"], index=0)
+# Définition des durées de vacances (en nombre de semaines) à chaque période
+vacances_A = [7, 7, 5, 6]
+vacances_B = [7, 7, 6, 6]
+vacances_C = [7, 7, 7, 6]
+
+vacances_map = {
+    "A": vacances_A,
+    "B": vacances_B,
+    "C": vacances_C
+}
+
+# Convertir en numéros de semaine où afficher la séparation
+vacances = vacances_map[zone]
+vacances_semaines = []
+s = 0
+for v in vacances:
+    s += v
+    vacances_semaines.append(s)
+#--------
 st.sidebar.checkbox("🔍 Afficher vue par automatisme", key="show_recap")
 # === MODE NUIT ===
 if "dark_mode" not in st.session_state:
@@ -231,9 +251,6 @@ if top_button_placeholder.button("🔄 (Re)calculer la distribution des automati
 
 # ===================== AFFICHAGE PLANNING =====================
 
-# Liste des semaines de vacances pour visualisation
-vacances_A = [6, 12, 18, 26]
-
 # Emojis numérotés S1 à S35
 emoji_numeros = [f"S{i+1}" for i in range(35)]
 
@@ -248,7 +265,7 @@ for i in range(35):
     semaine_num = i + 1
     emoji = st.session_state.sequences[i] if st.session_state.sequences[i] else "❓"
     label = emoji_numeros[i]
-    vacances_txt = "🡆|" if semaine_num in vacances_A else ""
+    vacances_txt = "🡆|" if semaine_num in vacances_semaines else ""
 
     with rows[row][col]:
         # Ligne contenant bouton semaine + repère vacances à droite
