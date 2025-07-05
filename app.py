@@ -85,7 +85,8 @@ def initialiser_selection_by_week():
 
 # Configuration de la page
 st.set_page_config(layout="wide")
-st.title("📅 Reprises d'automatismes mathématiques en 6e")
+#st.title("📅 Reprises d'automatismes mathématiques en 6e")
+st.markdown("## 📅 Reprises d'automatismes mathématiques en 6e")
 
 ## LEGENDES
 with st.expander("📘 Légende des thèmes ⤵" + " " + " " + " " + "\u00A0"* 15 + ">> Ouvrir le menu latéral pour plus d'actions !"):
