@@ -265,7 +265,12 @@ if st.session_state.btn_done:
     show_histogram = st.sidebar.checkbox("📊 Histogramme cumulé", value=True)
     # 🎛️ Sélecteur de thème(s)
     selected_themes = st.sidebar.multiselect("🎨 Filtrer par thème", theme_emojis, default=theme_emojis)
-## Histo
+    ## Selecteur codes
+    all_codes = sorted(data['Code'].unique())
+    selected_codes = st.sidebar.multiselect("🔎 Filtrer par code", all_codes, default=all_codes)
+    
+    # Et dans le filtre :
+    df_viz = df_viz[df_viz["Code"].isin(selected_codes)]
 
 #st.sidebar.markdown("### Affichages")
 
