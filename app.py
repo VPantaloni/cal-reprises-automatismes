@@ -248,7 +248,6 @@ for i in range(35):
             "background: linear-gradient(to right, white 85%, gold 85%);" 
             if semaine_num in vacances_A else ""
         )
-        
         # Conteneur avec le style
         st.markdown(f"<div style='padding:1px; border-radius:4px; {background_style}'>", unsafe_allow_html=True)
         # Bouton semaine (emoji + numéro)
@@ -288,7 +287,7 @@ for i in range(35):
                     })
             selection_df = pd.DataFrame(selection_df)
             afficher_pastilles_compacte(selection_df, nb_auto_par_ligne=3, total_cases=9)
-            st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-top:5px;'></div>", unsafe_allow_html=True)
 
 # Import du volet 2
 
