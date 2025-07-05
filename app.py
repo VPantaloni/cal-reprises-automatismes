@@ -97,6 +97,7 @@ with st.expander("📘 Légende des thèmes ⤵" + " " + " " + " " + "\u00A0"* 1
 
 # ===== SIDEBAR =====
 st.sidebar.markdown("### 🎯 Affichage")
+st.sidebar.checkbox("🔍 Afficher vue par automatisme", key="show_recap")
 # === MODE NUIT ===
 if "dark_mode" not in st.session_state:
     st.session_state.dark_mode = False
@@ -160,8 +161,8 @@ if st.sidebar.button("📙 Progression n°2"):
     st.rerun()
 
 top_button_placeholder = st.sidebar.empty()
-st.sidebar.markdown("### Affichages")
-st.sidebar.checkbox("🔍 Afficher vue par automatisme", key="show_recap")
+#st.sidebar.markdown("### Affichages")
+
 
 
 # Chargement des données
