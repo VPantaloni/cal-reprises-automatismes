@@ -201,7 +201,7 @@ if st.sidebar.button("📙 Progression n°2"):
 
 ## Message avant distrib :
 # Vérifier si tous les thèmes sont définis (au moins en grande partie)
-nb_vides = sum(1 for t in st.session_state.sequences if not t or t == "❓")
+nb_vides = sum(1 for t in st.session_state.get("sequences", []) if not t or t == "❓")
 
 if nb_vides > 10:
     st.sidebar.warning(
