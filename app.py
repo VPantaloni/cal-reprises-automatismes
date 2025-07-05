@@ -37,7 +37,6 @@ if 'next_index_by_theme' not in st.session_state:
     st.session_state.next_index_by_theme = defaultdict(lambda: 1)
 
 # ===== FONCTIONS UTILITAIRES =====
-
 def charger_donnees():
     try:
         df = pd.read_csv("Auto-6e.csv", sep=';', encoding='utf-8')
@@ -46,6 +45,7 @@ def charger_donnees():
         df['Couleur'] = df['Sous-Thème'].map(subtheme_colors)
         df['Rappel'] = df['Code'].str[1] == '↩'
         df['Num'] = df['Code'].str.extract(r'(\d+)$').astype(float)
+        df['__ordre__'] = range(len(df))  # 👈 Ajout essentiel pour préserver l'ordre
         return df
     except Exception as e:
         st.error(f"Erreur de lecture CSV : {e}")
