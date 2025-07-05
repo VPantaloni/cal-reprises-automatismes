@@ -264,13 +264,12 @@ if st.session_state.btn_done:
     # 🔘 Affichage conditionnel de l’histogramme
     show_histogram = st.sidebar.checkbox("📊 Histogramme cumulé", value=True)
     # 🎛️ Sélecteur de thème(s)
-    selected_themes = st.sidebar.multiselect("🎨 Filtrer par thème", theme_emojis, default=theme_emojis)
+    #selected_themes = st.sidebar.multiselect("🎨 Filtrer par thème", theme_emojis, default=theme_emojis)
     ## Selecteur codes
-    all_codes = sorted(data['Code'].unique())
-    selected_codes = st.sidebar.multiselect("🔎 Filtrer par code", all_codes, default=all_codes)
-    
+    #all_codes = sorted(data['Code'].unique())
+    #selected_codes = st.sidebar.multiselect("🔎 Filtrer par code", all_codes, default=all_codes)
     # Et dans le filtre :
-    df_viz = df_viz[df_viz["Code"].isin(selected_codes)]
+    #df_viz = df_viz[df_viz["Code"].isin(selected_codes)]
 
 #st.sidebar.markdown("### Affichages")
 
@@ -545,4 +544,56 @@ if show_histogram:
         category_orders={"Semaine": semaine_order}
     )
     
+    st.plotly_chart(fig, use_container_width=True)
+###
+if st.session_state.show_histogram:
+    st.markdown("### 📊 Histogramme des occurrences par semaine")
+
+    # -- Construction du dataframe df_viz --
+    df_viz = []
+    for code, semaines in st.session_state.auto_weeks.items():
+        couleur = data.loc[data['Code'] == code, 'Couleur'].values[0]
+        for i, semaine in enumerate(sorted(semaines)):
+            df_viz.append({
+                "Code": code,
+                "Semaine": f"S{semaine + 1}",
+                "Ordre": semaine,
+                "Occurrences cumulées": i + 1,
+                "Couleur": couleur
+            })
+    df_viz = pd.DataFrame(df_viz)
+
+    # 🎨 Filtres dynamiques dans la page principale
+    subthemes = [
+        ("🔢", "#ac2747"), ("➗", "#be5770"), ("📏", "#cc6c1d"), ("🔷", "#d27c36"),
+        ("⌚", "#dd9d68"), ("📐", "#16a34a"), ("🧊", "#44b56e"), ("📊", "#1975d1"),
+        ("🎲", "#3384d6"), ("∝", "#8a38d2")
+    ]
+    theme_emojis = [emoji for emoji, _ in subthemes]
+    all_codes = sorted(data['Code'].unique())
+
+    with st.container():
+        st.markdown("#### 🎛️ Filtres d’affichage")
+        col1, col2 = st.columns(2)
+        with col1:
+            selected_themes = st.multiselect("🎨 Filtrer par thème", theme_emojis, default=theme_emojis)
+        with col2:
+            selected_codes = st.multiselect("🔎 Filtrer par code", all_codes, default=all_codes)
+
+    # Appliquer les filtres
+    df_viz = df_viz[df_viz["Code"].str[0].isin(selected_themes)]
+    df_viz = df_viz[df_viz["Code"].isin(selected_codes)]
+
+    # -- Tracé --
+    fig = px.bar(
+        df_viz,
+        x="Semaine",
+        y="Occurrences cumulées",
+        color="Code",
+        color_discrete_map={row['Code']: row['Couleur'] for _, row in df_viz.iterrows()},
+        hover_name="Code",
+        labels={"Occurrences cumulées": "Cumul", "Semaine": "Semaine"},
+        title="Évolution cumulée des automatismes par semaine"
+    )
+    fig.update_layout(barmode='group', xaxis={'categoryorder': 'category ascending'})
     st.plotly_chart(fig, use_container_width=True)
