@@ -1,64 +1,57 @@
-import random
 from collections import defaultdict
 
-# Fonction pour reconstruire les auto_weeks et used_codes après Q1/Q2
 def reconstruire_auto_weeks(selection_by_week):
     auto_weeks = defaultdict(list)
     used_codes = defaultdict(int)
-    for semaine, codes in enumerate(selection_by_week):
+    for semaine, codes in selection_by_week.items():
         for code in codes:
             if code != "❓":
                 auto_weeks[code].append(semaine)
                 used_codes[code] += 1
     return auto_weeks, used_codes
 
-def get_espacement_fibonacci(occurrence):
-    fibonacci = [1, 2, 3, 5, 8, 11, 15, 20]
-    return fibonacci[occurrence - 1] if occurrence <= len(fibonacci) else fibonacci[-1]
+def est_valide(code, semaine, auto_weeks, used_codes, sequences, selection_by_week):
+    # Exemple de contrainte : espacement minimum entre occurrences
+    espacement_min = 3
+    if code not in auto_weeks:
+        return True
+    for s in auto_weeks[code]:
+        if abs(s - semaine) < espacement_min:
+            return False
+    # Eviter de mettre plusieurs fois le même code dans la même semaine
+    if code in selection_by_week[semaine]:
+        return False
+    return True
 
-def est_rappel(code):
-    return "↩" in code
+def selectionner_q3(data, sequences, selection_by_week, auto_weeks, used_codes):
+    all_codes = list(data['Code'].unique())
+    nb_semaines = len(sequences)
 
-def peut_etre_place(code, semaine, auto_weeks, used_codes, theme_code, theme_semaine):
-    occur = used_codes[code]
-    if occur == 0:
-        # Première occurrence : le thème doit avoir déjà été vu (ou est vu cette semaine)
-        return theme_code in theme_semaine or theme_code == theme_semaine.get(semaine)
-    else:
-        if est_rappel(code):
-            if occur >= 5:
-                return False
-            derniere = max(auto_weeks[code])
-            espacement = semaine - derniere
-            return espacement >= get_espacement_fibonacci(occur)
-        else:
-            return False  # Non-rappel déjà vu une fois
+    # Positions Q3 dans la grille
+    positions_q3 = [2, 5, 8]
 
-def selectionner_q3(data, selection_by_week, sequences):
-    auto_weeks, used_codes = reconstruire_auto_weeks(selection_by_week)
-    all_codes = list(data['Code'])
-    theme_par_code = {row['Code']: row['Code'][:2] for _, row in data.iterrows()}
-    tous_les_themes = {i: sequences[i] for i in range(len(sequences))}
-
-    # Calcul des occurrences actuelles
-    code_occurrences = defaultdict(int)
-    for semaine, codes in enumerate(selection_by_week):
-        for code in codes:
-            if code != "❓":
-                code_occurrences[code] += 1
-
-    # Trier les automatismes les moins vus en priorité
-    codes_tries = sorted(all_codes, key=lambda x: (code_occurrences[x], est_rappel(x)))
-
-    # Remplissage des cases ❓
-    for semaine in range(len(selection_by_week)):
-        for i in range(9):
-            if selection_by_week[semaine][i] == "❓":
+    for semaine in range(nb_semaines):
+        for pos in positions_q3:
+            if selection_by_week[semaine][pos] == "❓":
+                # On cherche un code valide
+                trouve = False
+                # Essayer d'abord les codes les moins utilisés pour équilibrer
+                codes_tries = sorted(all_codes, key=lambda c: used_codes.get(c,0))
                 for code in codes_tries:
-                    theme_code = theme_par_code.get(code, "")
-                    if peut_etre_place(code, semaine, auto_weeks, used_codes, theme_code, tous_les_themes):
-                        selection_by_week[semaine][i] = code
-                        used_codes[code] += 1
+                    if est_valide(code, semaine, auto_weeks, used_codes, sequences, selection_by_week):
+                        selection_by_week[semaine][pos] = code
                         auto_weeks[code].append(semaine)
-                        break  # On passe à la case suivante
+                        used_codes[code] += 1
+                        trouve = True
+                        break
+                # Fallback si rien trouvé : mettre un code au hasard (le moins utilisé)
+                if not trouve:
+                    for code in codes_tries:
+                        if code not in selection_by_week[semaine]:
+                            selection_by_week[semaine][pos] = code
+                            auto_weeks[code].append(semaine)
+                            used_codes[code] += 1
+                            break
+
+    # Retourner la sélection mise à jour (même si pas obligatoire car modif en place)
     return selection_by_week
