@@ -507,22 +507,24 @@ for code, semaines in st.session_state.auto_weeks.items():
             "Couleur": row['Couleur']
         })
 
-viz_df = pd.DataFrame(viz_rows)
-# Convertir 'Semaine' en catégorie ordonnée
+# Après avoir construit df_viz
+df_viz = pd.DataFrame(rows)
+
+# 🟢 AJOUT ICI — pour trier les semaines dans l'ordre S1, S2, ..., S35
 semaine_order = [f"S{i}" for i in range(1, 36)]
 df_viz["Semaine"] = pd.Categorical(df_viz["Semaine"], categories=semaine_order, ordered=True)
 df_viz = df_viz.sort_values("Semaine")
 
-if not viz_df.empty:
-        fig = px.bar(
-        viz_df,
-        x="Semaine",
-        y="Occurrence",
-        color="Code",
-        color_discrete_map={c: col for c, col in zip(viz_df["Code"], viz_df["Couleur"])},
-        hover_data=["Code", "Automatisme", "Occurrence"],
-        title="📊 Visualisation cumulative des automatismes par semaine",
-        labels={"Occurrence": "Nb cumulé", "Semaine": "Semaine"}
-    )
-    fig.update_layout(showlegend=False, height=400, margin=dict(t=40, b=20))
-    st.plotly_chart(fig, use_container_width=True)
+# Affichage plotly
+fig = px.bar(
+    df_viz,
+    x="Semaine",
+    y="Occurrences cumulées",
+    color="Couleur",
+    hover_name="Code",
+    title="📊 Histogramme cumulé par automatisme et semaine",
+    color_discrete_map="identity"
+)
+fig.update_layout(showlegend=False, height=400, margin=dict(t=40, b=20))
+st.plotly_chart(fig, use_container_width=True)
+
