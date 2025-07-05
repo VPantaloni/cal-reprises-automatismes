@@ -471,9 +471,9 @@ for i in range(35):
 colonnes = ["Semaine", "Thème semaine"] + [f"Auto{i+1}" for i in range(9)]
 df_grille = pd.DataFrame(grille_data, columns=colonnes)
 
-# Recap par automatisme (tu dois avoir `recap_data` défini ailleurs)
+# Recap par automatisme 
 df_recap = pd.DataFrame(recap_data)
-
+#EXPORT EXCEL
 with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
     df_grille.to_excel(writer, index=False, sheet_name='Grille')
     df_recap.to_excel(writer, index=False, sheet_name='Lecture_par_automatisme')
@@ -487,3 +487,38 @@ st.sidebar.download_button(
     file_name="planning_reprises_35sem.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+##
+import plotly.express as px
+import pandas as pd
+
+# Construire un tableau de toutes les apparitions
+viz_rows = []
+counter = defaultdict(int)
+
+for code, semaines in st.session_state.auto_weeks.items():
+    for semaine in sorted(semaines):  # Tri pour un cumul cohérent
+        counter[code] += 1
+        row = data[data['Code'] == code].iloc[0]  # Cherche info dans le CSV
+        viz_rows.append({
+            "Semaine": f"S{semaine+1}",
+            "Code": code,
+            "Automatisme": row['Automatisme'],
+            "Occurrence": counter[code],
+            "Couleur": row['Couleur']
+        })
+
+viz_df = pd.DataFrame(viz_rows)
+
+if not viz_df.empty:
+    fig = px.bar(
+        viz_df,
+        x="Semaine",
+        y="Occurrence",
+        color="Code",
+        color_discrete_map={c: col for c, col in zip(viz_df["Code"], viz_df["Couleur"])},
+        hover_data=["Code", "Automatisme", "Occurrence"],
+        title="📊 Visualisation cumulative des automatismes par semaine",
+        labels={"Occurrence": "Nb cumulé", "Semaine": "Semaine"}
+    )
+    fig.update_layout(showlegend=False, height=400, margin=dict(t=40, b=20))
+    st.plotly_chart(fig, use_container_width=True)
