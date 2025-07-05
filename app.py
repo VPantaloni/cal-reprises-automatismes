@@ -239,27 +239,43 @@ emoji_numeros = [f"S{i+1}" for i in range(35)]
 
 # Affichage en 5 lignes de 7 colonnes
 rows = [st.columns(7) for _ in range(5)]
+vacances_A = [6, 12, 18, 26]  # ← à adapter selon la zone
+
 for i in range(35):
     row = i // 7
     col = i % 7
+    semaine_num = i + 1
+    emoji = st.session_state.sequences[i] if st.session_state.sequences[i] else "❓"
+    label = emoji_numeros[i]
+    vacances_txt = "ⓥ🌞|" if semaine_num in vacances_A else ""
+
     with rows[row][col]:
-        emoji = st.session_state.sequences[i] if st.session_state.sequences[i] else "❓"
-        label = emoji_numeros[i]
-        semaine_num = i + 1
-        est_vacances = semaine_num in vacances_A
-    
-        # Ligne horizontale de deux colonnes : bouton + pastille vacances
-        btn_cols = st.columns([6, 1])  # 6 parts pour le bouton, 1 part pour la pastille
-        with btn_cols[0]:
-            if st.button(f"{label} {emoji}", key=f"pick_{i}"):
-                st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
-        with btn_cols[1]:
-            if est_vacances:
-                st.markdown("<div style='font-size:1.2em; text-align:center;'>ⓥ 🏖|</div>", unsafe_allow_html=True)
-            else:
-                st.markdown("&nbsp;", unsafe_allow_html=True)  # pour garder la hauteur
-    
-        # Picker emoji
+        # Bouton semaine avec info vacances à droite (compact)
+        st.markdown(
+            f"""
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <form action="" method="post">
+                    <button name="pick_{i}" type="submit" style="
+                        all: unset;
+                        cursor: pointer;
+                        font-size: 1em;
+                        font-weight: bold;
+                        background-color: transparent;
+                        border: none;
+                        padding: 0;
+                        margin: 0;
+                    ">{label} {emoji}</button>
+                </form>
+                <span style="font-size: 0.85em;">{vacances_txt}</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        if st.session_state.get(f"pick_{i}"):
+            st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
+            st.rerun()
+
         if st.session_state.get(f"show_picker_{i}", False):
             picker_rows = [st.columns(3) for _ in range(4)]
             layout = [
@@ -276,8 +292,8 @@ for i in range(35):
                                 st.session_state.sequences[i] = icon
                                 st.session_state[f"show_picker_{i}"] = False
                                 st.rerun()
-    
-        # Affichage des pastilles
+
+        # Affichage des pastilles si disponibles
         if st.session_state.sequences[i] and st.session_state.selection_by_week[i]:
             codes = st.session_state.selection_by_week[i]
             selection_df = []
