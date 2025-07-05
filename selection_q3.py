@@ -1,46 +1,50 @@
 from collections import defaultdict
 import random
+import pandas as pd
 
 def reconstruire_auto_weeks(selection_by_week):
     auto_weeks = defaultdict(list)
-    used_codes = defaultdict(int)
-    for semaine, codes in selection_by_week.items():
-        for code in codes:
+    for i, semaine in enumerate(selection_by_week):
+        for code in semaine:
             if code != "❓":
-                auto_weeks[code].append(semaine)
-                used_codes[code] += 1
-    return auto_weeks, used_codes
+                auto_weeks[code].append(i)
+    return auto_weeks
 
-def est_valide(code, semaine, auto_weeks, espacement=3):
-    # Vérifie qu'on ne place pas le même code trop près dans le temps
-    if code not in auto_weeks:
-        return True
-    for s in auto_weeks[code]:
-        if abs(s - semaine) < espacement:
-            return False
-    return True
+def selectionner_q3(data, selection_by_week):
+    # Recalcul des occurences
+    auto_weeks = reconstruire_auto_weeks(selection_by_week)
+    used_codes = defaultdict(int)
+    for code, semaines in auto_weeks.items():
+        used_codes[code] = len(semaines)
 
-def selectionner_q3(data, sequences, selection_by_week, auto_weeks, used_codes):
-    nb_semaines = len(sequences)
-    positions_q3 = [2, 5, 8]  # Positions réservées à Q3
+    # Index des 2 dernières semaines
+    indices_q2_finaux = [33, 34]
+    for semaine in indices_q2_finaux:
+        if semaine >= len(selection_by_week):
+            continue
+        futur_index = semaine + 2
+        if futur_index < len(selection_by_week):
+            theme = selection_by_week[futur_index][0] if selection_by_week[futur_index][0] != "❓" else None
+        else:
+            theme = None
+        if theme:
+            candidats = list(data[data['Code'].str.startswith(theme)]['Code'])
+            for i in [1, 4, 7]:
+                if i < len(selection_by_week[semaine]):
+                    selection_by_week[semaine][i] = candidats[i % len(candidats)] if candidats else "❓"
 
-    all_codes = list(data['Code'].unique())
-
-    for semaine in range(nb_semaines):
-        for pos in positions_q3:
-            if selection_by_week[semaine][pos] == "❓":
-                # Chercher un code valide aléatoire (pour plus de diversité)
-                random.shuffle(all_codes)
-                for code in all_codes:
-                    if est_valide(code, semaine, auto_weeks):
-                        selection_by_week[semaine][pos] = code
-                        auto_weeks[code].append(semaine)
-                        used_codes[code] += 1
+    # Complétion des ❓ restants
+    for semaine, semaine_data in enumerate(selection_by_week):
+        for i, code in enumerate(semaine_data):
+            if code == "❓":
+                candidats = list(data['Code'])
+                # Tri par nombre d’occurrences croissant
+                candidats.sort(key=lambda c: used_codes.get(c, 0))
+                for candidat in candidats:
+                    semaines_precedentes = auto_weeks.get(candidat, [])
+                    if all(abs(semaine - s) >= 2 for s in semaines_precedentes):
+                        selection_by_week[semaine][i] = candidat
+                        auto_weeks[candidat].append(semaine)
+                        used_codes[candidat] += 1
                         break
-                else:
-                    # Si pas de code valide, on force le premier code (fallback)
-                    code = all_codes[0]
-                    selection_by_week[semaine][pos] = code
-                    auto_weeks[code].append(semaine)
-                    used_codes[code] += 1
     return selection_by_week
