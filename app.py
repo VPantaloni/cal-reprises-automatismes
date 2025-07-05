@@ -100,16 +100,16 @@ with st.expander("📘 Légende des thèmes ⤵" + " " + " " + " " + "\u00A0"* 1
 
 st.sidebar.markdown("### 🎯 Affichage")
 # Choix de la zone de vacances
-zone = st.sidebar.radio("Zone de vacances 🡆|:", ["A", "B", "C"], index=0)
+zone = st.sidebar.radio("Choix vacances 🡆|:", ["Zone A", "Zone B", "Zone C"], index=0)
 # Définition des durées de vacances (en nombre de semaines) à chaque période
 vacances_A = [7, 7, 5, 6]
 vacances_B = [7, 7, 6, 6]
 vacances_C = [7, 7, 7, 6]
 
 vacances_map = {
-    "A": vacances_A,
-    "B": vacances_B,
-    "C": vacances_C
+    "Zone A": vacances_A,
+    "Zone B": vacances_B,
+    "Zone C": vacances_C
 }
 
 # Convertir en numéros de semaine où afficher la séparation
