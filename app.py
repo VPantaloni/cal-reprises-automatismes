@@ -495,23 +495,31 @@ st.sidebar.download_button(
     file_name="planning_reprises_35sem.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
-##
 if show_histogram:
     import plotly.express as px
     import pandas as pd
-    
+    from collections import defaultdict
+
+    # 🎨 Liste des thèmes disponibles
+    subthemes = [
+        ("🔢", "#ac2747"), ("➗", "#be5770"), ("📏", "#cc6c1d"), ("🔷", "#d27c36"),
+        ("⌚", "#dd9d68"), ("📐", "#16a34a"), ("🧊", "#44b56e"), ("📊", "#1975d1"),
+        ("🎲", "#3384d6"), ("∝", "#8a38d2")
+    ]
+    theme_emojis = [emoji for emoji, _ in subthemes]
+    all_codes = sorted(data['Code'].unique())
+
     # 🔧 Préparation des données pour le graphique
     rows = []
     cumul_counts = defaultdict(int)
-    
+
     for semaine_index in range(35):
         semaine_label = f"S{semaine_index + 1}"
         codes = st.session_state.selection_by_week[semaine_index] if semaine_index < len(st.session_state.selection_by_week) else []
-        
+
         for code in codes:
             if code != "❓":
                 cumul_counts[code] += 1
-                # Récupération des infos associées à ce code
                 row = data[data['Code'] == code]
                 if not row.empty:
                     couleur = row.iloc[0]['Couleur']
@@ -521,57 +529,15 @@ if show_histogram:
                         "Occurrences cumulées": cumul_counts[code],
                         "Couleur": couleur
                     })
-    
-    # 📊 Création du DataFrame
+
     df_viz = pd.DataFrame(rows)
-    
-    # 🧮 Tri explicite des semaines
+
+    # Tri explicite des semaines
     semaine_order = [f"S{i}" for i in range(1, 36)]
     df_viz["Semaine"] = pd.Categorical(df_viz["Semaine"], categories=semaine_order, ordered=True)
     df_viz = df_viz.sort_values("Semaine")
-    # 🎯 Ne garder que les automatismes dont le code commence par un emoji sélectionné
-    df_viz = df_viz[df_viz["Code"].str[0].isin(selected_themes)]
 
-    # 📈 Affichage interactif Plotly
-    fig = px.bar(
-        df_viz,
-        x="Semaine",
-        y="Occurrences cumulées",
-        color="Couleur",
-        hover_name="Code",
-        title="📊 Histogramme cumulé par automatisme et semaine",
-        color_discrete_map="identity",
-        category_orders={"Semaine": semaine_order}
-    )
-    
-    st.plotly_chart(fig, use_container_width=True)
-###
-if st.session_state.show_histogram:
-    st.markdown("### 📊 Histogramme des occurrences par semaine")
-
-    # -- Construction du dataframe df_viz --
-    df_viz = []
-    for code, semaines in st.session_state.auto_weeks.items():
-        couleur = data.loc[data['Code'] == code, 'Couleur'].values[0]
-        for i, semaine in enumerate(sorted(semaines)):
-            df_viz.append({
-                "Code": code,
-                "Semaine": f"S{semaine + 1}",
-                "Ordre": semaine,
-                "Occurrences cumulées": i + 1,
-                "Couleur": couleur
-            })
-    df_viz = pd.DataFrame(df_viz)
-
-    # 🎨 Filtres dynamiques dans la page principale
-    subthemes = [
-        ("🔢", "#ac2747"), ("➗", "#be5770"), ("📏", "#cc6c1d"), ("🔷", "#d27c36"),
-        ("⌚", "#dd9d68"), ("📐", "#16a34a"), ("🧊", "#44b56e"), ("📊", "#1975d1"),
-        ("🎲", "#3384d6"), ("∝", "#8a38d2")
-    ]
-    theme_emojis = [emoji for emoji, _ in subthemes]
-    all_codes = sorted(data['Code'].unique())
-
+    # --- FILTRES DYNAMIQUES SOUS L'HISTOGRAMME ---
     with st.container():
         st.markdown("#### 🎛️ Filtres d’affichage")
         col1, col2 = st.columns(2)
@@ -584,7 +550,7 @@ if st.session_state.show_histogram:
     df_viz = df_viz[df_viz["Code"].str[0].isin(selected_themes)]
     df_viz = df_viz[df_viz["Code"].isin(selected_codes)]
 
-    # -- Tracé --
+    # Affichage interactif Plotly avec la couleur issue du dataframe
     fig = px.bar(
         df_viz,
         x="Semaine",
@@ -592,8 +558,9 @@ if st.session_state.show_histogram:
         color="Code",
         color_discrete_map={row['Code']: row['Couleur'] for _, row in df_viz.iterrows()},
         hover_name="Code",
-        labels={"Occurrences cumulées": "Cumul", "Semaine": "Semaine"},
-        title="Évolution cumulée des automatismes par semaine"
+        title="📊 Histogramme cumulé par automatisme et semaine",
+        category_orders={"Semaine": semaine_order}
     )
+
     fig.update_layout(barmode='group', xaxis={'categoryorder': 'category ascending'})
     st.plotly_chart(fig, use_container_width=True)
