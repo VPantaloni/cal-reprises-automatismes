@@ -2,7 +2,7 @@ from collections import defaultdict
 import random
 
 def get_espacement_fibonacci(occurrence):
-    fibonacci = [1, 1, 2, 3, 5, 8, 13, 21, 34]
+    fibonacci = [1, 2, 3, 5, 8, 11, 15, 20]
     return fibonacci[occurrence - 1] if occurrence <= len(fibonacci) else fibonacci[-1]
 
 def respecte_espacement(semaines_precedentes, semaine_actuelle, est_rappel):
