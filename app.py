@@ -101,22 +101,26 @@ with st.expander("📘 Légende des thèmes ⤵" + " " + " " + " " + "\u00A0"* 1
 st.sidebar.markdown("### 🎯 Affichage")
 # Choix de la zone de vacances
 # Définir la valeur par défaut si elle n'existe pas déjà dans session_state
+# Initialiser la valeur par défaut dans session_state si absente
 if "zone_vacances" not in st.session_state:
     st.session_state.zone_vacances = "Zone B"
 
+# Widget radio, lié à la clé zone_vacances pour garder la sélection dans la session
 zone = st.sidebar.radio(
     "Choix vacances 🡆|",
     ["Zone A", "Zone B", "Zone C"],
     index=["Zone A", "Zone B", "Zone C"].index(st.session_state.zone_vacances),
     key="zone_vacances"
 )
-# Convertir en numéros de semaine où afficher la séparation
+
+# Utilisation
 vacances = vacances_map[zone]
 vacances_semaines = []
 s = 0
 for v in vacances:
     s += v
     vacances_semaines.append(s)
+
 #--------
 st.sidebar.checkbox("🔍 Afficher vue par automatisme", key="show_recap")
 # === MODE NUIT ===
