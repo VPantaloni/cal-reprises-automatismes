@@ -52,6 +52,9 @@ def charger_donnees():
         st.error(f"Erreur de lecture CSV : {e}")
         st.stop()
 
+# Chargement des données
+data = charger_donnees()
+
 def afficher_pastilles_compacte(selection_df, nb_auto_par_ligne=3, total_cases=9):
     if not selection_df.empty:
         pastilles_dict = {
@@ -216,8 +219,7 @@ st.sidebar.markdown(
 )
 
 
-# Chargement des données
-data = charger_donnees()
+
 
 # Initialisation session state
 if 'sequences' not in st.session_state:
