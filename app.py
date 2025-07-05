@@ -164,7 +164,7 @@ top_button_placeholder = st.sidebar.empty()
 #st.sidebar.markdown("### Affichages")
 st.sidebar.markdown(
     "<a href='https://codimd.apps.education.fr/s/xd2gxRA1m' target='_blank' style='text-decoration: none;'>"
-    "📚 Tuto </a>",
+    "📚 Lien vers tutoriel </a>",
     unsafe_allow_html=True
 )
 
