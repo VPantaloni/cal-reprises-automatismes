@@ -436,7 +436,6 @@ def afficher_lecture_et_export(data, subtheme_legend):
     else:
         st.info("Aucune donnée d'automatismes à afficher. Lancez la sélection Q1/Q2 pour générer le planning.")
 
-    occur_df = occur_df.sort_values(by="Occurrences", ascending=False)
     st.markdown("### 📊 Répartition des automatismes")
     st.dataframe(occur_df, use_container_width=True)
 
