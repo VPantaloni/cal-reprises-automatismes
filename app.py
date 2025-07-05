@@ -145,6 +145,11 @@ if nb_vides > 1:
     )
 
 # ===== SIDEBAR =====
+st.sidebar.markdown(
+    "<a href='https://codimd.apps.education.fr/s/xd2gxRA1m' target='_blank' style='text-decoration: none;'>"
+    "📚 Lien vers tutoriel </a>",
+    unsafe_allow_html=True
+)
 
 st.sidebar.markdown("### 🎯 Affichage")
 # Affichage légende
@@ -243,11 +248,6 @@ if st.sidebar.button("🛠️ Algo. distribuer les automatismes"):
     st.rerun()
 
 #st.sidebar.markdown("### Affichages")
-st.sidebar.markdown(
-    "<a href='https://codimd.apps.education.fr/s/xd2gxRA1m' target='_blank' style='text-decoration: none;'>"
-    "📚 Lien vers tutoriel </a>",
-    unsafe_allow_html=True
-)
 
 # === MODE NUIT ===
 if "dark_mode" not in st.session_state:
