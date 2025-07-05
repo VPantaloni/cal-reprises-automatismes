@@ -4,6 +4,7 @@ import pandas as pd
 import random
 from collections import defaultdict
 from io import BytesIO
+import selection_q1q2
 
 # ===== CONFIGURATION DES THÈMES =====
 subthemes = [
@@ -196,7 +197,6 @@ if st.sidebar.button("📙 Progression n°2"):
 
 top_button_placeholder = st.sidebar.empty()
 #---
-import selection_q1q2
 if st.sidebar.button("▶️ Sélection Q1/Q2 uniquement"):
     for i in range(35):
         if i < len(st.session_state.sequences):
