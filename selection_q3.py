@@ -1,50 +1,55 @@
 from collections import defaultdict
-import random
-import pandas as pd
 
-def reconstruire_auto_weeks(selection_by_week):
-    auto_weeks = defaultdict(list)
-    for i, semaine in enumerate(selection_by_week):
-        for code in semaine:
-            if code != "❓":
-                auto_weeks[code].append(i)
-    return auto_weeks
+def get_espacement_fibonacci(occurrence):
+    fibonacci = [1, 2, 3, 5, 8, 11, 15, 20]
+    return fibonacci[occurrence - 1] if occurrence <= len(fibonacci) else fibonacci[-1]
 
-def selectionner_q3(data, selection_by_week):
-    # Recalcul des occurences
-    auto_weeks = reconstruire_auto_weeks(selection_by_week)
-    used_codes = defaultdict(int)
-    for code, semaines in auto_weeks.items():
-        used_codes[code] = len(semaines)
+def est_valide(week, code, auto_weeks, used_codes):
+    if used_codes[code] >= 3:
+        return False
+    if not auto_weeks[code]:
+        return True
+    dernier = max(auto_weeks[code])
+    espacement_requis = get_espacement_fibonacci(used_codes[code] + 1)
+    return week - dernier >= espacement_requis
 
-    # Index des 2 dernières semaines
-    indices_q2_finaux = [33, 34]
-    for semaine in indices_q2_finaux:
-        if semaine >= len(selection_by_week):
+def selectionner_q3(data, sequences, selection_by_week, auto_weeks, used_codes):
+    for semaine in range(len(sequences)):
+        selection = selection_by_week[semaine]
+        if not selection:
             continue
-        futur_index = semaine + 2
-        if futur_index < len(selection_by_week):
-            theme = selection_by_week[futur_index][0] if selection_by_week[futur_index][0] != "❓" else None
-        else:
-            theme = None
-        if theme:
-            candidats = list(data[data['Code'].str.startswith(theme)]['Code'])
-            for i in [1, 4, 7]:
-                if i < len(selection_by_week[semaine]):
-                    selection_by_week[semaine][i] = candidats[i % len(candidats)] if candidats else "❓"
 
-    # Complétion des ❓ restants
-    for semaine, semaine_data in enumerate(selection_by_week):
-        for i, code in enumerate(semaine_data):
-            if code == "❓":
-                candidats = list(data['Code'])
-                # Tri par nombre d’occurrences croissant
-                candidats.sort(key=lambda c: used_codes.get(c, 0))
-                for candidat in candidats:
-                    semaines_precedentes = auto_weeks.get(candidat, [])
-                    if all(abs(semaine - s) >= 2 for s in semaines_precedentes):
-                        selection_by_week[semaine][i] = candidat
-                        auto_weeks[candidat].append(semaine)
-                        used_codes[candidat] += 1
-                        break
-    return selection_by_week
+        for i in range(9):
+            if selection[i] == "❓":
+                # Cherche un automatisme compatible avec le thème de la semaine
+                theme = sequences[semaine]
+                candidats = list(data[data['Code'].str.startswith(theme)]['Code'])
+
+                # Trier pour équilibrer les occurrences et espacer les répétitions
+                def score(c):
+                    nb = used_codes[c]
+                    spacing = semaine - max(auto_weeks[c]) if auto_weeks[c] else 999
+                    return (nb, -spacing)
+
+                candidats = sorted(c for c in candidats if est_valide(semaine, c, auto_weeks, used_codes))
+                candidats.sort(key=score)
+
+                if candidats:
+                    selection[i] = candidats[0]
+                    used_codes[candidats[0]] += 1
+                    auto_weeks[candidats[0]].append(semaine)
+
+    # Correction des 2 dernières semaines (Q2 manquante parfois)
+    for semaine in [33, 34]:
+        selection = selection_by_week[semaine]
+        if not selection:
+            continue
+        for i in [1, 4, 7]:  # positions Q2
+            if selection[i] == "❓":
+                theme = sequences[semaine]
+                candidats = list(data[data['Code'].str.startswith(theme)]['Code'])
+                candidats = sorted(c for c in candidats if est_valide(semaine, c, auto_weeks, used_codes))
+                if candidats:
+                    selection[i] = candidats[0]
+                    used_codes[candidats[0]] += 1
+                    auto_weeks[candidats[0]].append(semaine)
