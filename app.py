@@ -303,7 +303,7 @@ def afficher_lecture_et_export(data, subtheme_legend):
     chunk_size = nb // 3
     for j in range(3):
         start = j * chunk_size
-        end = (j + 1) * chunk_size if j < 2 else nb
+        end = (j + 1) * chunk_size + 2 if j < 1 else nb
         for r in recap_data[start:end]:
             with cols[j]:
                 st.markdown(
