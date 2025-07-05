@@ -441,8 +441,7 @@ def afficher_lecture_et_export(data, subtheme_legend):
 
     return recap_data
 
-
-    
+ 
 if st.session_state.show_recap:
     recap_data = afficher_lecture_et_export(data, subtheme_legend)
 else:
