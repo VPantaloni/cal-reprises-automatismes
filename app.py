@@ -248,7 +248,7 @@ for i in range(35):
     semaine_num = i + 1
     emoji = st.session_state.sequences[i] if st.session_state.sequences[i] else "❓"
     label = emoji_numeros[i]
-    vacances_txt = "ⓥ|" if semaine_num in vacances_A else ""
+    vacances_txt = "🡆|" if semaine_num in vacances_A else ""
 
     with rows[row][col]:
         # Ligne contenant bouton semaine + repère vacances à droite
