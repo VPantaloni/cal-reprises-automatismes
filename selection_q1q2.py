@@ -33,7 +33,7 @@ def selectionner_automatismes_theme_q1q2(data, semaine, theme, auto_weeks, used_
     return selection
 
 
-def selectionner_q1q2(data, semaine, theme, sequences):
+def selectionner_q1q2(data, semaine, theme, sequences, auto_weeks, used_codes):
     selection_finale = [None] * 9
     pos_theme = [0, 3, 6]
     pos_diag = [1, 4, 7]
