@@ -216,21 +216,23 @@ if st.sidebar.button("📘 Progression n°1"):
 if st.sidebar.button("📙 Progression n°2"):
     st.session_state.sequences = progression_2.copy()
     st.rerun()
-
-## Message avant distrib :
-# Vérifier si tous les thèmes sont définis (au moins en grande partie)
-nb_vides = sum(1 for t in st.session_state.get("sequences", []) if not t or t == "❓")
-
-
-## Bouton tout en un
+# BOUTON ALGO tout en un avec check de validation.
+# Initialisation au début
 if 'btn_done' not in st.session_state:
     st.session_state.btn_done = False
-if nb_vides == 0 and not st.session_state.btn_done :
+
+# Vérifier si tous les thèmes sont définis
+nb_vides = sum(1 for t in st.session_state.get("sequences", []) if not t or t == "❓")
+
+# ✅ Afficher message tant que algo pas lancé
+if nb_vides == 0 and not st.session_state.btn_done:
     st.sidebar.info("👍 Go go Algo!👇")
-#---
+
+# ✅ Algo distrib : bouton unique
 if st.sidebar.button("🛠️ Algo. distribuer les automatismes"):
     auto_weeks = defaultdict(list)
     used_codes = defaultdict(int)
+
     for i in range(35):
         if i < len(st.session_state.sequences):
             theme = st.session_state.sequences[i]
@@ -238,7 +240,7 @@ if st.sidebar.button("🛠️ Algo. distribuer les automatismes"):
                 st.session_state.selection_by_week[i] = selection_q1q2.selectionner_q1q2(
                     data, i, theme, st.session_state.sequences, auto_weeks, used_codes
                 )
-    
+
     from selection_q3 import selectionner_q3, reconstruire_auto_weeks
 
     auto_weeks, used_codes = reconstruire_auto_weeks(st.session_state.selection_by_week)
@@ -250,10 +252,16 @@ if st.sidebar.button("🛠️ Algo. distribuer les automatismes"):
         auto_weeks,
         used_codes
     )
+
+    # ✅ Marquer que le bouton a été utilisé
+    st.session_state.btn_done = True
+
     st.rerun()
-#-- validation de click
+
+# ✅ Message de confirmation si bouton déjà utilisé
 if st.session_state.btn_done:
-    st.sidebar.markdown("✅ Distribution prête !", unsafe_allow_html=True)
+    st.sidebar.success("✅ Distribution effectuée !")
+
     
 #st.sidebar.markdown("### Affichages")
 
