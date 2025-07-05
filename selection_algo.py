@@ -1,4 +1,3 @@
-# selection_algo
 from collections import defaultdict
 import random
 
@@ -11,7 +10,7 @@ def respecte_espacement(semaines_precedentes, semaine_actuelle, est_rappel):
         return True
     ecart = semaine_actuelle - max(semaines_precedentes)
     if est_rappel:
-        return ecart >= 1  # Espacement minimum pour les rappels
+        return ecart >= 1
     occurrence = len(semaines_precedentes) + 1
     return ecart >= get_espacement_fibonacci(occurrence)
 
@@ -21,13 +20,12 @@ def peut_etre_place(code, data, semaine, auto_weeks, used_codes, themes_passes, 
     est_rappel = row['Rappel']
     semaines_precedentes = auto_weeks.get(code, [])
 
-    # Limiter le nombre de révisions des rappels
     if est_rappel:
-        if used_codes[code] >= 5:  # Autoriser jusqu'à 5 rappels
+        if used_codes[code] >= 5:  # augmenté de 4 → 5
             return False
-    
-    # Pour les non-rappels, autoriser si le thème est passé OU est le thème en cours
-    if not est_rappel and theme_code not in themes_passes + [theme]:
+
+    # Non-rappel : le thème doit être passé ou correspondre à celui de la semaine
+    if not est_rappel and theme_code not in themes_passes and theme_code != theme:
         return False
 
     return respecte_espacement(semaines_precedentes, semaine, est_rappel)
@@ -38,13 +36,13 @@ def selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes
         c for c in data[data['Code'].str.startswith(theme)]['Code']
         if peut_etre_place(c, data, semaine, auto_weeks, used_codes, themes_passes, theme)
     ]
-    random.shuffle(theme_autos)
+    # ❌ Plus de random.shuffle → respect de l'ordre CSV
     for i, pos in enumerate(positions):
         if i < len(theme_autos):
             selection[pos] = theme_autos[i]
     return selection
 
-def selectionner_automatismes_autres_themes(data, semaine, theme, auto_weeks, used_codes, codes_selectionnes, themes_passes, positions):
+def selectionner_automatismes_autres_themes(data, semaine, auto_weeks, used_codes, codes_selectionnes, themes_passes, positions, theme):
     selection = [None] * 9
     tous_candidats = []
     for code in data['Code']:
@@ -66,7 +64,7 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
     selection_finale = [None] * 9
     codes_selectionnes = set()
 
-    # 1. Automatisme du thème de la semaine
+    # 1. Thème actuel
     pos_theme = [0, 3, 6]
     base_theme = selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes, themes_passes, pos_theme)
     for i in pos_theme:
@@ -74,7 +72,7 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
             selection_finale[i] = base_theme[i]
             codes_selectionnes.add(base_theme[i])
 
-    # 2. Automatisme diagnostique du thème à venir
+    # 2. Thème futur (diagnostique)
     future_index = semaine + 2
     if future_index < len(sequences) and sequences[future_index] == theme:
         if semaine + 3 < len(sequences):
@@ -82,26 +80,32 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
     if future_index < len(sequences):
         future_theme = sequences[future_index]
         pos_diag = [1, 4, 7]
-        diag_theme = selectionner_automatismes_theme(data, semaine, future_theme, auto_weeks, used_codes, themes_passes + [future_theme], pos_diag)
+        diag_theme = selectionner_automatismes_theme(
+            data, semaine, future_theme, auto_weeks, used_codes,
+            themes_passes + [future_theme], pos_diag
+        )
         for i in pos_diag:
             if diag_theme[i] is not None:
                 selection_finale[i] = diag_theme[i]
                 codes_selectionnes.add(diag_theme[i])
 
-    # 3. Complément (rappels et thèmes déjà vus)
+    # 3. Complément : rappels + thèmes déjà vus
     pos_autres = [i for i in range(9) if selection_finale[i] is None]
-    complement = selectionner_automatismes_autres_themes(data, semaine, theme, auto_weeks, used_codes, codes_selectionnes, themes_passes, pos_autres)
+    complement = selectionner_automatismes_autres_themes(
+        data, semaine, auto_weeks, used_codes, codes_selectionnes, themes_passes, pos_autres, theme
+    )
     for i in pos_autres:
         if selection_finale[i] is None and complement[i] is not None:
             selection_finale[i] = complement[i]
             codes_selectionnes.add(complement[i])
 
-    # 4. Dernier recours : remplir les cases vides
+    # 4. Dernier recours
     for i in range(9):
         if selection_finale[i] is None:
             candidats = [
                 c for c in data['Code']
-                if c not in selection_finale and respecte_espacement(auto_weeks.get(c, []), semaine, data[data['Code'] == c]['Rappel'].iloc[0])
+                if c not in selection_finale and respecte_espacement(
+                    auto_weeks.get(c, []), semaine, data[data['Code'] == c]['Rappel'].iloc[0])
             ]
             random.shuffle(candidats)
             for c in candidats:
