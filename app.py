@@ -160,6 +160,9 @@ if st.sidebar.button("📙 Progression n°2"):
     st.rerun()
 
 top_button_placeholder = st.sidebar.empty()
+st.sidebar.markdown("### Affichages")
+st.sidebar.checkbox("🔍 Afficher vue par automatisme", key="show_recap")
+
 
 # Chargement des données
 data = charger_donnees()
@@ -307,7 +310,10 @@ def afficher_lecture_et_export(data, subtheme_legend):
 
     return recap_data  # ← Ajouté ici
     
-recap_data = afficher_lecture_et_export(data, subtheme_legend)
+if st.session_state.show_recap:
+    recap_data = afficher_lecture_et_export(data, subtheme_legend)
+else:
+    recap_data = []  # Nécessaire pour éviter erreur dans export Excel
 
 #-----------------------
 # Génération export Excel
