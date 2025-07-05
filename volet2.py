@@ -64,7 +64,7 @@ def afficher_lecture_et_export(data, subtheme_legend):
 filename = "planning_reprises_35sem.xlsx"
 
 st.sidebar.download_button(
-        label=f"📅 Télécharger le planning Excel ({mode_text})",
+        label="📅 Télécharger le planning Excel",
         data=buffer.getvalue(),
         file_name=filename,
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
