@@ -38,10 +38,17 @@ def selectionner_q3(data, sequences, selection_by_week, auto_weeks, used_codes):
 
     all_codes = list(data['Code'].unique())
 
+    # Assurer que selection_by_week est complet et bien formé
+    for semaine in range(nb_semaines):
+        if semaine not in selection_by_week:
+            selection_by_week[semaine] = ["❓"] * 9
+        else:
+            while len(selection_by_week[semaine]) < 9:
+                selection_by_week[semaine].append("❓")
+
     for semaine in range(nb_semaines):
         for pos in positions_q3:
             if selection_by_week[semaine][pos] == "❓":
-                # Chercher un code valide aléatoire (pour plus de diversité)
                 random.shuffle(all_codes)
                 for code in all_codes:
                     if est_valide(code, semaine, auto_weeks):
@@ -50,9 +57,9 @@ def selectionner_q3(data, sequences, selection_by_week, auto_weeks, used_codes):
                         used_codes[code] += 1
                         break
                 else:
-                    # Si pas de code valide, on force le premier code (fallback)
                     code = all_codes[0]
                     selection_by_week[semaine][pos] = code
                     auto_weeks[code].append(semaine)
                     used_codes[code] += 1
     return selection_by_week
+
