@@ -5,6 +5,7 @@ import random
 from collections import defaultdict
 from io import BytesIO
 import selection_q1q2
+import selection_q3
 
 # ===== CONFIGURATION DES THÈMES =====
 subthemes = [
@@ -208,6 +209,14 @@ if st.sidebar.button("▶️ Sélection Q1/Q2 uniquement"):
                 st.session_state.selection_by_week[i] = selection_q1q2.selectionner_q1q2(
                     data, i, theme, st.session_state.sequences
                 )
+    st.rerun()
+#---
+if st.sidebar.button("🧩 Compléter Q3"):
+    st.session_state.selection_by_week = selection_q3.completer_q3(
+        data,
+        st.session_state.selection_by_week,
+        st.session_state.auto_weeks
+    )
     st.rerun()
 
 
