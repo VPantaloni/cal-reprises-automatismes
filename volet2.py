@@ -55,18 +55,3 @@ def afficher_lecture_et_export(data, subtheme_legend):
     colonnes = ["Semaine", "Thème semaine"] + [f"Auto{i+1}" for i in range(9)]
     df_grille = pd.DataFrame(grille_data, columns=colonnes)
     df_recap = pd.DataFrame(recap_data)
-    
-    # Export Excel
-    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-        df_grille.to_excel(writer, index=False, sheet_name='Grille')
-        df_recap.to_excel(writer, index=False, sheet_name='Lecture_par_automatisme')
-    
-    # Nom du fichier
-    filename = "planning_reprises_35sem_9auto.xlsx"
-    
-    st.download_button(
-        label="📅 Télécharger le planning Excel (35 semaines - 9 automatismes)",
-        data=buffer.getvalue(),
-        file_name=filename,
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
