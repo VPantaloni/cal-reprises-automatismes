@@ -242,20 +242,23 @@ for i in range(35):
         label = emoji_numeros[i]
         # Appliquer une bordure verticale si cette semaine précède des vacances
         semaine_num = i + 1
-
-        # Style de fond avec "bande dorée" à droite si la semaine précède des vacances
-        background_style = (
-            "background: linear-gradient(to right, white 85%, gold 85%);" 
-            if semaine_num in vacances_A else ""
+        emoji = st.session_state.sequences[i] if st.session_state.sequences[i] else "❓"
+        label = emoji_numeros[i]
+        
+        # Bordure verticale à droite si la semaine précède des vacances
+        border_style = (
+            "border-right: 5px solid gold; padding-right: 4px; margin-bottom:0px;"
+            if semaine_num in vacances_A else "margin-bottom:0px;"
         )
-        # Conteneur avec le style
-        st.markdown(f"<div style='padding:1px; border-radius:4px; {background_style}'>", unsafe_allow_html=True)
-        # Bouton semaine (emoji + numéro)
-        if st.button(f"{label} {emoji}", key=f"pick_{i}"):
-            st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
         
-        st.markdown("</div>", unsafe_allow_html=True)
+        # Bloc avec bordure droite — le bouton est inclus dedans
+        with st.container():
+            st.markdown(f"<div style='display:inline-block; {border_style}'>", unsafe_allow_html=True)
+            if st.button(f"{label} {emoji}", key=f"pick_{i}", use_container_width=True):
+                st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
+            st.markdown("</div>", unsafe_allow_html=True)
         
+        # Affiche le picker si besoin
         if st.session_state.get(f"show_picker_{i}", False):
             picker_rows = [st.columns(3) for _ in range(4)]
             layout = [
@@ -273,6 +276,7 @@ for i in range(35):
                                 st.session_state[f"show_picker_{i}"] = False
                                 st.rerun()
 
+
         if st.session_state.sequences[i] and st.session_state.selection_by_week[i]:
             codes = st.session_state.selection_by_week[i]
             selection_df = []
@@ -287,7 +291,7 @@ for i in range(35):
                     })
             selection_df = pd.DataFrame(selection_df)
             afficher_pastilles_compacte(selection_df, nb_auto_par_ligne=3, total_cases=9)
-            st.markdown("<div style='margin-top:5px;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
 
 # Import du volet 2
 
