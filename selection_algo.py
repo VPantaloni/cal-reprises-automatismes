@@ -44,7 +44,7 @@ def selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes
             selection[pos] = theme_autos[i]
     return selection
 
-def selectionner_automatismes_autres_themes(data, semaine, auto_weeks, used_codes, codes_selectionnes, themes_passes, positions):
+def selectionner_automatismes_autres_themes(data, semaine, theme, auto_weeks, used_codes, codes_selectionnes, themes_passes, positions):
     selection = [None] * 9
     tous_candidats = []
     for code in data['Code']:
@@ -90,7 +90,7 @@ def selectionner_automatismes(data, semaine, theme, auto_weeks, used_codes, next
 
     # 3. Complément (rappels et thèmes déjà vus)
     pos_autres = [i for i in range(9) if selection_finale[i] is None]
-    complement = selectionner_automatismes_autres_themes(data, semaine, auto_weeks, used_codes, codes_selectionnes, themes_passes, pos_autres)
+    complement = selectionner_automatismes_autres_themes(data, semaine, theme, auto_weeks, used_codes, codes_selectionnes, themes_passes, pos_autres)
     for i in pos_autres:
         if selection_finale[i] is None and complement[i] is not None:
             selection_finale[i] = complement[i]
