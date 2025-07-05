@@ -67,3 +67,4 @@ if st.sidebar.button("📅 Télécharger planning Excel"):
     data=buffer.getvalue(),
     file_name=filename,
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    st.rerun()
