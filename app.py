@@ -120,15 +120,6 @@ for i in range(35):
 st.set_page_config(layout="wide")
 #st.title("📅 Reprises d'automatismes mathématiques en 6e")
 st.markdown("## 📅 Reprises d'automatismes mathématiques en 6e")
-## Bulles tuto warning
-nb_vides = sum(1 for t in st.session_state.sequences if not t or t == "❓")
-
-if nb_vides > 1:
-    st.warning(
-        "🛠️ Avant de distribuer les automatismes :\n\n"
-        "- 🟦 Cliquez sur les boutons des semaines (S1 à S35) pour choisir un thème\n ou :"
-        "- 📘 chargez une progression prête ('Progression 1' ou 'Progression 2') via la barre latérale."
-    )
 
 # AFFICHAGE LÉGENDE SI ACTIVÉ
 if st.session_state.show_legend:
@@ -143,6 +134,15 @@ if st.session_state.show_legend:
                 </div>
             """, unsafe_allow_html=True)<br>
 
+## Bulles tuto warning
+nb_vides = sum(1 for t in st.session_state.sequences if not t or t == "❓")
+
+if nb_vides > 1:
+    st.warning(
+        "🛠️ Avant de distribuer les automatismes :\n\n"
+        "- 🟦 Cliquez sur les boutons des semaines (S1 à S35) pour choisir un thème\n ou :"
+        "- 📘 chargez une progression prête ('Progression 1' ou 'Progression 2') via la barre latérale."
+    )
 
 # ===== SIDEBAR =====
 
