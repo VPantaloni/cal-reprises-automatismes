@@ -378,9 +378,14 @@ for i in range(35):
 auto_weeks = selection_q3.reconstruire_auto_weeks(st.session_state.selection_by_week)
 st.session_state.auto_weeks = auto_weeks
 
+##
 def afficher_lecture_et_export(data, subtheme_legend):
     st.markdown("---")
     st.markdown("## 🔍 Lecture par automatisme")
+
+    # Sécurité en cas de corruption
+    if not isinstance(st.session_state.auto_weeks, dict):
+        st.session_state.auto_weeks, _ = selection_q3.reconstruire_auto_weeks(st.session_state.selection_by_week)
 
     recap_data = []
     for _, row in data.iterrows():
