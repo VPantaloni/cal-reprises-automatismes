@@ -286,7 +286,7 @@ for i in range(35):
                 st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
                 st.rerun()
         with col_vac:
-            st.markdown(f"<div style='font-size: 1.5em; text-align:right; color: yellow'>{vacances_txt}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='font-size: 1.5em; text-align:right; color: gold'>{vacances_txt}</div>", unsafe_allow_html=True)
 
         # Picker d'emoji (sélecteur de thème)
         if st.session_state.get(f"show_picker_{i}", False):
