@@ -199,37 +199,21 @@ if st.sidebar.button("📙 Progression n°2"):
     st.session_state.sequences = progression_2.copy()
     st.rerun()
 
-top_button_placeholder = st.sidebar.empty()
-#---
+## Message avant distrib :
+# Vérifier si tous les thèmes sont définis (au moins en grande partie)
+nb_vides = sum(1 for t in st.session_state.sequences if not t or t == "❓")
 
-if st.sidebar.button("▶️ Sélection Q1/Q2 uniquement"):
-    auto_weeks = defaultdict(list)
-    used_codes = defaultdict(int)
-    for i in range(35):
-        if i < len(st.session_state.sequences):
-            theme = st.session_state.sequences[i]
-            if theme and theme != "❓":
-                st.session_state.selection_by_week[i] = selection_q1q2.selectionner_q1q2(
-                    data, i, theme, st.session_state.sequences, auto_weeks, used_codes
-                )
-    st.rerun()
-
-if st.sidebar.button("🧩 Compléter Q3 ❓"):
-    from selection_q3 import selectionner_q3, reconstruire_auto_weeks
-
-    auto_weeks, used_codes = reconstruire_auto_weeks(st.session_state.selection_by_week)
-
-    st.session_state.selection_by_week = selectionner_q3(
-        data,
-        st.session_state.selection_by_week,
-        st.session_state.sequences,
-        auto_weeks,
-        used_codes
+if nb_vides > 10:
+    st.sidebar.warning(
+        "👆 Avant de distribuer les automatismes :\n\n"
+        "🟦 Cliquez sur chaque bouton de semaine (S1 à S35)\n"
+        "ou\n"
+        "📘 Chargez une progression déjà prête ('Progression 1' ou 'Progression 2')."
     )
-    st.rerun()
-
-## Tout en un ?
-if st.sidebar.button("Placer des automatismes"):
+else:
+    st.sidebar.info("👍 Thèmes détectés pour la majorité des semaines. Vous pouvez lancer la distribution des automatismes.")
+## Bouton tout en un
+if st.sidebar.button("⚙ Algo. distribuer les automatismes"):
     auto_weeks = defaultdict(list)
     used_codes = defaultdict(int)
     for i in range(35):
@@ -311,11 +295,6 @@ def recalculer_toute_la_repartition():
             for code in codes:
                 st.session_state.auto_weeks[code].append(i)
                 st.session_state.used_codes[code] += 1
-
-# Bouton recalcul
-if top_button_placeholder.button("🔄 (Re)calculer la distribution des automatismes"):
-    recalculer_toute_la_repartition()
-    st.rerun()
 
 # ===================== AFFICHAGE PLANNING =====================
 
