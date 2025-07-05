@@ -229,6 +229,14 @@ if top_button_placeholder.button("🔄 (Re)calculer la distribution des automati
     recalculer_toute_la_repartition()
     st.rerun()
 
+# ===================== AFFICHAGE PLANNING =====================
+
+# Liste des semaines de vacances pour visualisation
+vacances_A = [6, 12, 18, 26]
+
+# Emojis numérotés S1 à S35
+emoji_numeros = [f"S{i+1}" for i in range(35)]
+
 # Affichage en 5 lignes de 7 colonnes
 rows = [st.columns(7) for _ in range(5)]
 for i in range(35):
@@ -236,10 +244,17 @@ for i in range(35):
     col = i % 7
     with rows[row][col]:
         emoji = st.session_state.sequences[i] if st.session_state.sequences[i] else "❓"
+
+        # Ajout d’un repère visuel pour les vacances
         label = emoji_numeros[i]
+        if i + 1 in vacances_A:
+            label += " 🟡"  # ou " V" selon préférence
+
+        # Bouton semaine
         if st.button(f"{label} {emoji}", key=f"pick_{i}"):
             st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
 
+        # Picker pour choisir un emoji
         if st.session_state.get(f"show_picker_{i}", False):
             picker_rows = [st.columns(3) for _ in range(4)]
             layout = [
@@ -257,6 +272,7 @@ for i in range(35):
                                 st.session_state[f"show_picker_{i}"] = False
                                 st.rerun()
 
+        # Affichage des automatismes si présents
         if st.session_state.sequences[i] and st.session_state.selection_by_week[i]:
             codes = st.session_state.selection_by_week[i]
             selection_df = []
