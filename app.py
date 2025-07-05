@@ -37,6 +37,8 @@ if 'used_codes' not in st.session_state:
     st.session_state.used_codes = defaultdict(int)
 if 'next_index_by_theme' not in st.session_state:
     st.session_state.next_index_by_theme = defaultdict(lambda: 1)
+if "show_legend" not in st.session_state:
+    st.session_state.show_legend = True
 
 # ===== FONCTIONS UTILITAIRES =====
 def charger_donnees():
