@@ -491,31 +491,37 @@ st.sidebar.download_button(
 import plotly.express as px
 import pandas as pd
 
-# Construire un tableau de toutes les apparitions
-viz_rows = []
-counter = defaultdict(int)
+# 🔧 Préparation des données pour le graphique
+rows = []
+cumul_counts = defaultdict(int)
 
-for code, semaines in st.session_state.auto_weeks.items():
-    for semaine in sorted(semaines):  # Tri pour un cumul cohérent
-        counter[code] += 1
-        row = data[data['Code'] == code].iloc[0]  # Cherche info dans le CSV
-        viz_rows.append({
-            "Semaine": f"S{semaine+1}",
-            "Code": code,
-            "Automatisme": row['Automatisme'],
-            "Occurrence": counter[code],
-            "Couleur": row['Couleur']
-        })
+for semaine_index in range(35):
+    semaine_label = f"S{semaine_index + 1}"
+    codes = st.session_state.selection_by_week[semaine_index] if semaine_index < len(st.session_state.selection_by_week) else []
+    
+    for code in codes:
+        if code != "❓":
+            cumul_counts[code] += 1
+            # Récupération des infos associées à ce code
+            row = data[data['Code'] == code]
+            if not row.empty:
+                couleur = row.iloc[0]['Couleur']
+                rows.append({
+                    "Semaine": semaine_label,
+                    "Code": code,
+                    "Occurrences cumulées": cumul_counts[code],
+                    "Couleur": couleur
+                })
 
-# Après avoir construit df_viz
+# 📊 Création du DataFrame
 df_viz = pd.DataFrame(rows)
 
-# 🟢 AJOUT ICI — pour trier les semaines dans l'ordre S1, S2, ..., S35
+# 🧮 Tri explicite des semaines
 semaine_order = [f"S{i}" for i in range(1, 36)]
 df_viz["Semaine"] = pd.Categorical(df_viz["Semaine"], categories=semaine_order, ordered=True)
 df_viz = df_viz.sort_values("Semaine")
 
-# Affichage plotly
+# 📈 Affichage interactif Plotly
 fig = px.bar(
     df_viz,
     x="Semaine",
@@ -523,8 +529,8 @@ fig = px.bar(
     color="Couleur",
     hover_name="Code",
     title="📊 Histogramme cumulé par automatisme et semaine",
-    color_discrete_map="identity"
+    color_discrete_map="identity",
+    category_orders={"Semaine": semaine_order}
 )
-fig.update_layout(showlegend=False, height=400, margin=dict(t=40, b=20))
-st.plotly_chart(fig, use_container_width=True)
 
+st.plotly_chart(fig, use_container_width=True)
