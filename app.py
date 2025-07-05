@@ -138,7 +138,7 @@ if st.session_state.show_legend:
 ## Bulles tuto warning
 nb_vides = sum(1 for t in st.session_state.sequences if not t or t == "❓")
 
-if nb_vides > 1:
+if nb_vides > 0:
     st.warning(
         "🛠️ Avant de distribuer les automatismes :\n\n"
         "- 🟦 Cliquez sur les boutons des semaines (S1 à S35) pour choisir un thème\n ou :\n"
