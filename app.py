@@ -255,7 +255,7 @@ for i in range(35):
                 st.session_state[f"show_picker_{i}"] = not st.session_state.get(f"show_picker_{i}", False)
         with btn_cols[1]:
             if est_vacances:
-                st.markdown("<div style='font-size:1.2em; text-align:center;'>🟡</div>", unsafe_allow_html=True)
+                st.markdown("<div style='font-size:1.2em; text-align:center;'>ⓥ 🏖|</div>", unsafe_allow_html=True)
             else:
                 st.markdown("&nbsp;", unsafe_allow_html=True)  # pour garder la hauteur
     
