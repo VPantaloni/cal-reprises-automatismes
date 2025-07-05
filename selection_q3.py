@@ -1,5 +1,15 @@
 from collections import defaultdict
 
+def reconstruire_auto_weeks(selection_by_week):
+    auto_weeks = defaultdict(list)
+    for semaine, selection in enumerate(selection_by_week):
+        if selection:
+            for code in selection:
+                if code and code != "❓":
+                    auto_weeks[code].append(semaine)
+    return auto_weeks
+
+
 def get_espacement_fibonacci(occurrence):
     fibonacci = [1, 2, 3, 5, 8, 11, 15, 20]
     return fibonacci[occurrence - 1] if occurrence <= len(fibonacci) else fibonacci[-1]
