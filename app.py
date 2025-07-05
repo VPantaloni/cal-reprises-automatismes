@@ -271,9 +271,9 @@ volet2.afficher_lecture_et_export(data, subtheme_legend)
 #---
 
 # Export Excel
-    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-        df_grille.to_excel(writer, index=False, sheet_name='Grille')
-        df_recap.to_excel(writer, index=False, sheet_name='Lecture_par_automatisme')
+with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+    df_grille.to_excel(writer, index=False, sheet_name='Grille')
+    df_recap.to_excel(writer, index=False, sheet_name='Lecture_par_automatisme')
     
 # Nom du fichier
 filename = "planning_reprises_35sem.xlsx"
