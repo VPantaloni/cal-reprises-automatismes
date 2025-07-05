@@ -5,14 +5,14 @@ def reconstruire_auto_weeks(selection_by_week):
     auto_weeks = defaultdict(list)
     used_codes = defaultdict(int)
 
-    # Adapté pour dict ou liste
+    # Si selection_by_week est un dict
     if hasattr(selection_by_week, 'items'):
         iterator = selection_by_week.items()
     else:
         iterator = enumerate(selection_by_week)
 
     for semaine, codes in iterator:
-        if not codes:
+        if codes is None:
             continue
         for code in codes:
             if code != "❓":
@@ -22,28 +22,31 @@ def reconstruire_auto_weeks(selection_by_week):
     return auto_weeks, used_codes
 
 def est_valide(code, semaine, auto_weeks, espacement=3):
-    return all(abs(s - semaine) >= espacement for s in auto_weeks.get(code, []))
+    if code not in auto_weeks:
+        return True
+    return all(abs(s - semaine) >= espacement for s in auto_weeks[code])
 
 def selectionner_q3(data, selection_by_week, sequences, auto_weeks, used_codes):
-    positions_q3 = [2, 5, 8]
+    nb_semaines = len(sequences)
     all_codes = list(data['Code'].unique())
+    random.shuffle(all_codes)  # Pour varier un peu
 
-    for semaine in range(len(sequences)):
-        if semaine >= len(selection_by_week):
-            continue
-        semaine_codes = selection_by_week[semaine]
-        if not semaine_codes or len(semaine_codes) < 9:
-            semaine_codes += ["❓"] * (9 - len(semaine_codes))
-
-        for pos in positions_q3:
-            if semaine_codes[pos] == "❓":
-                random.shuffle(all_codes)
+    for semaine in range(nb_semaines):
+        if not selection_by_week[semaine]:
+            selection_by_week[semaine] = ["❓"] * 9
+        for pos in range(9):
+            if selection_by_week[semaine][pos] == "❓":
                 for code in all_codes:
                     if est_valide(code, semaine, auto_weeks):
-                        semaine_codes[pos] = code
+                        selection_by_week[semaine][pos] = code
                         auto_weeks[code].append(semaine)
                         used_codes[code] += 1
                         break
-        selection_by_week[semaine] = semaine_codes
+                else:
+                    # Fallback si aucun code ne passe la contrainte
+                    code = all_codes[0]
+                    selection_by_week[semaine][pos] = code
+                    auto_weeks[code].append(semaine)
+                    used_codes[code] += 1
 
     return selection_by_week
