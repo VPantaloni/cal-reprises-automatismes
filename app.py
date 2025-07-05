@@ -87,6 +87,32 @@ def initialiser_sequences():
 
 def initialiser_selection_by_week():
     return [[] for _ in range(35)]
+##
+# INIT
+# Initialisation session state
+if 'sequences' not in st.session_state:
+    st.session_state.sequences = initialiser_sequences()
+if 'selection_by_week' not in st.session_state:
+    st.session_state.selection_by_week = initialiser_selection_by_week()
+if 'picker_open' not in st.session_state:
+    st.session_state.picker_open = None
+
+# Assurer que les listes ont la bonne taille
+if len(st.session_state.sequences) != 35:
+    old_sequences = st.session_state.sequences.copy()
+    st.session_state.sequences = initialiser_sequences()
+    # Copier les anciennes valeurs si possible
+    for i in range(min(len(old_sequences), 35)):
+        if old_sequences[i]:
+            st.session_state.sequences[i] = old_sequences[i]
+
+if len(st.session_state.selection_by_week) != 35:
+    st.session_state.selection_by_week = initialiser_selection_by_week()
+
+for i in range(35):
+    if f"show_picker_{i}" not in st.session_state:
+        st.session_state[f"show_picker_{i}"] = False
+
 
 # Configuration de la page
 st.set_page_config(layout="wide")
@@ -253,57 +279,8 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 
-
-
-
-# Initialisation session state
-if 'sequences' not in st.session_state:
-    st.session_state.sequences = initialiser_sequences()
-if 'selection_by_week' not in st.session_state:
-    st.session_state.selection_by_week = initialiser_selection_by_week()
-if 'picker_open' not in st.session_state:
-    st.session_state.picker_open = None
-
-# Assurer que les listes ont la bonne taille
-if len(st.session_state.sequences) != 35:
-    old_sequences = st.session_state.sequences.copy()
-    st.session_state.sequences = initialiser_sequences()
-    # Copier les anciennes valeurs si possible
-    for i in range(min(len(old_sequences), 35)):
-        if old_sequences[i]:
-            st.session_state.sequences[i] = old_sequences[i]
-
-if len(st.session_state.selection_by_week) != 35:
-    st.session_state.selection_by_week = initialiser_selection_by_week()
-
-for i in range(35):
-    if f"show_picker_{i}" not in st.session_state:
-        st.session_state[f"show_picker_{i}"] = False
-
 # Import de l'algorithme de sélection
-from selection_algo import selectionner_automatismes
-
-def recalculer_toute_la_repartition():
-    st.session_state.selection_by_week = [[] for _ in range(35)]
-    st.session_state.auto_weeks.clear()
-    st.session_state.used_codes.clear()
-    st.session_state.next_index_by_theme = defaultdict(lambda: 1)
-    
-    for i in range(35):
-        if st.session_state.sequences[i]:
-            themes_passes = [t for t in st.session_state.sequences[:i] if t]
-            codes = selectionner_automatismes(
-                data, i, st.session_state.sequences[i],
-                st.session_state.auto_weeks,
-                st.session_state.used_codes,
-                st.session_state.next_index_by_theme,
-                themes_passes=themes_passes,
-                sequences=st.session_state.sequences
-            )
-            st.session_state.selection_by_week[i] = codes
-            for code in codes:
-                st.session_state.auto_weeks[code].append(i)
-                st.session_state.used_codes[code] += 1
+# from selection_algo import selectionner_automatismes
 
 # ===================== AFFICHAGE PLANNING =====================
 
