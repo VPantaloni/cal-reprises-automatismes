@@ -427,7 +427,7 @@ def afficher_lecture_et_export(data, subtheme_legend):
         st.markdown("### 📊 Répartition des automatismes")
         st.dataframe(occur_df, use_container_width=True)
     else:
-        st.info("Aucune donnée d'automatismes à afficher. Lancez la sélection Q1/Q2 pour générer le planning.")
+        st.info("Aucune donnée d'automatismes à afficher. 🛠 Lancez l'algorithme de distribution des automatismes pour générer le planning.")
 
 #    st.markdown("### 📊 Répartition des automatismes")
 #    st.dataframe(occur_df, use_container_width=True)
