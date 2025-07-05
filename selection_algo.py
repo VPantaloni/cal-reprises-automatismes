@@ -41,19 +41,17 @@ def selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes
         if peut_etre_place(row['Code'], data, semaine, auto_weeks, used_codes, themes_passes, theme)
     ]
 
-    # Cas spéciaux pour thème avec peu d'automatismes
+    if len(codes_eligibles) == 0:
+        return selection  # Aucun automatisme possible
+
     if len(codes_eligibles) == 1:
         a = codes_eligibles[0]
         for pos in positions:
             selection[pos] = a
     elif len(codes_eligibles) == 2:
         a, b = codes_eligibles
-        # Petite variation aléatoire sur l'ordre : [a,b,a] ou [a,b,b]
-        choix = random.choice([
-            [a, b, a],
-            [a, b, b]
-        ])
-        for pos, code in zip(positions, choix):
+        variante = random.choice([[a, b, a], [a, b, b]])
+        for pos, code in zip(positions, variante):
             selection[pos] = code
     else:
         for i, pos in enumerate(positions):
