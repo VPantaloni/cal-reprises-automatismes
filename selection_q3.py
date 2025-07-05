@@ -1,14 +1,26 @@
 from collections import defaultdict
 import random
 
+from collections import defaultdict
+
 def reconstruire_auto_weeks(selection_by_week):
     auto_weeks = defaultdict(list)
     used_codes = defaultdict(int)
-    for semaine, codes in selection_by_week.items():
+
+    # Si selection_by_week est dict
+    if hasattr(selection_by_week, 'items'):
+        iterator = selection_by_week.items()
+    else:
+        iterator = enumerate(selection_by_week)
+
+    for semaine, codes in iterator:
+        if codes is None:
+            continue
         for code in codes:
             if code != "❓":
                 auto_weeks[code].append(semaine)
                 used_codes[code] += 1
+
     return auto_weeks, used_codes
 
 def est_valide(code, semaine, auto_weeks, espacement=3):
