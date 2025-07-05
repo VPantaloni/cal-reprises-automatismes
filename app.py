@@ -207,8 +207,9 @@ if st.sidebar.button("▶️ Sélection Q1/Q2 uniquement"):
             theme = st.session_state.sequences[i]
             if theme and theme != "❓":
                 st.session_state.selection_by_week[i] = selection_q1q2.selectionner_q1q2(
-                    data, i, theme, st.session_state.sequences
+                    data, i, theme, st.session_state.sequences, auto_weeks, used_codes
                 )
+
     st.rerun()
 #---
 if st.sidebar.button("🧩 Compléter Q3"):
