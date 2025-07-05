@@ -27,6 +27,11 @@ def peut_etre_place(code, data, semaine, auto_weeks, used_codes, themes_passes, 
     # Non-rappel : le thème doit être passé ou correspondre à celui de la semaine
     if not est_rappel and theme_code not in themes_passes and theme_code != theme:
         return False
+    if semaine >= 25:
+        if est_rappel and used_codes[code] >= 6:
+            return False  # autorise 6 au lieu de 5
+        # Réduire l’écart exigé ?
+        return True  # désactive le contrôle d’espacement
 
     return respecte_espacement(semaines_precedentes, semaine, est_rappel)
 
@@ -59,6 +64,9 @@ def selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes
         for i, pos in enumerate(positions):
             if i < len(theme_autos):
                 selection[pos] = theme_autos[i]
+    if not theme_autos:
+    # On prend malgré tout les automatismes du thème, même s'ils ne respectent pas les règles
+        theme_autos = list(data[data['Code'].str.startswith(theme)]['Code'])
 
     return selection
 
