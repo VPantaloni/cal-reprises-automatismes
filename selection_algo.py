@@ -32,33 +32,36 @@ def peut_etre_place(code, data, semaine, auto_weeks, used_codes, themes_passes, 
 
 def selectionner_automatismes_theme(data, semaine, theme, auto_weeks, used_codes, themes_passes, positions):
     selection = [None] * 9
-
-    df_theme = data[data['Code'].str.startswith(theme)].copy()
-    df_theme = df_theme.sort_values(by="__ordre__")
-
-    codes_eligibles = [
-        row['Code'] for _, row in df_theme.iterrows()
-        if peut_etre_place(row['Code'], data, semaine, auto_weeks, used_codes, themes_passes, theme)
+    theme_autos = [
+        c for c in data[data['Code'].str.startswith(theme)]['Code']
+        if peut_etre_place(c, data, semaine, auto_weeks, used_codes, themes_passes, theme)
     ]
 
-    if len(codes_eligibles) == 0:
-        return selection  # Aucun automatisme possible
+    # ✅ On ne mélange pas, on respecte l'ordre du fichier CSV
+    nb_autos = len(theme_autos)
 
-    if len(codes_eligibles) == 1:
-        a = codes_eligibles[0]
-        for pos in positions:
-            selection[pos] = a
-    elif len(codes_eligibles) == 2:
-        a, b = codes_eligibles
-        variante = random.choice([[a, b, a], [a, b, b]])
-        for pos, code in zip(positions, variante):
-            selection[pos] = code
+    if nb_autos == 1:
+        # Un seul automatisme → le répéter 3 fois
+        code = theme_autos[0]
+        for i in positions:
+            selection[i] = code
+
+    elif nb_autos == 2:
+        # Deux automatismes → a, b, a ou a, b, b
+        a, b = theme_autos
+        variants = [[a, b, a], [a, b, b]]
+        tirage = random.choice(variants)
+        for i, pos in enumerate(positions[:3]):
+            selection[pos] = tirage[i]
+
     else:
+        # Trois ou plus → on prend les 3 premiers disponibles
         for i, pos in enumerate(positions):
-            if i < len(codes_eligibles):
-                selection[pos] = codes_eligibles[i]
+            if i < len(theme_autos):
+                selection[pos] = theme_autos[i]
 
     return selection
+
 
 def selectionner_automatismes_autres_themes(data, semaine, auto_weeks, used_codes, codes_selectionnes, themes_passes, positions, theme):
     selection = [None] * 9
