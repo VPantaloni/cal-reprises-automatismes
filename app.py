@@ -195,6 +195,15 @@ if st.sidebar.button("📙 Progression n°2"):
     st.rerun()
 
 top_button_placeholder = st.sidebar.empty()
+#---
+import selection_q1q2
+if st.sidebar.button("▶️ Sélection Q1/Q2 uniquement"):
+    for i in range(35):
+        theme = st.session_state.sequences[i]
+        if theme:
+            st.session_state.selection_by_week[i] = selection_q1q2.selectionner_q1q2(data, i, theme, st.session_state.sequences)
+    st.rerun()
+
 #st.sidebar.markdown("### Affichages")
 st.sidebar.markdown(
     "<a href='https://codimd.apps.education.fr/s/xd2gxRA1m' target='_blank' style='text-decoration: none;'>"
