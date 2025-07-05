@@ -215,11 +215,28 @@ if st.sidebar.button("▶️ Sélection Q1/Q2 uniquement"):
     st.rerun()
 
 #---
-if st.sidebar.button("🧩 Compléter Q3"):
-    st.session_state.selection_by_week = selection_q3.selectionner_q3(data, st.session_state.selection_by_week)
-    auto_weeks = selection_q3.reconstruire_auto_weeks(st.session_state.selection_by_week)
-    st.session_state.auto_weeks = auto_weeks
+if st.sidebar.button("🧩 Compléter Q3 ❓"):
+    from selection_q3 import selectionner_q3
+    auto_weeks = defaultdict(list)
+    used_codes = defaultdict(int)
+
+    # Recalculer les compteurs à partir de Q1/Q2 déjà placés
+    for semaine in range(35):
+        if semaine in st.session_state.selection_by_week:
+            for code in st.session_state.selection_by_week[semaine]:
+                if code != "❓":
+                    auto_weeks[code].append(semaine)
+                    used_codes[code] += 1
+
+    selectionner_q3(
+        data,
+        st.session_state.sequences,
+        st.session_state.selection_by_week,
+        auto_weeks,
+        used_codes
+    )
     st.rerun()
+
 
 
 #st.sidebar.markdown("### Affichages")
