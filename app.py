@@ -275,13 +275,6 @@ for i in range(35):
             st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
 
 # Import du volet 2
-#import volet2
-#volet2.afficher_lecture_et_export(data, subtheme_legend)
-#---
-# volet2.py
-#import streamlit as st
-#import pandas as pd
-#from io import BytesIO
 
 def afficher_lecture_et_export(data, subtheme_legend):
     st.markdown("---")
@@ -301,10 +294,15 @@ def afficher_lecture_et_export(data, subtheme_legend):
     cols = st.columns(3)
     nb = len(recap_data)
     
-    # Répartition : col1 → +1 si besoin, col2, col3
+    # Répartition initiale
     base = nb // 3
     reste = nb % 3
-    sizes = [base + (1 if i < reste else 0) for i in range(3)]  # [col1, col2, col3]
+    
+    # Attribution manuelle des tailles selon ta logique :
+    # - col 0 : +1 (donc base + 1)
+    # - col 1 : base - 1
+    # - col 2 : le reste
+    sizes = [base + 1, base - 1, nb - (base + 1 + base - 1)]
     
     start = 0
     for j in range(3):
@@ -321,6 +319,7 @@ def afficher_lecture_et_export(data, subtheme_legend):
         start = end
     
     return recap_data
+
 
     
 if st.session_state.show_recap:
