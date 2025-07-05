@@ -495,21 +495,21 @@ st.sidebar.download_button(
     file_name="planning_reprises_35sem.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+###-----   H I S T O
 if show_histogram:
     import plotly.express as px
     import pandas as pd
     from collections import defaultdict
 
-    # 🎨 Liste des thèmes disponibles
+    # Liste des thèmes disponibles (emoji + couleur)
     subthemes = [
         ("🔢", "#ac2747"), ("➗", "#be5770"), ("📏", "#cc6c1d"), ("🔷", "#d27c36"),
         ("⌚", "#dd9d68"), ("📐", "#16a34a"), ("🧊", "#44b56e"), ("📊", "#1975d1"),
         ("🎲", "#3384d6"), ("∝", "#8a38d2")
     ]
     theme_emojis = [emoji for emoji, _ in subthemes]
-    all_codes = sorted(data['Code'].unique())
 
-    # 🔧 Préparation des données pour le graphique
+    # Préparation des données pour le graphique
     rows = []
     cumul_counts = defaultdict(int)
 
@@ -532,25 +532,18 @@ if show_histogram:
 
     df_viz = pd.DataFrame(rows)
 
-    # Tri explicite des semaines
+    # Assurer l’ordre correct des semaines
     semaine_order = [f"S{i}" for i in range(1, 36)]
     df_viz["Semaine"] = pd.Categorical(df_viz["Semaine"], categories=semaine_order, ordered=True)
     df_viz = df_viz.sort_values("Semaine")
 
-    # --- FILTRES DYNAMIQUES SOUS L'HISTOGRAMME ---
-    with st.container():
-        st.markdown("#### 🎛️ Filtres d’affichage")
-        col1, col2 = st.columns(2)
-        with col1:
-            selected_themes = st.multiselect("🎨 Filtrer par thème", theme_emojis, default=theme_emojis)
-        with col2:
-            selected_codes = st.multiselect("🔎 Filtrer par code", all_codes, default=all_codes)
+    # Filtre dynamique par thème (emoji)
+    selected_themes = st.multiselect("🎨 Filtrer par thème", theme_emojis, default=theme_emojis)
 
-    # Appliquer les filtres
+    # Appliquer le filtre sur la première lettre du code (emoji)
     df_viz = df_viz[df_viz["Code"].str[0].isin(selected_themes)]
-    df_viz = df_viz[df_viz["Code"].isin(selected_codes)]
 
-    # Affichage interactif Plotly avec la couleur issue du dataframe
+    # Création du graphique
     fig = px.bar(
         df_viz,
         x="Semaine",
@@ -561,6 +554,6 @@ if show_histogram:
         title="📊 Histogramme cumulé par automatisme et semaine",
         category_orders={"Semaine": semaine_order}
     )
-
     fig.update_layout(barmode='group', xaxis={'categoryorder': 'category ascending'})
+
     st.plotly_chart(fig, use_container_width=True)
