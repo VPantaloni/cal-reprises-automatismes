@@ -561,7 +561,7 @@ if show_histogram:
         #
         col1, col2 = st.columns([0.1, 0.9])
         with col1:
-            if st.button(f"<span style='font-size:24px;'>{emoji}</span>", key=f"btn_toggle_{emoji}", help=f"Tout sélectionner/désélectionner {emoji}", use_container_width=True):
+            if st.button(f"<span>{emoji}</span>", key=f"btn_toggle_{emoji}", help=f"Tout sélectionner/désélectionner {emoji}", use_container_width=True):
                 # Inverse l'état actuel (toggle)
                 if all_selected:
                     for c in codes:
