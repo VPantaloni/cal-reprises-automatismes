@@ -558,10 +558,18 @@ if show_histogram:
         # Tout sélectionner ou tout désélectionner pour ce thème
         all_selected = all(code in st.session_state.codes_selectionnes for code in codes)
     
+        #
         col1, col2 = st.columns([0.1, 0.9])
         with col1:
-            toggle = st.checkbox(f"{emoji} {subtheme_legend[emoji]} (tout sélectionner)", value=all_selected, key=f"toggle_{emoji}")
-    
+            if st.button(f"<span style='font-size:24px;'>{emoji}</span>", key=f"btn_toggle_{emoji}", help=f"Tout sélectionner/désélectionner {emoji}", use_container_width=True):
+                # Inverse l'état actuel (toggle)
+                if all_selected:
+                    for c in codes:
+                        st.session_state.codes_selectionnes.discard(c)
+                else:
+                    for c in codes:
+                        st.session_state.codes_selectionnes.add(c)
+        
         with col2:
             # Si on vient de cliquer toggle on modifie la sélection
             if toggle and not all_selected:
