@@ -590,13 +590,15 @@ if show_histogram:
     col_select_all, col_deselect_all = st.columns(2)
     
     with col_select_all:
-        if st.button("Tout sélectionner", key="btn_select_all_global"):
-            for code in data['Code']:
-                st.session_state.codes_selectionnes.add(code)
-    
+    if st.button("Tout sélectionner", key="btn_select_all_global"):
+        for code in data['Code']:
+            st.session_state.codes_selectionnes.add(code)
+        st.experimental_rerun()
+
     with col_deselect_all:
         if st.button("Tout désélectionner", key="btn_deselect_all_global"):
             st.session_state.codes_selectionnes.clear()
+            st.experimental_rerun()
 
     # 4. Filtrer df_viz avant affichage selon sélection
     df_viz_filtered = df_viz[df_viz['Code'].isin(st.session_state.codes_selectionnes)]
