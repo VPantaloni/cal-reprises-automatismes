@@ -604,3 +604,44 @@ if show_histogram:
         category_orders={"Semaine": semaine_order}
     )
     st.plotly_chart(fig, use_container_width=True)
+## 2e histo non cumulé
+    # 🔁 On prépare à nouveau les données, cette fois sans cumul
+    rows_simple = []
+    
+    for semaine_index in range(35):
+        semaine_label = f"S{semaine_index + 1}"
+        codes = st.session_state.selection_by_week[semaine_index] if semaine_index < len(st.session_state.selection_by_week) else []
+    
+        for code in codes:
+            if code != "❓":
+                row = data[data['Code'] == code]
+                if not row.empty:
+                    couleur = row.iloc[0]['Couleur']
+                    rows_simple.append({
+                        "Semaine": semaine_label,
+                        "Code": code,
+                        "Occurrences": 1,  # Une unité par apparition
+                        "Couleur": couleur
+                    })
+    
+    # 📊 Création du DataFrame
+    df_simple = pd.DataFrame(rows_simple)
+    df_simple["Semaine"] = pd.Categorical(df_simple["Semaine"], categories=semaine_order, ordered=True)
+    df_simple = df_simple.sort_values(["Semaine", "Code"])
+    
+    # 🧽 Filtrer selon sélection de l'utilisateur
+    df_simple_filtered = df_simple[df_simple['Code'].isin(st.session_state.codes_selectionnes)]
+    
+    # 🎨 Graphique non cumulé
+    fig_simple = px.bar(
+        df_simple_filtered,
+        x="Semaine",
+        y="Occurrences",
+        color="Code",
+        color_discrete_map=couleur_map,
+        hover_name="Code",
+        title="📊 Histogramme simple : apparition des automatismes par semaine",
+        category_orders={"Semaine": semaine_order}
+    )
+    
+    st.plotly_chart(fig_simple, use_container_width=True)
