@@ -498,7 +498,7 @@ def afficher_lecture_et_export(data, subtheme_legend):
         with st.expander("📊 Répartition tabulaire des automatismes par nombre d'occurrences ⤵", expanded=False):
             st.dataframe(occur_df, use_container_width=True)
     else:
-        st.info("Aucune donnée d'automatismes à afficher. 🛠 Lancez l'algorithme de distribution des automatismes pour générer le planning et les dates d'apparition apparaîtront ci-dessus et dans un tableau ci-dessous.")
+        st.info("Aucune donnée d'automatismes à afficher. Placez une thème pour chaque semaine puis lancer 🛠 `Algo. distribuer automatismes` pour générer le planning.  Les dates apparaîtront ci-dessus et dans un tableau ci-dessous.")
 
     return recap_data
 
