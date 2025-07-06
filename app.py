@@ -152,7 +152,7 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 
-st.sidebar.markdown("### 🎯 Affichage")
+#st.sidebar.markdown("### 🎯 Affichage")
 # Affichage légende
 if "show_legend" not in st.session_state:
     st.session_state.show_legend = True
@@ -191,7 +191,6 @@ for v in vacances:
     vacances_semaines.append(s)
 
 #--------
-st.sidebar.checkbox("🔍 Afficher vue par automatisme", key="show_recap")
 
 st.sidebar.markdown("### Compléter grille")
 
@@ -262,14 +261,9 @@ if st.sidebar.button("🛠️ Algo. distribuer les automatismes"):
 if st.session_state.btn_done:
     #st.sidebar.success("✅ Distribution 🛠️")
     # 🔘 Affichage conditionnel de l’histogramme
-    show_histogram = st.sidebar.checkbox("📊 Histogramme cumulé", value=True)
-    # 🎛️ Sélecteur de thème(s)
-    #selected_themes = st.sidebar.multiselect("🎨 Filtrer par thème", theme_emojis, default=theme_emojis)
-    ## Selecteur codes
-    #all_codes = sorted(data['Code'].unique())
-    #selected_codes = st.sidebar.multiselect("🔎 Filtrer par code", all_codes, default=all_codes)
-    # Et dans le filtre :
-    #df_viz = df_viz[df_viz["Code"].isin(selected_codes)]
+    st.sidebar.checkbox("🔍 Afficher vue par automatisme", key="show_recap")
+    show_histogram = st.sidebar.checkbox("📊 Histogrammes", value=True)
+    
 
 #st.sidebar.markdown("### Affichages")
 
