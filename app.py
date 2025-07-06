@@ -462,7 +462,7 @@ def afficher_lecture_et_export(data, subtheme_legend):
 
     if not occur_df.empty and "Occurrences" in occur_df.columns:
         occur_df = occur_df.sort_values(by="Occurrences", ascending=False)
-        with st.expander("📊 Répartition tabulaire des automatismes ⤵", expanded=False):
+        with st.expander("📊 Répartition tabulaire des automatismes par nombre d'occurrences ⤵", expanded=False):
             st.dataframe(occur_df, use_container_width=True)
     else:
         st.info("Aucune donnée d'automatismes à afficher. 🛠 Lancez l'algorithme de distribution des automatismes pour générer le planning et les dates d'apparition apparaîtront ci-dessus et dans un tableau ci-dessous.")
@@ -617,7 +617,8 @@ if show_histogram:
         "Semaine": semaine_order,
         "Code": data["Code"].tolist()}  # 👈 ordre du CSV
     )
-    st.plotly_chart(fig, use_container_width=True)
+    with st.expander("📊 Hitogramme cumulé ⤵", expanded=False):
+            st.plotly_chart(fig, use_container_width=True)
 ## 2e histo non cumulé
     # 🔁 On prépare à nouveau les données, cette fois sans cumul
     rows_simple = []
