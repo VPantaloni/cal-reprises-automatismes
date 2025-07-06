@@ -550,20 +550,7 @@ if show_histogram:
     if 'codes_selectionnes' not in st.session_state:
         # Par défaut on sélectionne tous les codes
         st.session_state.codes_selectionnes = set(data['Code'].tolist())
-    # 5. Affichage du graphique filtré
-    import plotly.express as px
     
-    fig = px.bar(
-        df_viz_filtered,
-        x="Semaine",
-        y="Occurrences cumulées",
-        color="Code",
-        color_discrete_map=couleur_map,
-        hover_name="Code",
-        title="📊 Histogramme cumulé par automatisme et semaine",
-        category_orders={"Semaine": semaine_order}
-    )
-    st.plotly_chart(fig, use_container_width=True)
     # 3. Afficher les filtres thématiques sous forme de sections
     st.markdown("### 🎛️ Filtrer par thème et codes")
     
