@@ -606,13 +606,13 @@ if show_histogram:
     st.plotly_chart(fig, use_container_width=True)
     col_select_all, col_deselect_all = st.columns(2)
     
-    with col_select_all:
-        if st.button("Tout sélectionner", key="btn_select_all_global"):
-            for code in data['Code']:
-                st.session_state.codes_selectionnes.add(code)
-            st.experimental_rerun()
-    
-    with col_deselect_all:
-        if st.button("Tout désélectionner", key="btn_deselect_all_global"):
-            st.session_state.codes_selectionnes.clear()
-            st.experimental_rerun()
+with col_select_all:
+    if st.button("Tout sélectionner", key="btn_select_all_global"):
+        for code in data['Code']:
+            st.session_state.codes_selectionnes.add(code)
+        st.experimental_rerun()
+
+with col_deselect_all:
+    if st.button("Tout désélectionner", key="btn_deselect_all_global"):
+        st.session_state.codes_selectionnes.clear()
+        st.experimental_rerun()
