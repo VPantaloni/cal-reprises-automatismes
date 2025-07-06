@@ -146,8 +146,8 @@ nb_vides = sum(1 for t in st.session_state.sequences if not t or t == "❓")
 if nb_vides > 0:
     st.warning(
         "🛠️ Avant de distribuer les automatismes :\n\n"
-        "- 🟦 Cliquez sur les boutons des semaines (S1 à S35) pour choisir un thème\n ou :\n"
-        "- 📘 chargez une progression prête ('Progression 1' ou 'Progression 2') via la barre latérale."
+        "- 🟦 Cliquez sur les boutons des semaines (S1 à S35) pour choisir le thème (changer les ❓) de la semaine dans votre progression ou :\n"
+        "- 📘 chargez une progression prête ('Progression 1' ou 'Progression 2') via la barre latérale. Vous pourrez la modifier."
     )
 
 # ===== SIDEBAR =====
@@ -268,7 +268,7 @@ if st.sidebar.button("🛠️ Algo. distribuer les automatismes"):
 if st.session_state.btn_done:
     #st.sidebar.success("✅ Distribution 🛠️")
     # 🔘 Affichage conditionnel de l’histogramme
-    show_histogram = st.sidebar.checkbox("📊 Histogrammes", value=True)
+    show_histogram = st.sidebar.checkbox("📊 Histogrammes", value=False)
     
 
 #st.sidebar.markdown("### Affichages")
