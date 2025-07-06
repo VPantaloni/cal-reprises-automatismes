@@ -41,6 +41,8 @@ if "show_legend" not in st.session_state:
     st.session_state.show_legend = True
 if "show_recap" not in st.session_state:
     st.session_state.show_recap = False
+if "show_recap" not in st.session_state:
+    st.session_state.show_tuto = False
 #if "show_histogram" not in st.session_state:
 #    st.session_state.show_histogram = False
 show_histogram = False
@@ -148,7 +150,7 @@ if nb_vides > 0:
         "🛠️ Avant de distribuer les automatismes :\n\n"
         "- 🟦 Cliquez sur les boutons des semaines (S1 à S35) pour choisir le thème (changer les ❓) de la semaine dans votre progression ou :\n"
         "- 📘 chargez une progression prête ('Progression 1' ou 'Progression 2') via la barre latérale. Vous pourrez la modifier.\n"
-        "- 📚 Afficher le tutoriel en cochant la case ✅ **Tutoriel** dans le volet latéral"
+        "- 📚 Pour plus de détails, affichez le tutoriel en cochant la case ✅ 📚**Tutoriel** dans le volet latéral"
     )
 
 # 📘 TUTORIEL DE DÉMARRAGE
@@ -178,9 +180,8 @@ Cet outil vous permet de calculer et afficher un **calendrier de reprise des aut
 
 5. La fin de chaque période (début de vacances 🎉) est marquée par `🡆|` et on peut choisir sa zone de vacances scolaires (A,B,C).
 
-Pour plus de détails, consultez ce "<a href='https://codimd.apps.education.fr/s/xd2gxRA1m' target='_blank' style='text-decoration: none;'>"
-    "📚 Tutoriel détaillé</a>",
-    unsafe_allow_html=True
+Pour plus de détails, consultez ce <a href='https://codimd.apps.education.fr/s/xd2gxRA1m' target='_blank' style='text-decoration: none;'>
+    📚 Tutoriel détaillé</a>
 ---
 """)
 
