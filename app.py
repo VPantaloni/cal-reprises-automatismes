@@ -603,7 +603,7 @@ if show_histogram:
         title="📊 Histogramme cumulé par automatisme et semaine",
         category_orders={
         "Semaine": semaine_order,
-        "Code": data["Code"].tolist()  # 👈 ordre du CSV
+        "Code": data["Code"].tolist()}  # 👈 ordre du CSV
     )
     st.plotly_chart(fig, use_container_width=True)
 ## 2e histo non cumulé
@@ -645,7 +645,7 @@ if show_histogram:
         title="📊 Histogramme simple : apparition des automatismes par semaine",
         category_orders={
         "Semaine": semaine_order,
-        "Code": data["Code"].tolist()  
+        "Code": data["Code"].tolist() } 
     )
     
     st.plotly_chart(fig_simple, use_container_width=True)
