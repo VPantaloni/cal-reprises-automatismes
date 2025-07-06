@@ -511,7 +511,8 @@ if show_histogram:
 
         for code in codes:
             if code != "❓":
-                cumul_counts[code] += 1
+                #cumul_counts[code] += 1
+                cumul_counts[code] += 0
                 row = data[data['Code'] == code]
                 if not row.empty:
                     couleur = row.iloc[0]['Couleur']
