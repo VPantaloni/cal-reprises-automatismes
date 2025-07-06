@@ -25,6 +25,11 @@ def est_valide(code, semaine, auto_weeks, espacement=3):
         return True
     return all(abs(s - semaine) >= espacement for s in auto_weeks[code])
 
+# 🔍 Nouvelle fonction : vérifier si le thème d’un code a déjà été abordé
+def theme_deja_aborde(code, semaine, sequences):
+    emoji_theme = code[0]
+    return emoji_theme in sequences[:semaine]
+
 def selectionner_q3(data, selection_by_week, sequences, auto_weeks, used_codes):
     nb_semaines = len(sequences)
     all_codes = list(data['Code'].unique())
@@ -35,16 +40,20 @@ def selectionner_q3(data, selection_by_week, sequences, auto_weeks, used_codes):
 
         for pos in range(9):
             if selection_by_week[semaine][pos] == "❓":
-                # 🔽 On trie les codes par nombre d'occurrences (les moins fréquents en premier)
                 sorted_codes = sorted(all_codes, key=lambda c: used_codes.get(c, 0))
+                
+                placed = False
                 for code in sorted_codes:
                     if est_valide(code, semaine, auto_weeks):
-                        selection_by_week[semaine][pos] = code
-                        auto_weeks[code].append(semaine)
-                        used_codes[code] += 1
-                        break
-                else:
-                    # ⚠️ Aucun ne respecte l'espacement → forçage du moins utilisé
+                        if theme_deja_aborde(code, semaine, sequences) or code[1] == "↩":
+                            selection_by_week[semaine][pos] = code
+                            auto_weeks[code].append(semaine)
+                            used_codes[code] += 1
+                            placed = True
+                            break
+
+                if not placed and sorted_codes:
+                    # 🔁 Aucun code ne passe les critères pédagogiques → fallback forcé
                     fallback_code = sorted_codes[0]
                     selection_by_week[semaine][pos] = fallback_code
                     auto_weeks[fallback_code].append(semaine)
