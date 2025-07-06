@@ -160,7 +160,6 @@ if st.session_state.get("show_tuto", True):
 Cet outil vous permet de calculer et afficher un **calendrier de reprise des automatismes** mathématiques en 6e, en fonction de votre progression.
 
 #### 🧩 Étapes à suivre :
-
 1. **Choisissez les thèmes hebdomadaires** :
    - Cliquez sur les boutons `S1`, `S2`, etc. pour choisir le thème plus particulièrement travaillé en classe cette semaine.
    - Vous pouvez aussi charger une **progression enregistrée** dans la barre latérale (📘`Progression n°1` ou 📙 `Progression n°2`).
@@ -168,15 +167,15 @@ Cet outil vous permet de calculer et afficher un **calendrier de reprise des aut
 2. **Lancez la distribution des automatismes** :
    - Utilisez le bouton 👉 `🛠️ Algo. distribuer les automatismes`,
    - L’algorithme répartit les automatismes selon les thèmes et les rappels `↩` des années antérieures,
-   - Il y a trois séries verticales (pour trois jours) de trois automatismes par semaine : 
-           - le 1er automatisme porte sur le thème actuel, 
-           - le 2e sur le thème à venir dans deux semaines et 
-           - le 3e est calculé de sorte à optimiser la répartition et ne porte que sur des thématiques abordées ou bien est un rappel des années précédentes (logo ↩). 
+   - Il y a trois séries verticales (pour trois jours) de trois automatismes par semaine :
+       - le 1er automatisme porte sur le thème actuel,
+       - le 2e sur le thème à venir dans deux semaines et
+       - le 3e est calculé de sorte à optimiser la répartition et ne porte que sur des thématiques abordées ou bien est un rappel des années précédentes (logo ↩).
 
 3. **Visualisez et ajustez** :
    - L’onglet **🔍Liste automatismes** vous montre l'intitulé et la répartition de chacun.
    - Des **graphiques interactifs** (avec filtres par **thème ou code**) permettent d’analyser la couverture semaine par semaine (✅ `Histogrammes`).
-  
+
 4. **Exportez** votre travail si besoin :
    - En HTML (Ctrl+S) ou tableur via les boutons d’export.
 
