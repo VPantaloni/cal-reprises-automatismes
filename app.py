@@ -61,7 +61,7 @@ data = charger_donnees()
 def afficher_pastilles_compacte(selection_df, nb_auto_par_ligne=3, total_cases=9):
     if not selection_df.empty:
         pastilles_dict = {
-            int(row['Position']): f"<div title=\"{row['Automatisme']}\" style='flex:1; padding:2px; border:3px solid {row['Couleur']}; background:transparent; border-radius:4px; font-size:0.8em; font-weight:bold; text-align:center; cursor:help;'> {row['Code']} </div>"
+            int(row['Position']): f"<div title=\"{row['Automatisme']}\" style='flex:1; padding:2px; border:3px solid {row['Couleur']}; background:transparent; border-radius:4px; font-size:0.73em; font-weight:bold; text-align:center; cursor:help;'> {row['Code']} </div>"
             for _, row in selection_df.iterrows()
         }
         nb_lignes = (total_cases + nb_auto_par_ligne - 1) // nb_auto_par_ligne
@@ -129,7 +129,7 @@ if st.session_state.show_legend:
         with cols[idx % 5]:
             st.markdown(f"""
                 <div style='background:{subtheme_colors[emoji]}; padding:4px; border-radius:6px;
-                            color:white; font-size:0.85em; text-align:left'>
+                            color:white; font-size:0.77em; text-align:left'>
                     <b>{emoji}</b> {label}
                 </div>
             """, unsafe_allow_html=True)
@@ -310,7 +310,6 @@ if st.session_state.dark_mode:
 # Emojis numérotés S1 à S35
 emoji_numeros = [f"S{i+1}" for i in range(35)]
 
-# Affichage en 5 lignes de 7 colonnes
 # Affichage en 5 lignes de 7 colonnes
 rows = [st.columns(7) for _ in range(5)]
 vacances_A = [6, 12, 18, 26]  # Numéros de semaine juste avant vacances
