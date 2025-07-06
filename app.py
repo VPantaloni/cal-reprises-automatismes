@@ -169,9 +169,9 @@ Cet outil vous permet de calculer et afficher un **calendrier de reprise des aut
    - Utilisez le bouton 👉 `🛠️ Algo. distribuer les automatismes`,
    - L’algorithme répartit les automatismes selon les thèmes et les rappels `↩` des années antérieures,
    - Il y a trois séries verticales (pour trois jours) de trois automatismes par semaine : 
-       -- le 1er automatisme porte sur le thème actuel, 
-       -- le 2e sur le thème à venir dans deux semaines et 
-       -- le 3e est calculé de sorte à optimiser la répartition et ne porte que sur des thématiques abordées ou bien est un rappel des années précédentes (logo ↩). 
+           - le 1er automatisme porte sur le thème actuel, 
+           - le 2e sur le thème à venir dans deux semaines et 
+           - le 3e est calculé de sorte à optimiser la répartition et ne porte que sur des thématiques abordées ou bien est un rappel des années précédentes (logo ↩). 
 
 3. **Visualisez et ajustez** :
    - L’onglet **🔍Liste automatismes** vous montre l'intitulé et la répartition de chacun.
