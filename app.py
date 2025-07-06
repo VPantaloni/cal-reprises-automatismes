@@ -585,7 +585,16 @@ if show_histogram:
                 else:
                     # Colonne vide pour aligner la grille
                     cols_codes[i].markdown("&nbsp;")  # espace insécable pour la hauteur minimale
-
+            # Ajout des boutons Tout sélectionner / Tout désélectionner sous la grille, en deux colonnes
+            btn_col1, btn_col2 = st.columns([0.5, 0.5])
+            with btn_col1:
+                if st.button(f"Tout sélectionner {emoji}", key=f"btn_select_all_{emoji}"):
+                    for c in codes:
+                        st.session_state.codes_selectionnes.add(c)
+            with btn_col2:
+                if st.button(f"Tout désélectionner {emoji}", key=f"btn_deselect_all_{emoji}"):
+                    for c in codes:
+                        st.session_state.codes_selectionnes.discard(c)
     # 4. Filtrer df_viz avant affichage selon sélection
     df_viz_filtered = df_viz[df_viz['Code'].isin(st.session_state.codes_selectionnes)]
     
