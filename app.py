@@ -496,20 +496,12 @@ st.sidebar.download_button(
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
 ###-----   H I S T O
+import plotly.express as px
+import pandas as pd
+from collections import defaultdict
+
 if show_histogram:
-    import plotly.express as px
-    import pandas as pd
-    from collections import defaultdict
-
-    # Liste des thèmes disponibles (emoji + couleur)
-    subthemes = [
-        ("🔢", "#ac2747"), ("➗", "#be5770"), ("📏", "#cc6c1d"), ("🔷", "#d27c36"),
-        ("⌚", "#dd9d68"), ("📐", "#16a34a"), ("🧊", "#44b56e"), ("📊", "#1975d1"),
-        ("🎲", "#3384d6"), ("∝", "#8a38d2")
-    ]
-    theme_emojis = [emoji for emoji, _ in subthemes]
-
-    # Préparation des données pour le graphique
+    # Préparation des données
     rows = []
     cumul_counts = defaultdict(int)
 
@@ -532,29 +524,25 @@ if show_histogram:
 
     df_viz = pd.DataFrame(rows)
 
-    # Assurer l’ordre correct des semaines
-     # 🧮 Tri explicite des semaines
+    # Ordre naturel des semaines (string), explicitement défini
     semaine_order = [f"S{i}" for i in range(1, 36)]
     df_viz["Semaine"] = pd.Categorical(df_viz["Semaine"], categories=semaine_order, ordered=True)
-    df_viz = df_viz.sort_values("Semaine")
-    
-    # Filtre dynamique par thème (emoji)
-    selected_themes = st.multiselect("🎨 Filtrer par thème", theme_emojis, default=theme_emojis)
 
-    # Appliquer le filtre sur la première lettre du code (emoji)
-    df_viz = df_viz[df_viz["Code"].str[0].isin(selected_themes)]
+    # Trie par semaine et code pour que ça s’affiche bien
+    df_viz = df_viz.sort_values(["Semaine", "Code"])
 
-    # Création du graphique
+    # Mapping couleur précis par code unique
+    couleur_map = df_viz.drop_duplicates(subset=["Code"]).set_index("Code")["Couleur"].to_dict()
+
     fig = px.bar(
         df_viz,
         x="Semaine",
         y="Occurrences cumulées",
         color="Code",
-        color_discrete_map={row['Code']: row['Couleur'] for _, row in df_viz.iterrows()},
+        color_discrete_map=couleur_map,
         hover_name="Code",
         title="📊 Histogramme cumulé par automatisme et semaine",
         category_orders={"Semaine": semaine_order}
     )
-    fig.update_layout(barmode='group', xaxis={'categoryorder': 'category ascending'})
 
     st.plotly_chart(fig, use_container_width=True)
