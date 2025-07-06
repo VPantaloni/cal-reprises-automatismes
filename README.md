@@ -2,15 +2,17 @@
 # 🧠 *Calendrier de reprises* 
 ## Outil de planification des automatismes mathématiques en 6e
 
-Cet outil (appli StreamLit) permet aux enseignants de cycle 3 de construire une **grille annuelle de réactivation des automatismes** en lien avec la courbe d’Ebbinghaus, à partir d’un fichier CSV listant les automatismes.
+Cet outil (appli StreamLit) permet aux enseignants de cycle 3 de construire une **grille annuelle de réactivation des automatismes**, à partir d’un fichier CSV listant les automatismes du programme.
 
-## Fichiers utiles
 Fabrication d'une appli StreamLit qui appelle `app.py`
 
 https://cal-reprises-automatismes-6e.streamlit.app/
 
 Tutoriel utilisateur ici :
 https://codimd.apps.education.fr/s/xd2gxRA1m
+
+## Fichiers utiles
+
 
 * app.py 
 Mise en forme générale
