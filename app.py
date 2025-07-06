@@ -150,7 +150,40 @@ if nb_vides > 0:
         "- 📘 chargez une progression prête ('Progression 1' ou 'Progression 2') via la barre latérale. Vous pourrez la modifier."
     )
 
+# 📘 TUTORIEL DE DÉMARRAGE
+if st.session_state.get("show_tuto", True):
+    st.markdown("## 👋 Bienvenue dans l'outil de planification des automatismes")
+    st.markdown("""
+Cet outil vous permet de calculer et afficher une un calendrier de reprise des automatismes mathématiques en 6e, en fonction de votre progression.
+
+### 🧩 Étapes à suivre :
+
+1. **Choisissez les thèmes hebdomadaires** :
+   - Cliquez sur les boutons `S1`, `S2`, etc. pour choisir le thème plus particulièrement travaillé en cours cette semaine.
+   - Vous pouvez aussi charger une **progression enregistrée** dans la barre latérale.
+
+2. **Lancez la distribution des automatismes** :
+   - Utilisez le bouton 👉 `🛠️ Algo. distribuer les automatismes`,
+   - L’algorithme répartit les automatismes selon les thèmes et les rappels,
+   - Il y a trois séries verticales (pour trois jours) de trois automatismes par semaine : le 1er automatisme porte sur le thème actuel, le 2e sur le thème à venir dans deux semaines et le 3e est calculé de sorte à optimiser la rpartition et ne porte que sur des thématiques abordées ou bien est un rappel des années précédentes (logo ↩). 
+
+3. **Visualisez et ajustez** :
+   - L’onglet **🔍Liste automatismes** vous montre l'intitulé et la répartition de chacun.
+   - Des **graphiques interactifs** permettent d’analyser la couverture semaine par semaine (✅ Histogrammes).
+   - Filtrez les résultats par **thème ou code**.
+
+4. **Exportez** votre travail si besoin :
+   - En HTML (Ctrl+S) ou tableur via les boutons d’export.
+
+---
+
+💡 *Pensez à explorer la barre latérale pour accéder à d'autres options utiles.* comme les zones de vacances marquées par 🡆|
+
+""")
+
+
 # ===== SIDEBAR =====
+st.sidebar.checkbox("📚 Tutoriel", key="show_tuto", value=True)
 st.sidebar.markdown(
     "<a href='https://codimd.apps.education.fr/s/xd2gxRA1m' target='_blank' style='text-decoration: none;'>"
     "📚 Lien vers tutoriel </a>",
