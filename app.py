@@ -533,13 +533,11 @@ if show_histogram:
     df_viz = pd.DataFrame(rows)
 
     # Assurer l’ordre correct des semaines
-    # Assurer l’ordre correct des semaines avec un ordre catégoriel explicite
+     # 🧮 Tri explicite des semaines
     semaine_order = [f"S{i}" for i in range(1, 36)]
     df_viz["Semaine"] = pd.Categorical(df_viz["Semaine"], categories=semaine_order, ordered=True)
-    
-    # Puis trier selon cette catégorie ordonnée
     df_viz = df_viz.sort_values("Semaine")
-
+    
     # Filtre dynamique par thème (emoji)
     selected_themes = st.multiselect("🎨 Filtrer par thème", theme_emojis, default=theme_emojis)
 
