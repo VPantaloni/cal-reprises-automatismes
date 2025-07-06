@@ -39,11 +39,11 @@ if 'next_index_by_theme' not in st.session_state:
     st.session_state.next_index_by_theme = defaultdict(lambda: 1)
 if "show_legend" not in st.session_state:
     st.session_state.show_legend = True
-if "show_histogram" not in st.session_state:
-    st.session_state.show_histogram = False
 if "show_recap" not in st.session_state:
     st.session_state.show_recap = False
-
+#if "show_histogram" not in st.session_state:
+#    st.session_state.show_histogram = False
+show_histogram = False
 # ===== FONCTIONS UTILITAIRES =====
 def charger_donnees():
     try:
