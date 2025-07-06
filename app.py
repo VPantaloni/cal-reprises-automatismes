@@ -124,11 +124,11 @@ for i in range(35):
 # Configuration de la page
 st.set_page_config(layout="wide")
 #st.title("📅 Reprises d'automatismes mathématiques en 6e")
-st.markdown("## 📅 Reprises d'automatismes mathématiques en 6e")
+st.markdown("### 📅 Reprises d'automatismes mathématiques en 6e")
 
 # AFFICHAGE LÉGENDE SI ACTIVÉ
 if st.session_state.show_legend:
-    st.markdown("#### 📘 Légende des thèmes")
+    st.markdown("##### 📘 Légende des thèmes")
     cols = st.columns(5)
     for idx, (emoji, label) in enumerate(subtheme_legend.items()):
         with cols[idx % 5]:
@@ -220,6 +220,8 @@ if st.sidebar.button("📘 Progression n°1"):
 if st.sidebar.button("📙 Progression n°2"):
     st.session_state.sequences = progression_2.copy()
     st.rerun()
+# Liste auto
+st.sidebar.checkbox("🔍 Liste automatismes", key="show_recap")
 # BOUTON ALGO tout en un avec check de validation.
 # Initialisation au début
 if 'btn_done' not in st.session_state:
@@ -266,7 +268,6 @@ if st.sidebar.button("🛠️ Algo. distribuer les automatismes"):
 if st.session_state.btn_done:
     #st.sidebar.success("✅ Distribution 🛠️")
     # 🔘 Affichage conditionnel de l’histogramme
-    st.sidebar.checkbox("🔍 Afficher vue par automatisme", key="show_recap")
     show_histogram = st.sidebar.checkbox("📊 Histogrammes", value=True)
     
 
@@ -398,7 +399,7 @@ st.session_state.auto_weeks = auto_weeks
 
 def afficher_lecture_et_export(data, subtheme_legend):
     st.markdown("---")
-    st.markdown("## 🔍 Lecture par automatisme")
+    st.markdown("#### 🔍 Liste et fréquence des automatismes")
 
     # Sécurité
     if not isinstance(st.session_state.auto_weeks, dict):
