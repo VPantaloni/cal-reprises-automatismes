@@ -571,13 +571,13 @@ if show_histogram:
         
         with col2:
             # Pas besoin de toggle ici, juste afficher les cases à cocher
-            for code in codes:
-                checked = code in st.session_state.codes_selectionnes
-                changed = st.checkbox(code, value=checked, key=f"chk_{code}")
-                if changed and not checked:
-                    st.session_state.codes_selectionnes.add(code)
-                elif not changed and checked:
-                    st.session_state.codes_selectionnes.discard(code)
+            #for code in codes:
+             #   checked = code in st.session_state.codes_selectionnes
+              #  changed = st.checkbox(code, value=checked, key=f"chk_{code}")
+               # if changed and not checked:
+                #    st.session_state.codes_selectionnes.add(code)
+                #elif not changed and checked:
+                 #   st.session_state.codes_selectionnes.discard(code)
     ############
             # Afficher les cases à cocher individuelles (petites)
             cols_codes = st.columns(len(codes))
