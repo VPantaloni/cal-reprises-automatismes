@@ -148,7 +148,7 @@ if nb_vides > 0:
         "🛠️ Avant de distribuer les automatismes :\n\n"
         "- 🟦 Cliquez sur les boutons des semaines (S1 à S35) pour choisir le thème (changer les ❓) de la semaine dans votre progression ou :\n"
         "- 📘 chargez une progression prête ('Progression 1' ou 'Progression 2') via la barre latérale. Vous pourrez la modifier.\n"
-        "- 📚 Afficher le tutoriel en cochant la case ✅ **Tutoriel** dans le volet latéral
+        "- 📚 Afficher le tutoriel en cochant la case ✅ **Tutoriel** dans le volet latéral"
     )
 
 # 📘 TUTORIEL DE DÉMARRAGE
