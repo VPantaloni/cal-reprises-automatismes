@@ -533,9 +533,63 @@ if show_histogram:
 
     # Mapping couleur précis par code unique
     couleur_map = df_viz.drop_duplicates(subset=["Code"]).set_index("Code")["Couleur"].to_dict()
-
+       
+    # 1. Structure pour garder l'ordre CSV et regrouper par thème
+    # subtheme_legend est supposé : dict emoji -> nom
+    # data est ton DataFrame CSV avec colonnes : 'Code', 'Thème', etc.
+    # On part du principe que chaque 'Code' commence par emoji thème
+    
+    # Construire dict: emoji -> list de codes (dans l'ordre CSV)
+    codes_by_theme = {}
+    for emoji in subtheme_legend.keys():
+        codes = data[data['Code'].str.startswith(emoji)]['Code'].tolist()
+        if codes:
+            codes_by_theme[emoji] = codes
+    
+    # 2. Initialiser la sélection dans st.session_state si non existante
+    if 'codes_selectionnes' not in st.session_state:
+        # Par défaut on sélectionne tous les codes
+        st.session_state.codes_selectionnes = set(data['Code'].tolist())
+    
+    # 3. Afficher les filtres thématiques sous forme de sections
+    st.markdown("### 🎛️ Filtrer par thème et codes")
+    
+    for emoji, codes in codes_by_theme.items():
+        # Tout sélectionner ou tout désélectionner pour ce thème
+        all_selected = all(code in st.session_state.codes_selectionnes for code in codes)
+    
+        col1, col2 = st.columns([0.1, 0.9])
+        with col1:
+            toggle = st.checkbox(f"{emoji} {subtheme_legend[emoji]} (tout sélectionner)", value=all_selected, key=f"toggle_{emoji}")
+    
+        with col2:
+            # Si on vient de cliquer toggle on modifie la sélection
+            if toggle and not all_selected:
+                for c in codes:
+                    st.session_state.codes_selectionnes.add(c)
+            elif not toggle and all_selected:
+                for c in codes:
+                    st.session_state.codes_selectionnes.discard(c)
+    
+            # Afficher les cases à cocher individuelles (petites)
+            cols_codes = st.columns(len(codes))
+            for i, code in enumerate(codes):
+                checked = code in st.session_state.codes_selectionnes
+                # Chaque checkbox a une clé unique
+                cb = cols_codes[i].checkbox(code, value=checked, key=f"cb_{code}")
+                if cb and not checked:
+                    st.session_state.codes_selectionnes.add(code)
+                elif not cb and checked:
+                    st.session_state.codes_selectionnes.discard(code)
+    
+    # 4. Filtrer df_viz avant affichage selon sélection
+    df_viz_filtered = df_viz[df_viz['Code'].isin(st.session_state.codes_selectionnes)]
+    
+    # 5. Affichage du graphique filtré
+    import plotly.express as px
+    
     fig = px.bar(
-        df_viz,
+        df_viz_filtered,
         x="Semaine",
         y="Occurrences cumulées",
         color="Code",
@@ -544,5 +598,4 @@ if show_histogram:
         title="📊 Histogramme cumulé par automatisme et semaine",
         category_orders={"Semaine": semaine_order}
     )
-
     st.plotly_chart(fig, use_container_width=True)
