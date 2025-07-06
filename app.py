@@ -413,7 +413,7 @@ def afficher_lecture_et_export(data, subtheme_legend):
                 ligne_visuelle += "🟢"
             else:
                 ligne_visuelle += "⚪"
-        ligne_visuelle = f"<div style='font-family:monospace; font-size:0.52em'>{ligne_visuelle}</div>"
+        ligne_visuelle = f"<div style='font-family:monospace; font-size:0.48em'>{ligne_visuelle}</div>"
 
         recap_data.append({
             "Code": code,
