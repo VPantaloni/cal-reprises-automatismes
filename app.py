@@ -162,25 +162,24 @@ Cet outil vous permet de calculer et afficher un **calendrier de reprise des aut
 #### 🧩 Étapes à suivre :
 
 1. **Choisissez les thèmes hebdomadaires** :
-   - Cliquez sur les boutons `S1`, `S2`, etc. pour choisir le thème plus particulièrement travaillé en cours cette semaine.
-   - Vous pouvez aussi charger une **progression enregistrée** dans la barre latérale.
+   - Cliquez sur les boutons `S1`, `S2`, etc. pour choisir le thème plus particulièrement travaillé en classe cette semaine.
+   - Vous pouvez aussi charger une **progression enregistrée** dans la barre latérale (📘`Progression n°1` ou 📙 n°2).
 
 2. **Lancez la distribution des automatismes** :
    - Utilisez le bouton 👉 `🛠️ Algo. distribuer les automatismes`,
-   - L’algorithme répartit les automatismes selon les thèmes et les rappels,
-   - Il y a trois séries verticales (pour trois jours) de trois automatismes par semaine : le 1er automatisme porte sur le thème actuel, le 2e sur le thème à venir dans deux semaines et le 3e est calculé de sorte à optimiser la rpartition et ne porte que sur des thématiques abordées ou bien est un rappel des années précédentes (logo ↩). 
+   - L’algorithme répartit les automatismes selon les thèmes et les rappels `↩` des années antérieures,
+   - Il y a trois séries verticales (pour trois jours) de trois automatismes par semaine : le 1er automatisme porte sur le thème actuel, le 2e sur le thème à venir dans deux semaines et le 3e est calculé de sorte à optimiser la répartition et ne porte que sur des thématiques abordées ou bien est un rappel des années précédentes (logo ↩). 
 
 3. **Visualisez et ajustez** :
    - L’onglet **🔍Liste automatismes** vous montre l'intitulé et la répartition de chacun.
-   - Des **graphiques interactifs** permettent d’analyser la couverture semaine par semaine (✅ Histogrammes).
-   - Filtrez les résultats par **thème ou code**.
-
+   - Des **graphiques interactifs** (avec filtres par **thème ou code**) permettent d’analyser la couverture semaine par semaine (✅ `Histogrammes`).
+  
 4. **Exportez** votre travail si besoin :
    - En HTML (Ctrl+S) ou tableur via les boutons d’export.
 
 5. La fin de chaque période (début de vacances 🎉) est marquée par `🡆|` et on peut choisir sa zone de vacances scolaires (A,B,C).
 """)
-    st.markdown("Plus de détails ❓ Consultez ce [📚 Tutoriel détaillé (en ligne)](https://codimd.apps.education.fr/s/xd2gxRA1m)")
+    st.markdown("Besoin de plus de détails ❓ Consultez ce 📚 [Tutoriel détaillé](https://codimd.apps.education.fr/s/xd2gxRA1m) (en ligne)")
     st.markdown("---")
 
 # ===== SIDEBAR =====
