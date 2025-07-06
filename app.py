@@ -180,8 +180,9 @@ Cet outil vous permet de calculer et afficher un **calendrier de reprise des aut
    - En HTML (Ctrl+S) ou tableur via les boutons d’export.
 
 5. La fin de chaque période (début de vacances 🎉) est marquée par `🡆|` et on peut choisir sa zone de vacances scolaires (A,B,C).
-""")
-    st.markdown("Besoin de plus de détails ❓ Consultez ce 📚 [Tutoriel détaillé](https://codimd.apps.education.fr/s/xd2gxRA1m) (en ligne)")
+
+    #### ❓ Besoin de plus de détails """)
+    st.markdown("Consultez ce 📚 [Tutoriel détaillé](https://codimd.apps.education.fr/s/xd2gxRA1m) (en ligne)")
     st.markdown("---")
 
 # ===== SIDEBAR =====
