@@ -147,12 +147,13 @@ if nb_vides > 0:
     st.warning(
         "🛠️ Avant de distribuer les automatismes :\n\n"
         "- 🟦 Cliquez sur les boutons des semaines (S1 à S35) pour choisir le thème (changer les ❓) de la semaine dans votre progression ou :\n"
-        "- 📘 chargez une progression prête ('Progression 1' ou 'Progression 2') via la barre latérale. Vous pourrez la modifier."
+        "- 📘 chargez une progression prête ('Progression 1' ou 'Progression 2') via la barre latérale. Vous pourrez la modifier.\n"
+        "- 📚 Afficher le tutoriel en cochant la case ✅ **Tutoriel** dans le volet latéral
     )
 
 # 📘 TUTORIEL DE DÉMARRAGE
 if st.session_state.get("show_tuto", True):
-    st.markdown("### 👋 Bienvenue dans cet outil de planification des automatismes")
+    st.markdown("### 📚 Bienvenue dans cet outil de planification des automatismes")
     st.markdown("""
 Cet outil vous permet de calculer et afficher un **calendrier de reprise des automatismes** mathématiques en 6e, en fonction de votre progression.
 
@@ -177,16 +178,20 @@ Cet outil vous permet de calculer et afficher un **calendrier de reprise des aut
 
 5. La fin de chaque période (début de vacances 🎉) est marquée par `🡆|` et on peut choisir sa zone de vacances scolaires (A,B,C).
 
+Pour plus de détails, consultez ce "<a href='https://codimd.apps.education.fr/s/xd2gxRA1m' target='_blank' style='text-decoration: none;'>"
+    "📚 Tutoriel détaillé</a>",
+    unsafe_allow_html=True
+---
 """)
 
 
 # ===== SIDEBAR =====
-st.sidebar.checkbox("📚 Tutoriel", key="show_tuto", value=True)
-st.sidebar.markdown(
-    "<a href='https://codimd.apps.education.fr/s/xd2gxRA1m' target='_blank' style='text-decoration: none;'>"
-    "📚 Lien vers tutoriel </a>",
-    unsafe_allow_html=True
-)
+st.sidebar.checkbox("📚 Tutoriel", key="show_tuto", value=False)
+#st.sidebar.markdown(
+#    "<a href='https://codimd.apps.education.fr/s/xd2gxRA1m' target='_blank' style='text-decoration: none;'>"
+#    "📚 Lien vers tutoriel </a>",
+#    unsafe_allow_html=True
+#)
 
 #st.sidebar.markdown("### 🎯 Affichage")
 # Affichage légende
