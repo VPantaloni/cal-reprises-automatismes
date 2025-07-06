@@ -558,11 +558,10 @@ if show_histogram:
         # Tout sélectionner ou tout désélectionner pour ce thème
         all_selected = all(code in st.session_state.codes_selectionnes for code in codes)
     
-        #
         col1, col2 = st.columns([0.1, 0.9])
         with col1:
-            if st.button(f"{emoji}", key=f"btn_toggle_{emoji}", help=f"Tout sélectionner/désélectionner {emoji}", use_container_width=True):
-                # Inverse l'état actuel (toggle)
+            clicked = st.button(f"{emoji}", key=f"btn_toggle_{emoji}", help=f"Tout sélectionner/désélectionner {emoji}", use_container_width=True)
+            if clicked:
                 if all_selected:
                     for c in codes:
                         st.session_state.codes_selectionnes.discard(c)
@@ -571,14 +570,15 @@ if show_histogram:
                         st.session_state.codes_selectionnes.add(c)
         
         with col2:
-            # Si on vient de cliquer toggle on modifie la sélection
-            if toggle and not all_selected:
-                for c in codes:
-                    st.session_state.codes_selectionnes.add(c)
-            elif not toggle and all_selected:
-                for c in codes:
-                    st.session_state.codes_selectionnes.discard(c)
-    
+            # Pas besoin de toggle ici, juste afficher les cases à cocher
+            for code in codes:
+                checked = code in st.session_state.codes_selectionnes
+                changed = st.checkbox(code, value=checked, key=f"chk_{code}")
+                if changed and not checked:
+                    st.session_state.codes_selectionnes.add(code)
+                elif not changed and checked:
+                    st.session_state.codes_selectionnes.discard(code)
+    ############
             # Afficher les cases à cocher individuelles (petites)
             cols_codes = st.columns(len(codes))
             for i, code in enumerate(codes):
