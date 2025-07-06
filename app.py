@@ -570,26 +570,22 @@ if show_histogram:
                         st.session_state.codes_selectionnes.add(c)
         
         with col2:
-            # Pas besoin de toggle ici, juste afficher les cases à cocher
-            #for code in codes:
-             #   checked = code in st.session_state.codes_selectionnes
-              #  changed = st.checkbox(code, value=checked, key=f"chk_{code}")
-               # if changed and not checked:
-                #    st.session_state.codes_selectionnes.add(code)
-                #elif not changed and checked:
-                 #   st.session_state.codes_selectionnes.discard(code)
-    ############
-            # Afficher les cases à cocher individuelles (petites)
-            cols_codes = st.columns(len(codes))
-            for i, code in enumerate(codes):
-                checked = code in st.session_state.codes_selectionnes
-                # Chaque checkbox a une clé unique
-                cb = cols_codes[i].checkbox(code, value=checked, key=f"cb_{code}")
-                if cb and not checked:
-                    st.session_state.codes_selectionnes.add(code)
-                elif not cb and checked:
-                    st.session_state.codes_selectionnes.discard(code)
-    
+            max_cols = 10
+            cols_codes = st.columns(max_cols)  # toujours 10 colonnes fixes
+        
+            for i in range(max_cols):
+                if i < len(codes):
+                    code = codes[i]
+                    checked = code in st.session_state.codes_selectionnes
+                    cb = cols_codes[i].checkbox(code, value=checked, key=f"cb_{code}")
+                    if cb and not checked:
+                        st.session_state.codes_selectionnes.add(code)
+                    elif not cb and checked:
+                        st.session_state.codes_selectionnes.discard(code)
+                else:
+                    # Colonne vide pour aligner la grille
+                    cols_codes[i].markdown("&nbsp;")  # espace insécable pour la hauteur minimale
+
     # 4. Filtrer df_viz avant affichage selon sélection
     df_viz_filtered = df_viz[df_viz['Code'].isin(st.session_state.codes_selectionnes)]
     
