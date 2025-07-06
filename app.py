@@ -172,7 +172,8 @@ Cet outil vous permet de calculer et afficher un **calendrier de reprise des aut
        - le 2e sur le thème à venir dans deux semaines et
        - le 3e est calculé de sorte à optimiser la répartition et ne porte que sur des thématiques abordées ou bien est un rappel des années précédentes (logo `↩`).
 
-3. **Visualisez et ajustez** :
+3. **Visualisez la répartition** 
+    - Chaque intitulé d'automatisme est lisible par survol.
    - L’onglet **🔍Liste automatismes** vous montre l'intitulé et la répartition de chacun.
    - Des **graphiques interactifs** (avec filtres par **thème ou code**) permettent d’analyser la couverture semaine par semaine (✅ `Histogrammes`).
 
@@ -181,7 +182,7 @@ Cet outil vous permet de calculer et afficher un **calendrier de reprise des aut
 
 5. La fin de chaque période (début de vacances 🎉) est marquée par `🡆|` et on peut choisir sa zone de vacances scolaires (A,B,C).
 
-    #### ❓ Besoin de plus de détails """)
+#### Besoin de plus de détails ❓""")
     st.markdown("Consultez ce 📚 [Tutoriel détaillé](https://codimd.apps.education.fr/s/xd2gxRA1m) (en ligne)")
     st.markdown("---")
 
