@@ -385,28 +385,42 @@ for i in range(35):
             afficher_pastilles_compacte(selection_df, nb_auto_par_ligne=3, total_cases=9)
             st.markdown("<div style='margin-top:10px;'></div>", unsafe_allow_html=True)
 
+from collections import defaultdict
+import pandas as pd
+
 # Import du volet 2
 auto_weeks, used_codes = selection_q3.reconstruire_auto_weeks(st.session_state.selection_by_week)
 st.session_state.auto_weeks = auto_weeks
 
-##
 def afficher_lecture_et_export(data, subtheme_legend):
     st.markdown("---")
     st.markdown("## 🔍 Lecture par automatisme")
 
-    # Sécurité en cas de corruption
+    # Sécurité
     if not isinstance(st.session_state.auto_weeks, dict):
         st.session_state.auto_weeks, _ = selection_q3.reconstruire_auto_weeks(st.session_state.selection_by_week)
 
     recap_data = []
     for _, row in data.iterrows():
         code = row['Code']
-        semaines = [f"S{i+1}" for i in st.session_state.auto_weeks.get(code, [])]
+        semaines = st.session_state.auto_weeks.get(code, [])
+        semaines_str = [f"S{i+1}" for i in semaines]
+
+        # Représentation visuelle de 35 semaines
+        ligne_visuelle = ""
+        for i in range(35):
+            if i in semaines:
+                ligne_visuelle += "🟢"
+            else:
+                ligne_visuelle += "⚪"
+        ligne_visuelle = f"<div style='font-family:monospace; font-size:0.85em'>{ligne_visuelle}</div>"
+
         recap_data.append({
             "Code": code,
             "Automatisme": row['Automatisme'],
-            "Semaines": ", ".join(semaines),
-            "Couleur": row['Couleur']
+            "Semaines": ", ".join(semaines_str),
+            "Couleur": row['Couleur'],
+            "Timeline": ligne_visuelle
         })
 
     # Répartition en 3 colonnes équilibrées
@@ -425,12 +439,13 @@ def afficher_lecture_et_export(data, subtheme_legend):
                     f"<div style='padding:2px; margin:2px; border: 3px solid {r['Couleur']}; "
                     f"background:transparent; border-radius:4px; font-size:0.8em;'>"
                     f"<b>{r['Code']}</b> : {r['Automatisme']}<br>"
-                    f"<small><i>Semaine(s)</i> : {r['Semaines']}</small></div>",
+                    f"<small><i>Semaine(s)</i> : {r['Semaines']}</small><br>"
+                    f"{r['Timeline']}</div>",
                     unsafe_allow_html=True
                 )
         start = end
 
-    # ✅ Affichage unique du tableau global en dehors de la boucle
+    # ✅ Encapsulation du tableau dans un expander
     occur_df = pd.DataFrame([
         {
             "Code": code,
@@ -439,18 +454,16 @@ def afficher_lecture_et_export(data, subtheme_legend):
         }
         for code, semaines in st.session_state.auto_weeks.items()
     ])
-    
+
     if not occur_df.empty and "Occurrences" in occur_df.columns:
         occur_df = occur_df.sort_values(by="Occurrences", ascending=False)
-        st.markdown("### 📊 Répartition des automatismes")
-        st.dataframe(occur_df, use_container_width=True)
+        with st.expander("📊 Répartition tabulaire des automatismes ⤵", expanded=False):
+            st.dataframe(occur_df, use_container_width=True)
     else:
         st.info("Aucune donnée d'automatismes à afficher. 🛠 Lancez l'algorithme de distribution des automatismes pour générer le planning.")
 
-#    st.markdown("### 📊 Répartition des automatismes")
-#    st.dataframe(occur_df, use_container_width=True)
-
     return recap_data
+
 #----------------------------- 
 if st.session_state.show_recap:
     recap_data = afficher_lecture_et_export(data, subtheme_legend)
