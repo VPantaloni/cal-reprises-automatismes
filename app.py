@@ -152,11 +152,11 @@ if nb_vides > 0:
 
 # 📘 TUTORIEL DE DÉMARRAGE
 if st.session_state.get("show_tuto", True):
-    st.markdown("## 👋 Bienvenue dans l'outil de planification des automatismes")
+    st.markdown("### 👋 Bienvenue dans cet outil de planification des automatismes")
     st.markdown("""
-Cet outil vous permet de calculer et afficher une un calendrier de reprise des automatismes mathématiques en 6e, en fonction de votre progression.
+Cet outil vous permet de calculer et afficher un **calendrier de reprise des automatismes** mathématiques en 6e, en fonction de votre progression.
 
-### 🧩 Étapes à suivre :
+#### 🧩 Étapes à suivre :
 
 1. **Choisissez les thèmes hebdomadaires** :
    - Cliquez sur les boutons `S1`, `S2`, etc. pour choisir le thème plus particulièrement travaillé en cours cette semaine.
@@ -175,9 +175,7 @@ Cet outil vous permet de calculer et afficher une un calendrier de reprise des a
 4. **Exportez** votre travail si besoin :
    - En HTML (Ctrl+S) ou tableur via les boutons d’export.
 
----
-
-💡 *Pensez à explorer la barre latérale pour accéder à d'autres options utiles.* comme les zones de vacances marquées par 🡆|
+5. La fin de chaque période (début de vacances 🎉) est marquée par `🡆|` et on peut choisir sa zone de vacances scolaires (A,B,C).
 
 """)
 
