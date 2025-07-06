@@ -41,7 +41,7 @@ if "show_legend" not in st.session_state:
     st.session_state.show_legend = True
 if "show_recap" not in st.session_state:
     st.session_state.show_recap = False
-if "show_recap" not in st.session_state:
+if "show_tuto" not in st.session_state:
     st.session_state.show_tuto = False
 #if "show_histogram" not in st.session_state:
 #    st.session_state.show_histogram = False
@@ -181,7 +181,7 @@ Cet outil vous permet de calculer et afficher un **calendrier de reprise des aut
 5. La fin de chaque période (début de vacances 🎉) est marquée par `🡆|` et on peut choisir sa zone de vacances scolaires (A,B,C).
 
 Pour plus de détails, consultez ce <a href='https://codimd.apps.education.fr/s/xd2gxRA1m' target='_blank' style='text-decoration: none;'>
-    📚 Tutoriel détaillé</a>
+    "📚 Tutoriel détaillé"</a>
 ---
 """)
 
