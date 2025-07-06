@@ -99,6 +99,7 @@ if 'selection_by_week' not in st.session_state:
 if 'picker_open' not in st.session_state:
     st.session_state.picker_open = None
 show_histogram = False
+show_recap = False
 # Assurer que les listes ont la bonne taille
 if len(st.session_state.sequences) != 35:
     old_sequences = st.session_state.sequences.copy()
