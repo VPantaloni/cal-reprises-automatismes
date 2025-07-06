@@ -660,6 +660,5 @@ if show_histogram:
         "Semaine": semaine_order,
         "Code": data["Code"].tolist() } 
     )
-    
     with st.expander("📊 Histogramme simple : apparition des automatismes par semaine ⤵", expanded=False):
-        st.plotly_chart(fig, use_container_width=True)st.plotly_chart(fig_simple, use_container_width=True)
+        st.plotly_chart(fig_simple, use_container_width=True)
