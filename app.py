@@ -612,12 +612,12 @@ if show_histogram:
         color="Code",
         color_discrete_map=couleur_map,
         hover_name="Code",
-        title="📊 Histogramme cumulé par automatisme et semaine",
+        #title="📊 Histogramme cumulé par automatisme et semaine",
         category_orders={
         "Semaine": semaine_order,
         "Code": data["Code"].tolist()}  # 👈 ordre du CSV
     )
-    with st.expander("📊 Hitogramme cumulé ⤵", expanded=False):
+    with st.expander("📊 Histogramme : occurrences cumulées des automatismes par semaine ⤵", expanded=False):
             st.plotly_chart(fig, use_container_width=True)
 ## 2e histo non cumulé
     # 🔁 On prépare à nouveau les données, cette fois sans cumul
@@ -655,10 +655,11 @@ if show_histogram:
         color="Code",
         color_discrete_map=couleur_map,
         hover_name="Code",
-        title="📊 Histogramme simple : apparition des automatismes par semaine",
+        #title="📊 Histogramme simple : apparition des automatismes par semaine",
         category_orders={
         "Semaine": semaine_order,
         "Code": data["Code"].tolist() } 
     )
     
-    st.plotly_chart(fig_simple, use_container_width=True)
+    with st.expander("📊 Histogramme simple : apparition des automatismes par semaine ⤵", expanded=False):
+        st.plotly_chart(fig, use_container_width=True)st.plotly_chart(fig_simple, use_container_width=True)
