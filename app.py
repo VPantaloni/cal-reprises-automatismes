@@ -61,7 +61,7 @@ data = charger_donnees()
 def afficher_pastilles_compacte(selection_df, nb_auto_par_ligne=3, total_cases=9):
     if not selection_df.empty:
         pastilles_dict = {
-            int(row['Position']): f"<div title=\"{row['Automatisme']}\" style='flex:1; padding:2px; border:3px solid {row['Couleur']}; background:transparent; border-radius:4px; font-size:0.73em; font-weight:bold; text-align:center; cursor:help;'> {row['Code']} </div>"
+            int(row['Position']): f"<div title=\"{row['Automatisme']}\" style='flex:1; padding:2px; border:3px solid {row['Couleur']}; background:transparent; border-radius:4px; font-size:0.70em; font-weight:bold; text-align:center; cursor:help;'> {row['Code']} </div>"
             for _, row in selection_df.iterrows()
         }
         nb_lignes = (total_cases + nb_auto_par_ligne - 1) // nb_auto_par_ligne
@@ -73,7 +73,7 @@ def afficher_pastilles_compacte(selection_df, nb_auto_par_ligne=3, total_cases=9
                 if pos in pastilles_dict:
                     ligne_html += pastilles_dict[pos]
                 else:
-                    ligne_html += "<div style='flex:1; padding:2px; border:1px dashed #ccc; border-radius:4px; height:1.5em;'></div>"
+                    ligne_html += "<div style='flex:1; padding:2px; border:1px dashed #ccc; border-radius:4px; height:1.4em;'></div>"
             ligne_html += "</div>"
             st.markdown(ligne_html, unsafe_allow_html=True)
 
