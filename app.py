@@ -163,7 +163,7 @@ Cet outil vous permet de calculer et afficher un **calendrier de reprise des aut
 
 1. **Choisissez les thèmes hebdomadaires** :
    - Cliquez sur les boutons `S1`, `S2`, etc. pour choisir le thème plus particulièrement travaillé en classe cette semaine.
-   - Vous pouvez aussi charger une **progression enregistrée** dans la barre latérale (📘`Progression n°1` ou 📙 n°2).
+   - Vous pouvez aussi charger une **progression enregistrée** dans la barre latérale (📘`Progression n°1` ou 📙 `Progression n°2`).
 
 2. **Lancez la distribution des automatismes** :
    - Utilisez le bouton 👉 `🛠️ Algo. distribuer les automatismes`,
