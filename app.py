@@ -587,19 +587,6 @@ if show_histogram:
                     cols_codes[i].markdown("&nbsp;")  # espace insécable pour la hauteur minimale
     # Après la boucle d'affichage des thèmes + cases à cocher
 
-    col_select_all, col_deselect_all = st.columns(2)
-    
-    with col_select_all:
-        if st.button("Tout sélectionner", key="btn_select_all_global"):
-            for code in data['Code']:
-                st.session_state.codes_selectionnes.add(code)
-            st.experimental_rerun()
-
-    with col_deselect_all:
-        if st.button("Tout désélectionner", key="btn_deselect_all_global"):
-            st.session_state.codes_selectionnes.clear()
-            st.experimental_rerun()
-
     # 4. Filtrer df_viz avant affichage selon sélection
     df_viz_filtered = df_viz[df_viz['Code'].isin(st.session_state.codes_selectionnes)]
     
@@ -617,3 +604,15 @@ if show_histogram:
         category_orders={"Semaine": semaine_order}
     )
     st.plotly_chart(fig, use_container_width=True)
+    col_select_all, col_deselect_all = st.columns(2)
+    
+    with col_select_all:
+        if st.button("Tout sélectionner", key="btn_select_all_global"):
+            for code in data['Code']:
+                st.session_state.codes_selectionnes.add(code)
+            st.experimental_rerun()
+    
+    with col_deselect_all:
+        if st.button("Tout désélectionner", key="btn_deselect_all_global"):
+            st.session_state.codes_selectionnes.clear()
+            st.experimental_rerun()
