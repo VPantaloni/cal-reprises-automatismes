@@ -39,6 +39,10 @@ if 'next_index_by_theme' not in st.session_state:
     st.session_state.next_index_by_theme = defaultdict(lambda: 1)
 if "show_legend" not in st.session_state:
     st.session_state.show_legend = True
+if "show_histogram" not in st.session_state:
+    st.session_state.show_histogram = False
+if "show_recap" not in st.session_state:
+    st.session_state.show_recap = False
 
 # ===== FONCTIONS UTILITAIRES =====
 def charger_donnees():
@@ -98,8 +102,8 @@ if 'selection_by_week' not in st.session_state:
     st.session_state.selection_by_week = initialiser_selection_by_week()
 if 'picker_open' not in st.session_state:
     st.session_state.picker_open = None
-show_histogram = False
-show_recap = False
+#show_histogram = False
+#show_recap = False
 # Assurer que les listes ont la bonne taille
 if len(st.session_state.sequences) != 35:
     old_sequences = st.session_state.sequences.copy()
