@@ -149,7 +149,7 @@ if nb_vides > 0:
     st.warning(
         "🛠️ Avant de commencer à distribuer les automatismes :\n\n"
         "- 👉 Cliquez sur les boutons des semaines (**S1** à **S35**) pour choisir le thème de la semaine (changer les ❓) dans votre progression ou :\n"
-        "- 📕 Chargez une progression prête (📘**Progression n°1** ou 📙**Progression n°2*) via la barre latérale. Vous pourrez la modifier.\n"
+        "- 📕 Chargez une progression prête (📘**Progression n°1** ou 📙**Progression n°2**) via la barre latérale. Vous pourrez la modifier.\n"
         "- 📚 Pour plus de détails, affichez le tutoriel en cochant la case ✅ 📚**Tutoriel** dans le volet latéral"
     )
 
