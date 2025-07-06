@@ -604,7 +604,7 @@ if show_histogram:
         category_orders={"Semaine": semaine_order}
     )
     st.plotly_chart(fig, use_container_width=True)
-    col_select_all, col_deselect_all = st.columns(2)
+col_select_all, col_deselect_all = st.columns(2)
     
 with col_select_all:
     if st.button("Tout sélectionner", key="btn_select_all_global"):
