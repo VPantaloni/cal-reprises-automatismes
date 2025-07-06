@@ -601,7 +601,9 @@ if show_histogram:
         color_discrete_map=couleur_map,
         hover_name="Code",
         title="📊 Histogramme cumulé par automatisme et semaine",
-        category_orders={"Semaine": semaine_order}
+        category_orders={
+        "Semaine": semaine_order,
+        "Code": data["Code"].tolist()  # 👈 ordre du CSV
     )
     st.plotly_chart(fig, use_container_width=True)
 ## 2e histo non cumulé
@@ -641,7 +643,9 @@ if show_histogram:
         color_discrete_map=couleur_map,
         hover_name="Code",
         title="📊 Histogramme simple : apparition des automatismes par semaine",
-        category_orders={"Semaine": semaine_order}
+        category_orders={
+        "Semaine": semaine_order,
+        "Code": data["Code"].tolist()  
     )
     
     st.plotly_chart(fig_simple, use_container_width=True)
